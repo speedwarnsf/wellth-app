@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WELLTH - Daily wisdom for wealth and wellness. Transform your life with curated daily tips that nurture both your financial future and personal wellbeing.">
+    <meta property="og:title" content="WELLTH - Daily Wisdom for Wealth & Wellness">
+    <meta property="og:description" content="Transform your life one day at a time with curated wisdom for financial prosperity and personal wellbeing.">
+    <meta property="og:image" content="https://goodwellth.com/og-image.jpg">
+    <title>WELLTH - Daily Wisdom for Wealth & Wellness</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --gold-primary: #D4A574;
+            --gold-secondary: #C9974A;
+            --gold-tertiary: #B8863B;
+            --text-primary: #2c2c2c;
+            --text-secondary: #4a4a4a;
+            --bg-light: #fafafa;
+            --bg-cream: #f9f7f4;
+        }
+        
+        body {
+            font-family: 'EB Garamond', Georgia, serif;
+            color: var(--text-primary);
+            background: var(--bg-light);
+            overflow-x: hidden;
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(250, 250, 250, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        nav.scrolled {
+            padding: 15px 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-nav {
+            font-size: 28px;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary), var(--gold-tertiary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 500;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--gold-secondary);
+        }
+        
+        .download-btn {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(212, 165, 116, 0.3);
+        }
+        
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            padding: 80px 20px;
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-cream) 100%);
+        }
+        
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        
+        .hero-content {
+            animation: fadeInUp 1s ease;
+        }
+        
+        .hero-tagline {
+            font-size: 18px;
+            color: var(--gold-secondary);
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        
+        .hero-title {
+            font-size: 56px;
+            line-height: 1.1;
+            margin-bottom: 25px;
+            font-weight: 500;
+            letter-spacing: -1px;
+        }
+        
+        .gold-text {
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero-description {
+            font-size: 22px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary {
+            padding: 18px 40px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(212, 165, 116, 0.2);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(212, 165, 116, 0.3);
+        }
+        
+        .btn-secondary {
+            padding: 18px 40px;
+            background: transparent;
+            color: var(--gold-secondary);
+            text-decoration: none;
+            border: 2px solid var(--gold-secondary);
+            border-radius: 30px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gold-secondary);
+            color: white;
+        }
+        
+        .hero-image {
+            position: relative;
+            animation: fadeIn 1.5s ease;
+        }
+        
+        .phone-mockup {
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto;
+            display: block;
+            filter: drop-shadow(0 30px 60px rgba(0,0,0,0.12));
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 100px 20px;
+            background: white;
+        }
+        
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 80px;
+        }
+        
+        .section-subtitle {
+            font-size: 16px;
+            color: var(--gold-secondary);
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+        
+        .section-title {
+            font-size: 42px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .section-description {
+            font-size: 20px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+        
+        .feature-card {
+            text-align: center;
+            padding: 40px 30px;
+            background: var(--bg-light);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            background: white;
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+        
+        .feature-description {
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 100px 20px;
+            background: var(--bg-cream);
+        }
+        
+        .steps-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 60px;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            margin: 0 auto 25px;
+        }
+        
+        .step-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+        
+        .step-description {
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        
+        /* Wisdom Preview */
+        .wisdom-preview {
+            padding: 100px 20px;
+            background: white;
+        }
+        
+        .wisdom-cards {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        
+        .wisdom-card {
+            padding: 40px;
+            background: var(--bg-light);
+            border-radius: 20px;
+            border-left: 4px solid var(--gold-secondary);
+        }
+        
+        .wisdom-category {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold-secondary);
+            margin-bottom: 15px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+        
+        .wisdom-text {
+            font-size: 20px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            font-style: italic;
+        }
+        
+        /* Testimonials */
+        .testimonials {
+            padding: 100px 20px;
+            background: var(--bg-cream);
+        }
+        
+        .testimonials-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+        
+        .testimonial {
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        
+        .stars {
+            color: var(--gold-primary);
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .testimonial-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        .testimonial-author {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 20px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            text-align: center;
+            color: white;
+        }
+        
+        .cta-title {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .cta-description {
+            font-size: 22px;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+        
+        .cta-buttons-white {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-white {
+            padding: 18px 40px;
+            background: white;
+            color: var(--gold-secondary);
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-white:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        /* Footer */
+        footer {
+            padding: 60px 20px 40px;
+            background: var(--text-primary);
+            color: white;
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-brand {
+            max-width: 400px;
+        }
+        
+        .footer-logo {
+            font-size: 32px;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        .footer-description {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+        
+        .footer-column h4 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            opacity: 1;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 30px;
+            text-align: center;
+            opacity: 0.6;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .hero-title {
+                font-size: 42px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .steps-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .wisdom-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo-nav">WELLTH</div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#wisdom">Wisdom</a></li>
+                <li><a href="#testimonials">Reviews</a></li>
+            </ul>
+            <a href="#download" class="download-btn">Get Early Access</a>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <p class="hero-tagline">Transform your life, one day at a time</p>
+                <h1 class="hero-title">
+                    Daily wisdom for 
+                    <span class="gold-text">wealth</span> & 
+                    <span class="gold-text">wellness</span>
+                </h1>
+                <p class="hero-description">
+                    Wake up to curated insights that nurture both your financial future and personal wellbeing. Let our wise owl guide you toward a life of prosperity and purpose.
+                </p>
+                <div class="cta-buttons">
+                    <a href="#download" class="btn-primary">
+                        🍎 Download for iOS
+                    </a>
+                    <a href="#download" class="btn-secondary">
+                        🤖 Get for Android
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="app-mockup.jpg" 
+                     alt="WELLTH App on iPhone - showing daily wealth and wellness tips with owl mascot" 
+                     class="phone-mockup">
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-header">
+            <p class="section-subtitle">Why WELLTH</p>
+            <h2 class="section-title">Wisdom that works for you</h2>
+            <p class="section-description">
+                Carefully curated insights delivered daily to help you build wealth while nurturing your wellbeing.
+            </p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3 class="feature-title">Daily Wisdom</h3>
+                <p class="feature-description">
+                    Start each day with thoughtfully selected tips for financial growth and personal wellness.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">♥️</div>
+                <h3 class="feature-title">Upvote & Personalize</h3>
+                <p class="feature-description">
+                    Like the tips that resonate with you most, and watch as your daily wisdom becomes more tailored.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🦉</div>
+                <h3 class="feature-title">Wise Companion</h3>
+                <p class="feature-description">
+                    Our charming owl mascot celebrates your journey, making wisdom delightful, not daunting.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⏰</div>
+                <h3 class="feature-title">Custom Reminders</h3>
+                <p class="feature-description">
+                    Set your perfect time to receive daily tips. Morning coffee or evening wind-down—you choose.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3 class="feature-title">Curated Excellence</h3>
+                <p class="feature-description">
+                    200+ tips inspired by timeless principles, without the overwhelm of entire books.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎬</div>
+                <h3 class="feature-title">Inspiring Moments</h3>
+                <p class="feature-description">
+                    Beautiful animations and videos that make your daily wisdom a moment to cherish.
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="section-header">
+            <p class="section-subtitle">Simple & Effective</p>
+            <h2 class="section-title">How WELLTH works</h2>
+            <p class="section-description">
+                Three simple steps to transform your daily routine into a journey of growth.
+            </p>
+        </div>
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3 class="step-title">Download & Set</h3>
+                <p class="step-description">
+                    Get the app and choose your perfect time for daily wisdom delivery.
+                </p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3 class="step-title">Receive & Reflect</h3>
+                <p class="step-description">
+                    Wake up to curated tips for wealth and wellness, beautifully presented.
+                </p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3 class="step-title">Upvote & Grow</h3>
+                <p class="step-description">
+                    Like tips that resonate, and watch your wisdom become more personalized.
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Wisdom Preview -->
+    <section class="wisdom-preview" id="wisdom">
+        <div class="section-header">
+            <p class="section-subtitle">Sample Our Wisdom</p>
+            <h2 class="section-title">A taste of daily insights</h2>
+            <p class="section-description">
+                Here's what awaits you each morning—wisdom that's practical, profound, and personal.
+            </p>
+        </div>
+        <div class="wisdom-cards">
+            <div class="wisdom-card">
+                <div class="wisdom-category">Wealth</div>
+                <p class="wisdom-text">
+                    "Pay yourself first. Before any bill, before any pleasure, set aside ten percent of all you earn. This simple act builds empires from pennies."
+                </p>
+            </div>
+            <div class="wisdom-card">
+                <div class="wisdom-category">Wellness</div>
+                <p class="wisdom-text">
+                    "Your breath is the remote control to your nervous system. Four counts in, hold, release—instant calm in under a minute."
+                </p>
+            </div>
+            <div class="wisdom-card">
+                <div class="wisdom-category">Wealth</div>
+                <p class="wisdom-text">
+                    "The market transfers money from the impatient to the patient. Time in the market beats timing the market."
+                </p>
+            </div>
+            <div class="wisdom-card">
+                <div class="wisdom-category">Wellness</div>
+                <p class="wisdom-text">
+                    "Morning sunlight is nature's alarm clock. Ten minutes of early rays resets your entire circadian rhythm."
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Testimonials -->
+    <section class="testimonials" id="testimonials">
+        <div class="section-header">
+            <p class="section-subtitle">User Love</p>
+            <h2 class="section-title">What people are saying</h2>
+            <p class="section-description">
+                Join thousands who've transformed their daily routine into a journey of growth.
+            </p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial">
+                <div class="stars">★★★★★</div>
+                <p class="testimonial-text">
+                    "Finally, an app that doesn't overwhelm. Just two perfect tips each day that actually stick with me."
+                </p>
+                <div class="testimonial-author">Sarah M.</div>
+            </div>
+            <div class="testimonial">
+                <div class="stars">★★★★★</div>
+                <p class="testimonial-text">
+                    "The wealth tips have genuinely changed how I think about money. Simple, actionable, life-changing."
+                </p>
+                <div class="testimonial-author">Michael R.</div>
+            </div>
+            <div class="testimonial">
+                <div class="stars">★★★★★</div>
+                <p class="testimonial-text">
+                    "Love the owl! But seriously, the wellness tips have become my morning meditation. Beautiful app."
+                </p>
+                <div class="testimonial-author">Emma L.</div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="cta-section" id="download">
+        <h2 class="cta-title">Start your journey today</h2>
+        <p class="cta-description">
+            Join the WELLTH community and transform your tomorrow, one tip at a time.
+        </p>
+        <div class="cta-buttons-white">
+            <a href="#" class="btn-white">
+                🍎 Download for iOS
+            </a>
+            <a href="#" class="btn-white">
+                🤖 Get for Android
+            </a>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="footer-logo">WELLTH</div>
+                <p class="footer-description">
+                    Daily wisdom for wealth and wellness. Transform your life with curated insights that nurture both your financial future and personal wellbeing.
+                </p>
+            </div>
+            <div class="footer-column">
+                <h4>Product</h4>
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#wisdom">Sample Wisdom</a></li>
+                    <li><a href="#download">Download</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Company</h4>
+                <ul class="footer-links">
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Terms</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 WELLTH. All rights reserved. Made with 🦉 and wisdom.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all feature cards and wisdom cards
+        document.querySelectorAll('.feature-card, .wisdom-card, .step, .testimonial').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
