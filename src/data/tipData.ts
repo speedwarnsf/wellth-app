@@ -1,0 +1,76 @@
+export interface Tip {
+  id: string;
+  text: string;
+  category: 'Finance' | 'Well-being';
+}
+
+export const wealthTips: string[] = [
+  "Let this gentle guard stand watch: Sleep on purchases that shout for attention. By morning, the noisy ones slink away, and only the worthy remain.",
+  "Think of your savings not as deprivation, but as paying your future self first. Every dollar set aside is a seed planted in soil you'll walk on later—quietly growing, compounding, becoming shade for harder days.",
+  "Before you spend, ask: will this purchase matter in five years? Most impulses dissolve under that question. The ones that survive are the ones worth having.",
+  "Debt is a voice that whispers 'later' while stealing from tomorrow. Pay it down with patience and intention—each payment is a brick in the wall of your freedom.",
+  "Wealth isn't just what you earn; it's what you keep and how wisely you deploy it. A modest income, well-managed, outpaces a fortune squandered every time.",
+  "Invest consistently, even when the world feels uncertain. Time in the market matters more than timing the market. Your future self will thank your present discipline.",
+  "Track where your money goes for one month. The patterns will surprise you—and awareness alone changes behavior. You can't improve what you don't measure.",
+  "Build an emergency fund like building a fortress: brick by brick, month by month. Three to six months of expenses, tucked away, transforms anxiety into quiet confidence.",
+  "Automate your finances so good decisions don't require daily willpower. Set it, forget it, and let the system carry the weight of discipline for you.",
+  "Negotiate your bills once a year—insurance, subscriptions, services. Most companies would rather keep you at a discount than lose you entirely. A single phone call can save hundreds.",
+  "The best investment you'll ever make is in yourself—your skills, your health, your relationships. These are assets that can never be taken from you and only appreciate with time.",
+  "Live below your means, not because you have to, but because the margin between earning and spending is where freedom lives. That gap is your future.",
+  "Don't compare your financial chapter three to someone else's chapter twenty. Everyone starts somewhere, and the only race worth running is against your yesterday.",
+  "Diversify not just your investments, but your income streams. A single river can dry up; multiple streams keep the garden green through any season.",
+  "The cost of something isn't just its price tag—it's the hours of your life you traded to earn that money. Spend accordingly.",
+  "Review your subscriptions quarterly. The $10 here and $15 there add up to hundreds a year—money that could be working for you instead of streaming for you.",
+  "Teach your children about money early. The conversations you have at the dinner table about spending, saving, and giving shape their entire financial future.",
+  "Generosity is not the opposite of wealth—it's a symptom of it. Give freely, and you'll find that abundance has a way of circling back.",
+  "Your credit score is a reputation written in numbers. Tend to it like a garden—consistently, patiently, and with an eye on the long harvest.",
+  "The stock market is a device for transferring money from the impatient to the patient. Choose patience. Choose compounding. Choose the long game.",
+  "Financial literacy is not taught in most schools—so teach yourself. Read one book about money this month. Knowledge compounds just like interest.",
+  "Protect your wealth with proper insurance. It feels like wasted money until the day it saves everything. Hope for the best, prepare for the rest.",
+  "A budget isn't a cage—it's a map. It shows you where you are and helps you get where you want to go. Freedom comes from knowing, not guessing.",
+  "Avoid lifestyle inflation. When your income rises, resist the urge to upgrade everything. The gap between earning more and spending more is where wealth is built.",
+  "Money is a tool, not a scoreboard. Use it to build the life you want, not to impress people you don't know with things you don't need.",
+  "Start investing with whatever you have. Waiting for the 'perfect amount' is a trap. The best time was yesterday. The second best time is now.",
+  "Keep your financial goals visible—on your fridge, your phone wallpaper, your mirror. What you see daily shapes what you do daily.",
+  "Pay yourself first, then pay your bills. If you wait until after expenses, there's never anything left. Reverse the order and watch the magic happen.",
+  "The wealthiest people aren't those who earn the most—they're those who need the least. Contentment is the ultimate wealth strategy.",
+  "Every financial mistake is tuition. Don't waste it by repeating the lesson. Write it down, learn it, and let it make you wiser.",
+  "Talk openly about money with your partner. Financial secrets breed resentment. Shared goals and honest numbers build unshakable partnerships.",
+];
+
+export const wellnessTips: string[] = [
+  "Here's a grounding reminder: food is not just fuel, it's information. Each bite tells your body how to perform—whether to build, fight, or rest. Choose wisely, and your meals become medicine instead of burden.",
+  "Sleep is not laziness—it's restoration. Your brain sorts memories, your body repairs tissue, your emotions recalibrate. Guarding your sleep is one of the most productive things you can do.",
+  "Move your body not as punishment for what you ate, but as celebration of what it can do. A walk, a stretch, a dance in the kitchen—movement is gratitude in motion.",
+  "Stillness is not empty; it is full. Five minutes of quiet breathing rewires your nervous system, lowers cortisol, and reminds you that peace is always one breath away.",
+  "Connection is a nutrient. Loneliness harms the body as much as smoking fifteen cigarettes a day. Reach out to someone today—not because you need to, but because you're human.",
+  "Drink water before you drink anything else each morning. Your body wakes up dehydrated after hours of rest. That first glass is a kindness to every cell in your body.",
+  "Set boundaries not as walls, but as fences with gates. They don't keep people out—they show others where the door is, and they give you room to breathe.",
+  "Gratitude isn't positivity theater. It's a practice that physically reshapes your brain over time. Three things, written down, each night. Simple. Transformative. Try it for thirty days.",
+  "Your attention is the most valuable thing you own—more precious than money, more finite than time. Guard it fiercely. What you focus on becomes your life.",
+  "Rest before you're exhausted. Eat before you're starving. Speak before resentment builds. The art of wellness is anticipation, not reaction.",
+  "Sunlight in the first hour of waking sets your circadian rhythm for the entire day. Step outside, look at the sky, and let your biology sync with the world.",
+  "Your gut is your second brain. Feed it fiber, fermented foods, and variety. A healthy microbiome doesn't just aid digestion—it shapes your mood, immunity, and clarity.",
+  "Laughter is not trivial. It releases endorphins, reduces inflammation, and strengthens your immune system. Seek out what makes you laugh—it's medicine without a prescription.",
+  "Forgiveness is not about the other person. It's about releasing the weight you've been carrying. Set it down. Your back will thank you. Your heart will follow.",
+  "Spend time in nature without your phone. Trees lower cortisol. Birdsong calms the nervous system. The natural world has been healing humans long before medicine existed.",
+  "Your posture shapes your mood more than you think. Stand tall, shoulders back, chin level. The body leads and the mind follows. Try it right now.",
+  "Learn to say no without explanation. 'No' is a complete sentence. Every yes to something unimportant is a no to something that matters.",
+  "Cook a meal from scratch this week. The act of chopping, stirring, and seasoning is meditative. And feeding yourself with your own hands is an act of self-love.",
+  "Cold exposure—even thirty seconds of cold water at the end of your shower—triggers a cascade of feel-good neurotransmitters. Discomfort, chosen wisely, builds resilience.",
+  "Write down what's bothering you. Don't edit, don't judge—just let it flow onto the page. Journaling moves problems from your spinning mind into a place where they can be seen and solved.",
+  "Schedule your rest like you schedule your meetings. If it's not on the calendar, it doesn't exist. Block time for doing nothing—your creativity depends on it.",
+  "Hug someone for twenty seconds today. That's the threshold where oxytocin releases, blood pressure drops, and both bodies remember what safety feels like.",
+  "Digital sunsets: turn off screens an hour before bed. The blue light suppresses melatonin, but it's the endless scroll that truly steals your sleep. Give your mind permission to wind down.",
+  "Comparison is the thief of joy—and of health. Your wellness journey is yours alone. Someone else's routine, body, or pace has nothing to do with your path.",
+  "Breathe in for four counts, hold for seven, exhale for eight. This single technique can pull you out of anxiety in under two minutes. Practice it now.",
+  "Move your body in the morning, even for just ten minutes. It primes your brain with dopamine and serotonin—nature's way of saying 'good morning' from the inside out.",
+  "Eat the rainbow—not from a bag, but from the earth. Each color in fruits and vegetables represents different phytonutrients your body craves.",
+  "Boredom is not a problem to solve—it's a signal to listen to. Some of your best ideas, deepest rest, and truest desires emerge in the space between distractions.",
+  "Kindness to others is wellness for yourself. Acts of generosity activate the same reward centers in the brain as receiving a gift. Give freely and feel the glow.",
+  "Your body keeps the score. Tension in your jaw, tightness in your shoulders, clenching in your fists—these are messages. Pause, scan, and release what you're holding.",
+  "You are not behind. You are not broken. You are exactly where a person with your history and your courage would be. Breathe. You're doing better than you think.",
+];
+
+// Legacy tip objects (kept for reference, unused in current UI)
+// export const tips: Tip[] = [ ... ];

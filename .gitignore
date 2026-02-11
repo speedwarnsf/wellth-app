@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.expo/
+*.DS_Store
+src/assets/*-original.png
+.env.local
+.vercel/
