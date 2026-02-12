@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { wealthTips, wellnessTips } from '../data/tipData';
 import { getStreak, getStreakMilestone, getCheckIn, todayKey } from '../utils/storage';
+import OnboardingScreen, { hasOnboarded } from './OnboardingScreen';
 
 // ── helpers ──────────────────────────────────────────────
 const getGreeting = () => {
@@ -226,14 +227,46 @@ const OwlVideoSection = () => {
   );
 };
 
-// ── TipCard ──────────────────────────────────────────────
-const TipCard = ({ label, emoji, tip, isFav, onToggleFav }: {
-  label: string; emoji: string; tip: string; isFav: boolean; onToggleFav: () => void;
+// ── AnimatedTipCard with cycling ─────────────────────────
+const AnimatedTipCard = ({ label, emoji, tips, dayIndex, favorites, onToggleFav }: {
+  label: string; emoji: string; tips: string[]; dayIndex: number;
+  favorites: string[]; onToggleFav: (tip: string) => void;
 }) => {
+  const [tipIdx, setTipIdx] = useState(dayIndex % tips.length);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  const tip = tips[tipIdx];
+  const isFav = favorites.includes(tip);
+
+  const cycleTip = useCallback((direction: 1 | -1) => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 0, duration: 180, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: direction * -12, duration: 180, useNativeDriver: true }),
+    ]).start(() => {
+      setTipIdx(prev => (prev + direction + tips.length) % tips.length);
+      slideAnim.setValue(direction * 12);
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 320, useNativeDriver: true, easing: Easing.out(Easing.cubic) }),
+        Animated.timing(slideAnim, { toValue: 0, duration: 320, useNativeDriver: true, easing: Easing.out(Easing.cubic) }),
+      ]).start();
+    });
+  }, [tips.length]);
+
+  // Initial entrance animation
+  const entranceFade = useRef(new Animated.Value(0)).current;
+  const entranceSlide = useRef(new Animated.Value(18)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(entranceFade, { toValue: 1, duration: 700, useNativeDriver: true, easing: Easing.out(Easing.cubic) }),
+      Animated.timing(entranceSlide, { toValue: 0, duration: 700, useNativeDriver: true, easing: Easing.out(Easing.cubic) }),
+    ]).start();
+  }, []);
+
   const webProps: any = Platform.OS === 'web' ? { className: 'tip-card' } : {};
 
   return (
-    <View style={styles.card} {...webProps}>
+    <Animated.View style={[styles.card, { opacity: entranceFade, transform: [{ translateY: entranceSlide }] }]} {...webProps}>
       <View style={styles.cardHeader}>
         <View style={styles.tipHeaderRow}>
           <Text style={styles.tipLabel}>Your daily </Text>
@@ -242,7 +275,7 @@ const TipCard = ({ label, emoji, tip, isFav, onToggleFav }: {
           <Text style={styles.tipIcon}>{emoji}</Text>
         </View>
         <TouchableOpacity
-          onPress={onToggleFav}
+          onPress={() => onToggleFav(tip)}
           activeOpacity={0.7}
           {...(Platform.OS === 'web' ? { className: `fav-btn ${isFav ? 'active' : ''}` } : {})}
         >
@@ -251,8 +284,22 @@ const TipCard = ({ label, emoji, tip, isFav, onToggleFav }: {
           </Text>
         </TouchableOpacity>
       </View>
-      <Text style={styles.tipText}>{tip}</Text>
-    </View>
+
+      <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+        <Text style={styles.tipText}>{tip}</Text>
+      </Animated.View>
+
+      {/* Navigation arrows */}
+      <View style={styles.tipNav}>
+        <TouchableOpacity onPress={() => cycleTip(-1)} activeOpacity={0.6} style={styles.tipNavBtn}>
+          <Text style={styles.tipNavArrow}>‹</Text>
+        </TouchableOpacity>
+        <Text style={styles.tipNavCounter}>{tipIdx + 1} / {tips.length}</Text>
+        <TouchableOpacity onPress={() => cycleTip(1)} activeOpacity={0.6} style={styles.tipNavBtn}>
+          <Text style={styles.tipNavArrow}>›</Text>
+        </TouchableOpacity>
+      </View>
+    </Animated.View>
   );
 };
 
@@ -285,12 +332,11 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   const { width } = useWindowDimensions();
   const maxWidth = Math.min(width, 520);
   const dayIndex = getDayIndex();
-  const wealthTip = wealthTips[dayIndex % wealthTips.length];
-  const wellnessTip = wellnessTips[dayIndex % wellnessTips.length];
 
   const [favorites, setFavorites] = useState<string[]>(loadFavorites);
   const [showFavs, setShowFavs] = useState(false);
   const [showSplash, setShowSplash] = useState(!hasSplashBeenSeen());
+  const [showOnboarding, setShowOnboarding] = useState(!hasOnboarded());
   const [streak, setStreak] = useState(0);
   const [checkedInToday, setCheckedInToday] = useState(false);
 
@@ -323,6 +369,10 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
 
   if (showSplash && Platform.OS === 'web') {
     return <SplashScreen onDone={() => setShowSplash(false)} />;
+  }
+
+  if (showOnboarding) {
+    return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />;
   }
 
   return (
@@ -418,8 +468,8 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         </View>
 
         {/* Tip Cards */}
-        <TipCard label="Wealth tip" emoji="🪴" tip={wealthTip} isFav={favorites.includes(wealthTip)} onToggleFav={() => toggleFav(wealthTip)} />
-        <TipCard label="Wellness tip" emoji="💛" tip={wellnessTip} isFav={favorites.includes(wellnessTip)} onToggleFav={() => toggleFav(wellnessTip)} />
+        <AnimatedTipCard label="Wealth tip" emoji="🪴" tips={wealthTips} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
+        <AnimatedTipCard label="Wellness tip" emoji="💛" tips={wellnessTips} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
 
         {/* Favorites toggle */}
         <TouchableOpacity
@@ -516,6 +566,15 @@ const styles = StyleSheet.create({
   tipLabelBoldGold: { fontSize: 19, fontWeight: '700', fontStyle: 'italic', color: '#B8963E', fontFamily: serif },
   tipIcon: { fontSize: 18 },
   tipText: { fontSize: 17, lineHeight: 28, color: '#3A3A3A', fontFamily: bodySerif },
+
+  // Tip navigation
+  tipNav: {
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+    marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#F0E8D8',
+  },
+  tipNavBtn: { paddingHorizontal: 16, paddingVertical: 4 },
+  tipNavArrow: { fontSize: 24, color: '#B8963E', fontWeight: '600' },
+  tipNavCounter: { fontSize: 13, color: '#BBAA88', fontFamily: bodySerif, minWidth: 60, textAlign: 'center' },
 
   // Favorite heart
   favHeart: { fontSize: 26, color: '#CCBBAA', paddingLeft: 12 },
