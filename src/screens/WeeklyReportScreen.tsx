@@ -4,6 +4,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import storage, { getCheckIn, getWeekDates, CheckInData, getStreak } from '../utils/storage';
+import QuickNav from '../components/QuickNav';
 
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
@@ -303,6 +304,7 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
 
       <Text style={styles.footer}>Keep building your wellness, one day at a time.</Text>
 
+      <QuickNav navigation={navigation} currentScreen="WeeklyReport" />
       <View style={{ height: 40 }} />
     </ScrollView>
   );

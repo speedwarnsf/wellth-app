@@ -86,14 +86,7 @@ const injectCSS = () => {
       0%, 100% { box-shadow: 0 4px 30px rgba(184,150,62,0.15); }
       50% { box-shadow: 0 8px 50px rgba(184,150,62,0.3); }
     }
-    .owl-mascot {
-      animation: owlFloat 5s ease-in-out infinite;
-    }
-    .owl-mascot:hover {
-      animation: owlFloat 2.5s ease-in-out infinite;
-      filter: drop-shadow(0 8px 24px rgba(184,150,62,0.25));
-      cursor: pointer;
-    }
+    /* owl-mascot class removed (banned asset) */
     .tip-card { animation: fadeSlideIn 0.7s ease-out both; }
     .tip-card:nth-child(2) { animation-delay: 0.15s; }
     .fav-btn { transition: transform 0.2s ease, color 0.2s ease; }
@@ -496,7 +489,7 @@ const styles = StyleSheet.create({
   streakMilestone: { width: '100%' as any, textAlign: 'center', fontSize: 14, color: '#B8963E', fontStyle: 'italic', fontFamily: bodySerif, marginTop: 4 },
 
   // Feature buttons
-  featureGrid: { flexDirection: 'row', gap: 10, marginBottom: 24 },
+  featureGrid: { flexDirection: 'row', gap: 10, marginBottom: 12 },
   featureBtn: {
     flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 18,
     alignItems: 'center', borderWidth: 1.5, borderColor: '#EDE3CC',
@@ -548,9 +541,7 @@ const styles = StyleSheet.create({
   favItem: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#EDE3CC' },
   favItemText: { fontSize: 15, lineHeight: 24, color: '#3A3A3A', fontFamily: bodySerif },
 
-  // Mascot
-  mascotContainer: { alignItems: 'center', marginTop: 12 },
-  mascot: { width: 200, height: 200 },
+  // (mascot styles removed — banned asset)
 
   // Footer
   footer: {

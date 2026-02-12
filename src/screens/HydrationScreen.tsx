@@ -4,6 +4,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import storage from '../utils/storage';
+import QuickNav from '../components/QuickNav';
 
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
@@ -220,6 +221,7 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
         <Text style={styles.factText}>{WATER_FACTS[factIndex]}</Text>
       </View>
 
+      <QuickNav navigation={navigation} currentScreen="Hydration" />
       <View style={{ height: 40 }} />
     </ScrollView>
   );

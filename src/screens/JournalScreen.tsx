@@ -4,6 +4,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import storage, { getCheckIn, todayKey, CheckInData } from '../utils/storage';
+import QuickNav from '../components/QuickNav';
 
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
@@ -214,6 +215,7 @@ const JournalScreen = ({ navigation }: { navigation: any }) => {
         <Text style={styles.noEntries}>No entries yet. Start your first check-in and journal entry today!</Text>
       )}
 
+      <QuickNav navigation={navigation} currentScreen="Journal" />
       <View style={{ height: 40 }} />
     </ScrollView>
   );

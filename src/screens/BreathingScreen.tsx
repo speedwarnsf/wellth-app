@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Platform,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform,
   useWindowDimensions, Animated, Easing,
 } from 'react-native';
+import QuickNav from '../components/QuickNav';
 
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
@@ -126,7 +127,7 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
   const phaseClass = phaseIndex === 0 ? 'inhale' : phaseIndex === 1 ? 'hold' : phaseIndex === 2 ? 'exhale' : 'pause';
 
   return (
-    <View style={[styles.screen, { maxWidth, alignSelf: 'center' as any }]}>
+    <ScrollView style={styles.scrollView} contentContainerStyle={[styles.screen, { maxWidth, alignSelf: 'center' as any }]}>
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
         <Text style={styles.backText}>← Back</Text>
       </TouchableOpacity>
@@ -203,15 +204,18 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
           <Text style={styles.instructNote}>Used by Navy SEALs and yogis alike to calm the nervous system.</Text>
         </View>
       )}
-    </View>
+
+      <QuickNav navigation={navigation} currentScreen="Breathing" />
+      <View style={{ height: 40 }} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollView: { flex: 1, backgroundColor: '#FAF8F3' },
   screen: {
-    flex: 1, backgroundColor: '#FAF8F3',
     paddingHorizontal: 28, paddingTop: Platform.OS === 'web' ? 48 : 60,
-    width: '100%',
+    paddingBottom: 40, width: '100%',
   },
 
   backBtn: { marginBottom: 16 },

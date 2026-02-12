@@ -4,6 +4,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { saveCheckIn, getCheckIn, todayKey, getWeekDates, CheckInData, getStreak, getStreakMilestone } from '../utils/storage';
+import QuickNav from '../components/QuickNav';
 
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
@@ -153,6 +154,7 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
 
       {showWeekly && <WeeklySummary />}
 
+      <QuickNav navigation={navigation} currentScreen="CheckIn" />
       <View style={{ height: 40 }} />
     </ScrollView>
   );
