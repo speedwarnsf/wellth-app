@@ -38,13 +38,62 @@ html = html.replace(
   'overflow: auto !important; -webkit-overflow-scrolling: touch; background-color: #FAF8F3; -webkit-font-smoothing: antialiased;'
 );
 
-// Add extra scroll fix that overrides any runtime JS
+// Add extra scroll fix that overrides any runtime JS — including a MutationObserver
+// to fight React Native Web re-applying overflow:hidden at runtime
 const scrollFix = `
     <style id="scroll-fix">
-      html, body, #root { overflow: auto !important; height: auto !important; min-height: 100%; }
-      body { -webkit-overflow-scrolling: touch; }
-      #root > div { min-height: 100vh; }
-    </style>`;
+      html, body, #root { overflow: auto !important; height: auto !important; min-height: 100% !important; position: static !important; }
+      body { -webkit-overflow-scrolling: touch !important; overflow-y: scroll !important; }
+      #root > div { min-height: 100vh; overflow: auto !important; }
+      /* Override RNW's ScrollView wrapper that traps scroll */
+      [data-testid="scroll-view"], [style*="overflow: hidden"] {
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+    </style>
+    <script>
+      // Fight RNW runtime overflow:hidden — observe and override
+      (function() {
+        function forceScroll() {
+          document.body.style.setProperty('overflow', 'auto', 'important');
+          document.body.style.setProperty('overflow-y', 'scroll', 'important');
+          document.body.style.setProperty('height', 'auto', 'important');
+          document.body.style.setProperty('position', 'static', 'important');
+          var root = document.getElementById('root');
+          if (root) {
+            root.style.setProperty('overflow', 'auto', 'important');
+            root.style.setProperty('height', 'auto', 'important');
+            root.style.setProperty('min-height', '100%', 'important');
+            // Fix first child of root (RNW app container)
+            if (root.firstElementChild) {
+              root.firstElementChild.style.setProperty('overflow', 'auto', 'important');
+              root.firstElementChild.style.setProperty('height', 'auto', 'important');
+              root.firstElementChild.style.setProperty('min-height', '100vh', 'important');
+            }
+          }
+        }
+        // Run immediately, after DOM ready, and observe mutations
+        forceScroll();
+        document.addEventListener('DOMContentLoaded', forceScroll);
+        window.addEventListener('load', function() {
+          forceScroll();
+          // Keep enforcing for 5 seconds after load (RNW hydration)
+          var count = 0;
+          var interval = setInterval(function() {
+            forceScroll();
+            if (++count > 50) clearInterval(interval);
+          }, 100);
+        });
+        // MutationObserver to catch RNW style changes
+        var observer = new MutationObserver(function(mutations) {
+          forceScroll();
+        });
+        observer.observe(document.documentElement, {
+          attributes: true, attributeFilter: ['style'],
+          subtree: true, childList: true
+        });
+      })();
+    </script>`;
 html = html.replace('</head>', scrollFix + '\n  </head>');
 
 // Fix JSX-style attribute
