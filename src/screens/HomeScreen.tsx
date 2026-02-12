@@ -189,7 +189,39 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
   );
 };
 
-// ── Owl Video Section (REMOVED — Dustin banned the owl 2026-02-12) ──
+// ── Owl Video Section (no box/container — Dustin wants it clean) ──
+const OwlVideoSection = () => {
+  const [currentVideo, setCurrentVideo] = useState(0);
+  const videos = [
+    { src: '/videos/owl-looking.mp4', label: '🦉 Owl is watching over your wealth' },
+    { src: '/videos/owl-maturing.mp4', label: '✨ Growing wiser every day' },
+    { src: '/videos/owl-emerging.mp4', label: '🌱 Growing together' },
+  ];
+
+  const cycleVideo = () => {
+    setCurrentVideo(prev => (prev + 1) % videos.length);
+  };
+
+  if (Platform.OS !== 'web') return null;
+
+  return (
+    <div onClick={cycleVideo} style={{ marginBottom: 24, textAlign: 'center' as const }}>
+      <video
+        key={videos[currentVideo].src}
+        autoPlay
+        muted
+        playsInline
+        loop
+        src={videos[currentVideo].src}
+        style={{ width: '100%', maxWidth: 400, borderRadius: 20 }}
+      />
+      <div style={{
+        marginTop: 8, fontSize: 13, color: '#8A7A5A',
+        fontFamily: 'Georgia, serif', fontStyle: 'italic'
+      }}>{videos[currentVideo].label}</div>
+    </div>
+  );
+};
 
 // ── AnimatedTipCard with cycling ─────────────────────────
 const AnimatedTipCard = ({ label, emoji, tips, dayIndex, favorites, onToggleFav }: {
@@ -347,7 +379,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         <View style={styles.logoContainer}>
           <Image
             source={require('../assets/wellth-logo.png')}
-            style={[styles.headerLogo, isSmall && { width: 180, height: 54 }]}
+            style={[styles.headerLogo, isSmall && { width: 209, height: 63 }]}
             resizeMode="contain"
             {...(Platform.OS === 'web' ? { className: 'wellth-header-logo' } as any : {})}
             accessibilityLabel="Wellth"
@@ -360,6 +392,9 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           <Text style={styles.greetingText}>{getGreeting()}, </Text>
           <Text style={styles.greetingDate}>{getFormattedDate()}</Text>
         </View>
+
+        {/* Owl Video — no box */}
+        <OwlVideoSection />
 
         {/* Streak Banner */}
         {streak > 0 && (
@@ -472,7 +507,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   headerLogo: {
-    width: 240, height: 72,
+    width: 278, height: 84,
   },
   header: {
     fontSize: 52, fontWeight: '700', color: '#B8963E',
