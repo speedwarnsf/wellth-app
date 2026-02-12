@@ -385,7 +385,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             accessibilityLabel="Wellth"
           />
         </View>
-        <View style={styles.divider} />
+        {/* gold hairline removed per Dustin */}
 
         {/* Greeting */}
         <View style={styles.greetingRow}>
