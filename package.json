@@ -6,7 +6,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build": "npx expo export --platform web && node scripts/post-export.js",
+    "postexport": "node scripts/post-export.js"
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
