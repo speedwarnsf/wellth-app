@@ -170,7 +170,7 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
         <View style={styles.reminderCard}>
           <Text style={styles.reminderEmoji}>🦉</Text>
           <Text style={styles.reminderText}>
-            It's been over an hour since your last glass. Your owl thinks it's time for a sip!
+            It's been over an hour since your last glass. Time for a sip!
           </Text>
         </View>
       )}

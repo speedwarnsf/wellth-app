@@ -15,11 +15,11 @@ const PHASES = [
   { label: 'Hold', duration: 4000, emoji: '🦉' },
 ];
 
-const OWL_MESSAGES = [
+const CALM_MESSAGES = [
   "Let the calm wash over you...",
   "You're doing beautifully.",
   "Feel each breath nourish your body.",
-  "The owl breathes with you.",
+  "Breathe with intention.",
   "Stillness is your superpower.",
   "Peace flows through you.",
   "Every breath is a fresh start.",
@@ -57,11 +57,11 @@ const injectBreathingCSS = () => {
     .breathing-circle.hold { transform: scale(1.4); }
     .breathing-circle.exhale { transform: scale(1); }
     .breathing-circle.pause { transform: scale(1); }
-    .breathing-owl {
+    .breathing-calm {
       transition: transform 4s ease-in-out, opacity 0.5s ease;
     }
-    .breathing-owl.inhale { transform: scale(1.1) translateY(-5px); }
-    .breathing-owl.exhale { transform: scale(1) translateY(0); }
+    .breathing-calm.inhale { transform: scale(1.1) translateY(-5px); }
+    .breathing-calm.exhale { transform: scale(1) translateY(0); }
   `;
   document.head.appendChild(style);
 };
@@ -75,7 +75,7 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [countdown, setCountdown] = useState(4);
   const [cycleCount, setCycleCount] = useState(0);
-  const [owlMsg, setOwlMsg] = useState(0);
+  const [calmMsg, setCalmMsg] = useState(0);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => { injectBreathingCSS(); }, []);
@@ -100,7 +100,7 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
       setPhaseIndex(nextPhase);
       if (nextPhase === 0) {
         setCycleCount(c => c + 1);
-        setOwlMsg(m => (m + 1) % OWL_MESSAGES.length);
+        setCalmMsg(m => (m + 1) % CALM_MESSAGES.length);
       }
     }, phase.duration);
 
@@ -133,7 +133,7 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
       </TouchableOpacity>
 
       <Text style={styles.title}>Box Breathing</Text>
-      <Text style={styles.subtitle}>4-4-4-4 guided by your owl 🦉</Text>
+      <Text style={styles.subtitle}>4-4-4-4 guided breathing</Text>
 
       {/* Breathing Circle */}
       <View style={styles.circleContainer}>
@@ -169,13 +169,13 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
         {isActive ? phase.label : 'Ready when you are'}
       </Text>
 
-      {/* Owl message */}
+      {/* Breathing message */}
       {isActive && (
-        <View style={styles.owlMsgContainer}>
+        <View style={styles.calmMsgContainer}>
           <Text style={{ fontSize: 48, textAlign: 'center' as const, marginBottom: 4 }}
-            {...(Platform.OS === 'web' ? { className: `breathing-owl ${phaseClass}` } as any : {})}
+            {...(Platform.OS === 'web' ? { className: `breathing-calm ${phaseClass}` } as any : {})}
           >🦉</Text>
-          <Text style={styles.owlMsgText}>{OWL_MESSAGES[owlMsg]}</Text>
+          <Text style={styles.calmMsgText}>{CALM_MESSAGES[calmMsg]}</Text>
         </View>
       )}
 
@@ -197,9 +197,9 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
       {!isActive && (
         <View style={styles.instructions}>
           <Text style={styles.instructTitle}>How Box Breathing Works</Text>
-          <Text style={styles.instructText}>🌬️ Breathe in slowly for 4 seconds</Text>
+          <Text style={styles.instructText}>🌬️ Breathe in slcalmy for 4 seconds</Text>
           <Text style={styles.instructText}>✨ Hold your breath for 4 seconds</Text>
-          <Text style={styles.instructText}>🍃 Exhale slowly for 4 seconds</Text>
+          <Text style={styles.instructText}>🍃 Exhale slcalmy for 4 seconds</Text>
           <Text style={styles.instructText}>🦉 Hold empty for 4 seconds</Text>
           <Text style={styles.instructNote}>Used by Navy SEALs and yogis alike to calm the nervous system.</Text>
         </View>
@@ -234,9 +234,9 @@ const styles = StyleSheet.create({
 
   phaseLabel: { fontSize: 22, fontWeight: '600', color: '#3A3A3A', textAlign: 'center', fontFamily: serif, marginBottom: 20 },
 
-  owlMsgContainer: { alignItems: 'center', marginBottom: 20 },
-  owlSmall: { width: 80, height: 80, marginBottom: 8 },
-  owlMsgText: { fontSize: 15, color: '#8A7A5A', fontStyle: 'italic', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, textAlign: 'center' },
+  calmMsgContainer: { alignItems: 'center', marginBottom: 20 },
+  calmSmall: { width: 80, height: 80, marginBottom: 8 },
+  calmMsgText: { fontSize: 15, color: '#8A7A5A', fontStyle: 'italic', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, textAlign: 'center' },
 
   cycleText: { fontSize: 14, color: '#B8963E', textAlign: 'center', marginBottom: 16, fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined },
 

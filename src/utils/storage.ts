@@ -83,6 +83,6 @@ export const getStreakMilestone = (streak: number): string | null => {
   if (streak === 30) return '🏆 30 days! Incredible!';
   if (streak === 60) return '💎 60 days! Unstoppable!';
   if (streak === 90) return '👑 90 days! You are legendary!';
-  if (streak === 365) return '🦉 One full year! The owl bows to you.';
+  if (streak === 365) return '🏆 One full year! Incredible dedication.';
   return null;
 };

@@ -285,7 +285,7 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
       {/* Insights */}
       {insights.length > 0 && (
         <View style={styles.insightsCard}>
-          <Text style={styles.insightsTitle}>🦉 Owl's Insights</Text>
+          <Text style={styles.insightsTitle}>💡 Weekly Insights</Text>
           {insights.map((insight, i) => (
             <Text key={i} style={styles.insightText}>{insight}</Text>
           ))}

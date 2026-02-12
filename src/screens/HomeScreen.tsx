@@ -58,7 +58,8 @@ const injectCSS = () => {
   const style = document.createElement('style');
   style.id = 'wellth-css';
   style.textContent = `
-    @keyframes owlFloat {
+    /* owlFloat animation removed */
+    @keyframes owlFloat_UNUSED {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       25% { transform: translateY(-8px) rotate(1.5deg); }
       75% { transform: translateY(4px) rotate(-1deg); }
@@ -170,14 +171,6 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
 
   return (
     <div className={`splash-screen ${fadeOut ? 'fade-out' : ''}`} onClick={handleSkip}>
-      <video
-        className="splash-video"
-        autoPlay
-        muted
-        playsInline
-        loop
-        src="/videos/owl-looking.mp4"
-      />
       <img
         src={require('../assets/wellth-logo.png')}
         className="splash-logo"
@@ -196,36 +189,7 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
   );
 };
 
-// ── Owl Video Section ────────────────────────────────────
-const OwlVideoSection = () => {
-  const [currentVideo, setCurrentVideo] = useState(0);
-  const videos = [
-    { src: '/videos/owl-looking.mp4', label: '🦉 Owl is watching over your wealth' },
-    { src: '/videos/owl-maturing.mp4', label: '✨ Growing wiser every day' },
-    { src: '/videos/owl-emerging.mp4', label: '🌱 Growing together' },
-  ];
-
-  const cycleVideo = () => {
-    setCurrentVideo(prev => (prev + 1) % videos.length);
-  };
-
-  if (Platform.OS !== 'web') return null;
-
-  return (
-    <div className="owl-video-container" onClick={cycleVideo} style={{ marginBottom: 24 }}>
-      <video
-        key={videos[currentVideo].src}
-        autoPlay
-        muted
-        playsInline
-        loop
-        src={videos[currentVideo].src}
-        style={{ width: '100%', borderRadius: 20 }}
-      />
-      <div className="owl-video-label">{videos[currentVideo].label}</div>
-    </div>
-  );
-};
+// ── Owl Video Section (REMOVED — Dustin banned the owl 2026-02-12) ──
 
 // ── AnimatedTipCard with cycling ─────────────────────────
 const AnimatedTipCard = ({ label, emoji, tips, dayIndex, favorites, onToggleFav }: {
@@ -396,9 +360,6 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           <Text style={styles.greetingText}>{getGreeting()}, </Text>
           <Text style={styles.greetingDate}>{getFormattedDate()}</Text>
         </View>
-
-        {/* Owl Video */}
-        <OwlVideoSection />
 
         {/* Streak Banner */}
         {streak > 0 && (
