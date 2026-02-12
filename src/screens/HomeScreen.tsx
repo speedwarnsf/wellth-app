@@ -414,16 +414,6 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
 
         {showFavs && <FavoritesPanel favorites={favorites} onClose={() => setShowFavs(false)} />}
 
-        {/* Owl Mascot */}
-        <View style={styles.mascotContainer}>
-          <Image
-            source={require('../assets/owl-mascot.png')}
-            style={[styles.mascot, isSmall && { width: 160, height: 160 }]}
-            resizeMode="contain"
-            {...(Platform.OS === 'web' ? { className: 'owl-mascot' } as any : {})}
-          />
-        </View>
-
         {/* Footer */}
         <Text style={styles.footer}>Grow your wealth. Nourish your wellness.</Text>
         <Text style={styles.copyright}>© {new Date().getFullYear()} Wellth</Text>

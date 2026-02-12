@@ -32,10 +32,10 @@ const metaTags = `
 
 html = html.replace('</title>', '</title>' + metaTags);
 
-// Fix body styles
+// Fix body styles — allow scrolling on mobile (RN ScrollView sometimes fails on mobile web)
 html = html.replace(
   'overflow: hidden;',
-  'overflow: hidden; background-color: #FAF8F3; -webkit-font-smoothing: antialiased;'
+  'overflow: auto; -webkit-overflow-scrolling: touch; background-color: #FAF8F3; -webkit-font-smoothing: antialiased;'
 );
 
 // Fix JSX-style attribute

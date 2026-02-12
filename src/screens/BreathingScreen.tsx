@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Platform, Image,
+  View, Text, StyleSheet, TouchableOpacity, Platform,
   useWindowDimensions, Animated, Easing,
 } from 'react-native';
 
@@ -171,12 +171,9 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
       {/* Owl message */}
       {isActive && (
         <View style={styles.owlMsgContainer}>
-          <Image
-            source={require('../assets/owl-mascot.png')}
-            style={styles.owlSmall}
-            resizeMode="contain"
+          <Text style={{ fontSize: 48, textAlign: 'center' as const, marginBottom: 4 }}
             {...(Platform.OS === 'web' ? { className: `breathing-owl ${phaseClass}` } as any : {})}
-          />
+          >🦉</Text>
           <Text style={styles.owlMsgText}>{OWL_MESSAGES[owlMsg]}</Text>
         </View>
       )}
