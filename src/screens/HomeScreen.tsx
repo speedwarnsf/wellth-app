@@ -182,7 +182,7 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
         muted
         playsInline
         loop
-        src="/videos/owl-winking.mp4"
+        src="/videos/owl-looking.mp4"
       />
       <img
         src={require('../assets/wellth-logo.png')}
@@ -207,7 +207,7 @@ const OwlVideoSection = () => {
   const [currentVideo, setCurrentVideo] = useState(0);
   const videos = [
     { src: '/videos/owl-looking.mp4', label: '🦉 Owl is watching over your wealth' },
-    { src: '/videos/owl-winking.mp4', label: '✨ A wink of wisdom' },
+    { src: '/videos/owl-maturing.mp4', label: '✨ Growing wiser every day' },
     { src: '/videos/owl-emerging.mp4', label: '🌱 Growing together' },
   ];
 

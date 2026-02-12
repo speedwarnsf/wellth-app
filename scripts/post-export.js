@@ -35,8 +35,17 @@ html = html.replace('</title>', '</title>' + metaTags);
 // Fix body styles — allow scrolling on mobile (RN ScrollView sometimes fails on mobile web)
 html = html.replace(
   'overflow: hidden;',
-  'overflow: auto; -webkit-overflow-scrolling: touch; background-color: #FAF8F3; -webkit-font-smoothing: antialiased;'
+  'overflow: auto !important; -webkit-overflow-scrolling: touch; background-color: #FAF8F3; -webkit-font-smoothing: antialiased;'
 );
+
+// Add extra scroll fix that overrides any runtime JS
+const scrollFix = `
+    <style id="scroll-fix">
+      html, body, #root { overflow: auto !important; height: auto !important; min-height: 100%; }
+      body { -webkit-overflow-scrolling: touch; }
+      #root > div { min-height: 100vh; }
+    </style>`;
+html = html.replace('</head>', scrollFix + '\n  </head>');
 
 // Fix JSX-style attribute
 html = html.replace('httpEquiv=', 'http-equiv=');
