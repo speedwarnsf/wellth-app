@@ -397,6 +397,33 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           </TouchableOpacity>
         </View>
 
+        <View style={styles.featureGrid}>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('Journal')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.featureBtnEmoji}>📖</Text>
+            <Text style={styles.featureBtnLabel}>Journal</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('Hydration')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.featureBtnEmoji}>💧</Text>
+            <Text style={styles.featureBtnLabel}>Hydration</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('WeeklyReport')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.featureBtnEmoji}>📊</Text>
+            <Text style={styles.featureBtnLabel}>Report</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Tip Cards */}
         <TipCard label="Wealth tip" emoji="🪴" tip={wealthTip} isFav={favorites.includes(wealthTip)} onToggleFav={() => toggleFav(wealthTip)} />
         <TipCard label="Wellness tip" emoji="💛" tip={wellnessTip} isFav={favorites.includes(wellnessTip)} onToggleFav={() => toggleFav(wellnessTip)} />
