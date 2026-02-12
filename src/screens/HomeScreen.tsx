@@ -4,6 +4,7 @@ import {
   useWindowDimensions, TouchableOpacity, Animated, Easing,
 } from 'react-native';
 import { wealthTips, wellnessTips } from '../data/tipData';
+import { getStreak, getStreakMilestone, getCheckIn, todayKey } from '../utils/storage';
 
 // ── helpers ──────────────────────────────────────────────
 const getGreeting = () => {
@@ -287,7 +288,7 @@ const FavoritesPanel = ({ favorites, onClose }: { favorites: string[]; onClose: 
 };
 
 // ── HomeScreen ───────────────────────────────────────────
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }: { navigation?: any }) => {
   const { width } = useWindowDimensions();
   const maxWidth = Math.min(width, 520);
   const dayIndex = getDayIndex();
@@ -297,6 +298,13 @@ const HomeScreen = () => {
   const [favorites, setFavorites] = useState<string[]>(loadFavorites);
   const [showFavs, setShowFavs] = useState(false);
   const [showSplash, setShowSplash] = useState(!hasSplashBeenSeen());
+  const [streak, setStreak] = useState(0);
+  const [checkedInToday, setCheckedInToday] = useState(false);
+
+  useEffect(() => {
+    setStreak(getStreak());
+    setCheckedInToday(!!getCheckIn(todayKey()));
+  }, []);
 
   // RN animated values for non-web fade-in
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -348,6 +356,46 @@ const HomeScreen = () => {
 
         {/* Owl Video */}
         <OwlVideoSection />
+
+        {/* Streak Banner */}
+        {streak > 0 && (
+          <View style={styles.streakBanner}>
+            <Text style={styles.streakEmoji}>🔥</Text>
+            <Text style={styles.streakCount}>{streak}</Text>
+            <Text style={styles.streakText}>day streak</Text>
+            {getStreakMilestone(streak) && (
+              <Text style={styles.streakMilestone}>{getStreakMilestone(streak)}</Text>
+            )}
+          </View>
+        )}
+
+        {/* Feature Buttons */}
+        <View style={styles.featureGrid}>
+          <TouchableOpacity
+            style={[styles.featureBtn, !checkedInToday && styles.featureBtnHighlight]}
+            onPress={() => navigation?.navigate('CheckIn')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.featureBtnEmoji}>{checkedInToday ? '✅' : '📝'}</Text>
+            <Text style={styles.featureBtnLabel}>{checkedInToday ? 'Checked In' : 'Check In'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('Tips')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.featureBtnEmoji}>💡</Text>
+            <Text style={styles.featureBtnLabel}>All Tips</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('Breathing')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.featureBtnEmoji}>🧘</Text>
+            <Text style={styles.featureBtnLabel}>Breathe</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Tip Cards */}
         <TipCard label="Wealth tip" emoji="🪴" tip={wealthTip} isFav={favorites.includes(wealthTip)} onToggleFav={() => toggleFav(wealthTip)} />
@@ -418,6 +466,27 @@ const styles = StyleSheet.create({
   greetingRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', marginBottom: 24 },
   greetingText: { fontSize: 18, color: '#3A3A3A', fontFamily: bodySerif },
   greetingDate: { fontSize: 18, color: '#3A3A3A', fontStyle: 'italic', fontWeight: '600', fontFamily: bodySerif },
+
+  // Streak banner
+  streakBanner: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#FFF9EE', borderRadius: 16, padding: 14, marginBottom: 20,
+    borderWidth: 1.5, borderColor: '#D4B96A', flexWrap: 'wrap',
+  },
+  streakEmoji: { fontSize: 22, marginRight: 6 },
+  streakCount: { fontSize: 28, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginRight: 6 },
+  streakText: { fontSize: 16, color: '#8A7A5A', fontFamily: bodySerif },
+  streakMilestone: { width: '100%' as any, textAlign: 'center', fontSize: 14, color: '#B8963E', fontStyle: 'italic', fontFamily: bodySerif, marginTop: 4 },
+
+  // Feature buttons
+  featureGrid: { flexDirection: 'row', gap: 10, marginBottom: 24 },
+  featureBtn: {
+    flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 18,
+    alignItems: 'center', borderWidth: 1.5, borderColor: '#EDE3CC',
+  },
+  featureBtnHighlight: { borderColor: '#B8963E', backgroundColor: '#FFF9EE' },
+  featureBtnEmoji: { fontSize: 26, marginBottom: 6 },
+  featureBtnLabel: { fontSize: 13, fontWeight: '600', color: '#8A7A5A', fontFamily: bodySerif },
 
   // Tip card
   card: {
