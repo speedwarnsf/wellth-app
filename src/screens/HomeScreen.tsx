@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, Image, ScrollView, Platform,
   useWindowDimensions, TouchableOpacity, Animated, Easing,
 } from 'react-native';
-import { wealthTips, wellnessTips } from '../data/tipData';
+import { wealthTips, wellnessTips, fetchTips, getWealthTips, getWellnessTips } from '../data/tipData';
 import { getStreak, getStreakMilestone, getCheckIn, todayKey } from '../utils/storage';
 import OnboardingScreen, { hasOnboarded } from './OnboardingScreen';
 import {
@@ -369,10 +369,14 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   const [showOnboarding, setShowOnboarding] = useState(!hasOnboarded());
   const [streak, setStreak] = useState(0);
   const [checkedInToday, setCheckedInToday] = useState(false);
+  const [liveTips, setLiveTips] = useState<{ wealth: string[]; wellness: string[] }>({ wealth: wealthTips, wellness: wellnessTips });
 
   useEffect(() => {
     setStreak(getStreak());
     setCheckedInToday(!!getCheckIn(todayKey()));
+    fetchTips().then(() => {
+      setLiveTips({ wealth: getWealthTips(), wellness: getWellnessTips() });
+    });
   }, []);
 
   // RN animated values for non-web fade-in
@@ -516,8 +520,8 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         </View>
 
         {/* Tip Cards */}
-        <AnimatedTipCard label="Wealth tip" emoji="" tips={wealthTips} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
-        <AnimatedTipCard label="Wellness tip" emoji="" tips={wellnessTips} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
+        <AnimatedTipCard label="Wealth tip" emoji="" tips={liveTips.wealth} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
+        <AnimatedTipCard label="Wellness tip" emoji="" tips={liveTips.wellness} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
 
         {/* Favorites toggle */}
         <TouchableOpacity

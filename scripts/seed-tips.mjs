@@ -1,14 +1,9 @@
-import { supabase } from '../lib/supabase';
+// Seed tips into Supabase
+const URL = 'https://vqkoxfenyjomillmxawh.supabase.co';
+const KEY = process.env.SUPABASE_SERVICE_KEY;
+if (!KEY) { console.error('Set SUPABASE_SERVICE_KEY env var'); process.exit(1); }
 
-export interface Tip {
-  id: string;
-  text: string;
-  category: 'Finance' | 'Well-being';
-}
-
-// ── Hardcoded fallbacks ──────────────────────────────────
-
-export const wealthTips: string[] = [
+const wealthTips = [
   "Let this gentle guard stand watch: Sleep on purchases that shout for attention. By morning, the noisy ones slink away, and only the worthy remain.",
   "Think of your savings not as deprivation, but as paying your future self first. Every dollar set aside is a seed planted in soil you'll walk on later—quietly growing, compounding, becoming shade for harder days.",
   "Before you spend, ask: will this purchase matter in five years? Most impulses dissolve under that question. The ones that survive are the ones worth having.",
@@ -42,7 +37,7 @@ export const wealthTips: string[] = [
   "Talk openly about money with your partner. Financial secrets breed resentment. Shared goals and honest numbers build unshakable partnerships.",
 ];
 
-export const wellnessTips: string[] = [
+const wellnessTips = [
   "Here's a grounding reminder: food is not just fuel, it's information. Each bite tells your body how to perform—whether to build, fight, or rest. Choose wisely, and your meals become medicine instead of burden.",
   "Sleep is not laziness—it's restoration. Your brain sorts memories, your body repairs tissue, your emotions recalibrate. Guarding your sleep is one of the most productive things you can do.",
   "Move your body not as punishment for what you ate, but as celebration of what it can do. A walk, a stretch, a dance in the kitchen—movement is gratitude in motion.",
@@ -76,42 +71,22 @@ export const wellnessTips: string[] = [
   "You are not behind. You are not broken. You are exactly where a person with your history and your courage would be. Breathe. You're doing better than you think.",
 ];
 
-// ── Supabase fetch with fallback ─────────────────────────
+const rows = [
+  ...wealthTips.map(t => ({ text: t, category: 'Finance' })),
+  ...wellnessTips.map(t => ({ text: t, category: 'Well-being' })),
+];
 
-let _cachedFinance: string[] | null = null;
-let _cachedWellbeing: string[] | null = null;
-let _fetchPromise: Promise<void> | null = null;
+const res = await fetch(`${URL}/rest/v1/tips`, {
+  method: 'POST',
+  headers: {
+    'apikey': KEY,
+    'Authorization': `Bearer ${KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation',
+  },
+  body: JSON.stringify(rows),
+});
 
-async function _fetchTips(): Promise<void> {
-  try {
-    const { data, error } = await supabase
-      .from('tips')
-      .select('text, category')
-      .order('created_at', { ascending: true });
-
-    if (error || !data || data.length === 0) {
-      console.warn('Supabase tips fetch failed, using fallback:', error?.message);
-      return;
-    }
-
-    _cachedFinance = data.filter((t: any) => t.category === 'Finance').map((t: any) => t.text);
-    _cachedWellbeing = data.filter((t: any) => t.category === 'Well-being').map((t: any) => t.text);
-  } catch (e) {
-    console.warn('Supabase tips fetch error, using fallback:', e);
-  }
-}
-
-export function fetchTips(): Promise<void> {
-  if (!_fetchPromise) {
-    _fetchPromise = _fetchTips();
-  }
-  return _fetchPromise;
-}
-
-export function getWealthTips(): string[] {
-  return _cachedFinance ?? wealthTips;
-}
-
-export function getWellnessTips(): string[] {
-  return _cachedWellbeing ?? wellnessTips;
-}
+const data = await res.json();
+console.log(`Status: ${res.status}, Inserted: ${Array.isArray(data) ? data.length : 'error'}`);
+if (!res.ok) console.log(JSON.stringify(data));

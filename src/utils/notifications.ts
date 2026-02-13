@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { wealthTips, wellnessTips } from '../data/tipData';
+import { wealthTips, wellnessTips, getWealthTips, getWellnessTips } from '../data/tipData';
 
 const NOTIF_PREF_KEY = 'wellth_notifications_enabled';
 const NOTIF_SCHEDULED_KEY = 'wellth_notif_scheduled';
@@ -56,7 +56,7 @@ export const disableNotifications = () => {
 const getDailyTip = (): { title: string; body: string } => {
   const dayIndex = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 864e5);
   const isWealth = dayIndex % 2 === 0;
-  const tips = isWealth ? wealthTips : wellnessTips;
+  const tips = isWealth ? getWealthTips() : getWellnessTips();
   const tip = tips[dayIndex % tips.length];
   return {
     title: isWealth ? 'Wellth — Daily Wealth Tip' : 'Wellth — Daily Wellness Tip',

@@ -1,9 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform,
   useWindowDimensions,
 } from 'react-native';
-import { wellnessTips } from '../data/tipData';
+import { wellnessTips, fetchTips, getWellnessTips } from '../data/tipData';
 import storage from '../utils/storage';
 import QuickNav from '../components/QuickNav';
 
@@ -42,6 +42,11 @@ const TipsScreen = ({ navigation }: { navigation: any }) => {
   const maxWidth = Math.min(width, 520);
   const [activeCategory, setActiveCategory] = useState<Category>('all');
   const [favorites, setFavorites] = useState<string[]>(() => storage.getJSON(FAVS_KEY, []));
+  const [tips, setTips] = useState<string[]>(wellnessTips);
+
+  useEffect(() => {
+    fetchTips().then(() => setTips(getWellnessTips()));
+  }, []);
 
   const toggleFav = useCallback((tip: string) => {
     setFavorites(prev => {
@@ -52,8 +57,8 @@ const TipsScreen = ({ navigation }: { navigation: any }) => {
   }, []);
 
   const filtered = activeCategory === 'all'
-    ? wellnessTips
-    : wellnessTips.filter(tip => categorize(tip).includes(activeCategory));
+    ? tips
+    : tips.filter(tip => categorize(tip).includes(activeCategory));
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as any }]}>
