@@ -1,0 +1,13 @@
+{
+  "name": "Wellth",
+  "short_name": "Wellth",
+  "description": "Grow your wealth. Nourish your wellness.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF8F3",
+  "theme_color": "#B8963E",
+  "icons": [
+    { "src": "/icons/tips.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/tips.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

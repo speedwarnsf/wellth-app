@@ -9,10 +9,10 @@ const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New R
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
 
 const PHASES = [
-  { label: 'Breathe In', duration: 4000, emoji: '🌬️' },
-  { label: 'Hold', duration: 4000, emoji: '✨' },
-  { label: 'Breathe Out', duration: 4000, emoji: '🍃' },
-  { label: 'Hold', duration: 4000, emoji: '🦉' },
+  { label: 'Breathe In', duration: 4000, emoji: '' },
+  { label: 'Hold', duration: 4000, emoji: '' },
+  { label: 'Breathe Out', duration: 4000, emoji: '' },
+  { label: 'Hold', duration: 4000, emoji: '' },
 ];
 
 const CALM_MESSAGES = [
@@ -141,13 +141,13 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
           <div
             className={`breathing-circle ${isActive ? phaseClass : ''}`}
             style={{
-              width: 200, height: 200, borderRadius: '50%',
+              width: 200, height: 200, borderRadius: 0,
               backgroundColor: '#FFF9EE', border: '3px solid #D4B96A',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexDirection: 'column',
             }}
           >
-            <span style={{ fontSize: 40 }}>{isActive ? phase.emoji : '🦉'}</span>
+            <span style={{ fontSize: 40 }}>{isActive ? phase.emoji : ''}</span>
             <span style={{
               fontSize: 36, fontWeight: '700', color: '#B8963E',
               fontFamily: '"Playfair Display", Georgia, serif',
@@ -158,7 +158,7 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
           </div>
         ) : (
           <View style={styles.circle}>
-            <Text style={{ fontSize: 40 }}>{isActive ? phase.emoji : '🦉'}</Text>
+            <Text style={{ fontSize: 40 }}>{isActive ? phase.emoji : ''}</Text>
             <Text style={styles.circleCount}>{isActive ? countdown : '4'}</Text>
           </View>
         )}
@@ -172,9 +172,9 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
       {/* Breathing message */}
       {isActive && (
         <View style={styles.calmMsgContainer}>
-          <Text style={{ fontSize: 48, textAlign: 'center' as const, marginBottom: 4 }}
+          <Text style={{ fontSize: 20, textAlign: 'center' as const, marginBottom: 4, color: '#B8963E', fontFamily: serif, fontWeight: '600' }}
             {...(Platform.OS === 'web' ? { className: `breathing-calm ${phaseClass}` } as any : {})}
-          >🦉</Text>
+          >~</Text>
           <Text style={styles.calmMsgText}>{CALM_MESSAGES[calmMsg]}</Text>
         </View>
       )}
@@ -197,10 +197,10 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
       {!isActive && (
         <View style={styles.instructions}>
           <Text style={styles.instructTitle}>How Box Breathing Works</Text>
-          <Text style={styles.instructText}>🌬️ Breathe in slcalmy for 4 seconds</Text>
-          <Text style={styles.instructText}>✨ Hold your breath for 4 seconds</Text>
-          <Text style={styles.instructText}>🍃 Exhale slcalmy for 4 seconds</Text>
-          <Text style={styles.instructText}>🦉 Hold empty for 4 seconds</Text>
+          <Text style={styles.instructText}>Breathe in slowly for 4 seconds</Text>
+          <Text style={styles.instructText}>Hold your breath for 4 seconds</Text>
+          <Text style={styles.instructText}>Exhale slowly for 4 seconds</Text>
+          <Text style={styles.instructText}>Hold empty for 4 seconds</Text>
           <Text style={styles.instructNote}>Used by Navy SEALs and yogis alike to calm the nervous system.</Text>
         </View>
       )}
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
 
   circleContainer: { alignItems: 'center', marginBottom: 24 },
   circle: {
-    width: 200, height: 200, borderRadius: 100,
+    width: 200, height: 200, borderRadius: 0,
     backgroundColor: '#FFF9EE', borderWidth: 3, borderColor: '#D4B96A',
     alignItems: 'center', justifyContent: 'center',
   },
@@ -241,14 +241,14 @@ const styles = StyleSheet.create({
   cycleText: { fontSize: 14, color: '#B8963E', textAlign: 'center', marginBottom: 16, fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined },
 
   actionBtn: {
-    backgroundColor: '#B8963E', borderRadius: 14, paddingVertical: 16,
+    backgroundColor: '#B8963E', borderRadius: 0, paddingVertical: 16,
     alignItems: 'center', marginBottom: 24,
   },
   actionBtnStop: { backgroundColor: '#8A7A5A' },
   actionBtnText: { fontSize: 17, fontWeight: '700', color: '#FFFFFF', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined },
 
   instructions: {
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20,
     ...(Platform.OS === 'web'
       ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),

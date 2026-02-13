@@ -96,6 +96,21 @@ const scrollFix = `
     </script>`;
 html = html.replace('</head>', scrollFix + '\n  </head>');
 
+// Copy service worker and manifest to dist
+const publicFiles = ['sw.js', 'manifest.json'];
+publicFiles.forEach(file => {
+  const src = path.join(__dirname, '..', 'public', file);
+  const dest = path.join(__dirname, '..', 'dist', file);
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, dest);
+    console.log(`✅ ${file} copied to dist/`);
+  }
+});
+
+// Add manifest link for PWA
+const manifestTag = `\n    <link rel="manifest" href="/manifest.json" />`;
+html = html.replace('</title>' + metaTags, '</title>' + metaTags + manifestTag);
+
 // Fix JSX-style attribute
 html = html.replace('httpEquiv=', 'http-equiv=');
 

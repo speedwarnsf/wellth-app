@@ -9,7 +9,7 @@ import QuickNav from '../components/QuickNav';
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
 
-const MOODS = ['😞', '😕', '😐', '🙂', '😄'];
+const MOODS = ['1', '2', '3', '4', '5'];
 const MOOD_LABELS = ['Rough', 'Low', 'Okay', 'Good', 'Great'];
 const JOURNAL_PREFIX = 'wellth_journal_';
 
@@ -102,7 +102,7 @@ const JournalScreen = ({ navigation }: { navigation: any }) => {
       </TouchableOpacity>
 
       <Text style={styles.title}>Mood Journal</Text>
-      <Text style={styles.subtitle}>Reflect, track, and grow 🦉</Text>
+      <Text style={styles.subtitle}>Reflect, track, and grow</Text>
 
       {/* Today's mood from check-in */}
       {getCheckIn(today) && (
@@ -170,14 +170,14 @@ const JournalScreen = ({ navigation }: { navigation: any }) => {
           disabled={!journalText.trim()}
           activeOpacity={0.7}
         >
-          <Text style={styles.saveBtnText}>{saved ? '✓ Saved' : 'Save Entry'}</Text>
+          <Text style={styles.saveBtnText}>{saved ? 'Saved' : 'Save Entry'}</Text>
         </TouchableOpacity>
       </View>
 
       {/* History */}
       <TouchableOpacity onPress={() => setShowHistory(!showHistory)} style={styles.historyToggle}>
         <Text style={styles.historyToggleText}>
-          {showHistory ? 'Hide History' : `📖 View History (${entries.length} entries)`}
+          {showHistory ? 'Hide History' : `View History (${entries.length} entries)`}
         </Text>
       </TouchableOpacity>
 
@@ -191,9 +191,9 @@ const JournalScreen = ({ navigation }: { navigation: any }) => {
           </View>
           {entry.checkin && (
             <View style={styles.historyStats}>
-              {entry.checkin.water > 0 && <Text style={styles.historyStat}>💧 {entry.checkin.water}</Text>}
-              {entry.checkin.sleep > 0 && <Text style={styles.historyStat}>😴 {entry.checkin.sleep}h</Text>}
-              {entry.checkin.exercise && <Text style={styles.historyStat}>🏃 ✓</Text>}
+              {entry.checkin.water > 0 && <Text style={styles.historyStat}>Water: {entry.checkin.water}</Text>}
+              {entry.checkin.sleep > 0 && <Text style={styles.historyStat}>Sleep: {entry.checkin.sleep}h</Text>}
+              {entry.checkin.exercise && <Text style={styles.historyStat}>Exercised</Text>}
             </View>
           )}
           {entry.text ? (
@@ -233,14 +233,14 @@ const styles = StyleSheet.create({
 
   todayMood: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF9EE',
-    borderRadius: 14, padding: 14, marginBottom: 20, borderWidth: 1.5, borderColor: '#D4B96A',
+    borderRadius: 0, padding: 14, marginBottom: 20, borderWidth: 1.5, borderColor: '#D4B96A',
   },
   todayMoodLabel: { fontSize: 15, color: '#8A7A5A', fontFamily: bodySerif, marginRight: 8 },
   todayMoodEmoji: { fontSize: 28, marginRight: 8 },
   todayMoodText: { fontSize: 16, fontWeight: '600', color: '#B8963E', fontFamily: bodySerif },
 
   trendCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, marginBottom: 24,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20, marginBottom: 24,
     ...(Platform.OS === 'web'
       ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
@@ -248,14 +248,14 @@ const styles = StyleSheet.create({
   trendTitle: { fontSize: 18, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 16, textAlign: 'center' },
   trendRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end' },
   trendCol: { alignItems: 'center', gap: 4 },
-  trendBar: { width: 24, borderRadius: 6, minHeight: 8 },
+  trendBar: { width: 24, borderRadius: 0, minHeight: 8 },
   trendDay: { fontSize: 11, color: '#999', fontFamily: bodySerif },
 
   entrySection: { marginBottom: 24 },
   sectionTitle: { fontSize: 18, fontWeight: '600', color: '#3A3A3A', fontFamily: bodySerif, marginBottom: 12 },
 
   textInput: {
-    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16, fontSize: 16, lineHeight: 24,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 16, fontSize: 16, lineHeight: 24,
     fontFamily: bodySerif, color: '#3A3A3A', minHeight: 120, textAlignVertical: 'top',
     borderWidth: 1.5, borderColor: '#EDE3CC',
     ...(Platform.OS === 'web' ? { outlineColor: '#D4B96A' } as any : {}),
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   tagLabel: { fontSize: 14, color: '#8A7A5A', fontFamily: bodySerif, marginTop: 12, marginBottom: 8 },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   tag: {
-    paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20,
+    paddingHorizontal: 14, paddingVertical: 7, borderRadius: 0,
     borderWidth: 1.5, borderColor: '#EDE3CC', backgroundColor: '#FFFFFF',
   },
   tagActive: { borderColor: '#B8963E', backgroundColor: '#FFF9EE' },
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   tagTextActive: { color: '#B8963E', fontWeight: '600' },
 
   saveBtn: {
-    backgroundColor: '#B8963E', borderRadius: 14, paddingVertical: 16,
+    backgroundColor: '#B8963E', borderRadius: 0, paddingVertical: 16,
     alignItems: 'center',
   },
   saveBtnDisabled: { opacity: 0.5 },
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   historyToggleText: { fontSize: 15, color: '#B8963E', fontWeight: '600', fontFamily: bodySerif },
 
   historyCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, marginBottom: 12,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 18, marginBottom: 12,
     ...(Platform.OS === 'web'
       ? { boxShadow: '0 2px 12px rgba(184,150,62,0.08)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 2 }),

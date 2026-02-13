@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   modalView: {
     margin: 20,
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderRadius: 0,
     padding: 35,
     alignItems: 'center',
     shadowColor: '#000',
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   timeButton: {
     padding: 10,
     margin: 5,
-    borderRadius: 5,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#ccc',
   },

@@ -111,22 +111,22 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
       </TouchableOpacity>
 
       <Text style={styles.title}>Hydration Tracker</Text>
-      <Text style={styles.subtitle}>Stay refreshed, stay sharp 💧</Text>
+      <Text style={styles.subtitle}>Stay refreshed, stay sharp</Text>
 
       {/* Progress Ring */}
       <View style={styles.progressCard}>
         {Platform.OS === 'web' ? (
           <div style={{
-            width: 180, height: 180, borderRadius: '50%', position: 'relative',
+            width: 180, height: 180, borderRadius: 0, position: 'relative',
             background: `conic-gradient(#B8963E ${progressPercent}%, #EDE3CC ${progressPercent}%)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto',
           }}>
             <div style={{
-              width: 150, height: 150, borderRadius: '50%', backgroundColor: '#FAF8F3',
+              width: 150, height: 150, borderRadius: 0, backgroundColor: '#FAF8F3',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
             }}>
-              <span style={{ fontSize: 40 }}>💧</span>
+              <img src="/icons/hydration.png" width="48" height="48" alt="water" />
               <span style={{ fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: '"Playfair Display", Georgia, serif' }}>
                 {glasses}/{goal}
               </span>
@@ -135,14 +135,14 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
           </div>
         ) : (
           <View style={styles.progressCircle}>
-            <Text style={{ fontSize: 40 }}>💧</Text>
+            <Image source={{ uri: '/icons/hydration.png' }} style={{ width: 48, height: 48 }} />
             <Text style={styles.progressCount}>{glasses}/{goal}</Text>
             <Text style={styles.progressLabel}>glasses</Text>
           </View>
         )}
 
         {glasses >= goal && (
-          <Text style={styles.goalReached}>🎉 Goal reached! Great job staying hydrated!</Text>
+          <Text style={styles.goalReached}>Goal reached — great job staying hydrated.</Text>
         )}
 
         {lastGlassTime !== null && (
@@ -157,7 +157,7 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
             <Text style={styles.circleBtnText}>−</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={addGlass} style={[styles.circleBtn, styles.circleBtnPrimary]} activeOpacity={0.7}>
-            <Text style={[styles.circleBtnText, { color: '#FFF' }]}>+ 💧</Text>
+            <Text style={[styles.circleBtnText, { color: '#FFF' }]}>+</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={removeGlass} style={[styles.circleBtn, { opacity: 0 }]} disabled>
             <Text style={styles.circleBtnText}>−</Text>
@@ -168,7 +168,7 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
       {/* Reminder tip */}
       {lastGlassTime !== null && lastGlassTime > 60 && (
         <View style={styles.reminderCard}>
-          <Text style={styles.reminderEmoji}>🦉</Text>
+          <Text style={styles.reminderEmoji}></Text>
           <Text style={styles.reminderText}>
             It's been over an hour since your last glass. Time for a sip!
           </Text>
@@ -217,7 +217,7 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
 
       {/* Water Fact */}
       <View style={styles.factCard}>
-        <Text style={styles.factEmoji}>💡</Text>
+        <Text style={styles.factEmoji}>·</Text>
         <Text style={styles.factText}>{WATER_FACTS[factIndex]}</Text>
       </View>
 
@@ -238,13 +238,13 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 24 },
 
   progressCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 20, padding: 28, marginBottom: 20, alignItems: 'center',
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 28, marginBottom: 20, alignItems: 'center',
     ...(Platform.OS === 'web'
       ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
   progressCircle: {
-    width: 180, height: 180, borderRadius: 90, backgroundColor: '#FFF9EE',
+    width: 180, height: 180, borderRadius: 0, backgroundColor: '#FFF9EE',
     borderWidth: 6, borderColor: '#D4B96A', alignItems: 'center', justifyContent: 'center',
   },
   progressCount: { fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: serif },
@@ -255,15 +255,15 @@ const styles = StyleSheet.create({
 
   btnRow: { flexDirection: 'row', gap: 16, marginTop: 20, alignItems: 'center', justifyContent: 'center' },
   circleBtn: {
-    width: 56, height: 56, borderRadius: 28, borderWidth: 2, borderColor: '#D4B96A',
+    width: 56, height: 56, borderRadius: 0, borderWidth: 2, borderColor: '#D4B96A',
     alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF',
   },
-  circleBtnPrimary: { backgroundColor: '#B8963E', borderColor: '#B8963E', width: 80, height: 56, borderRadius: 28 },
+  circleBtnPrimary: { backgroundColor: '#B8963E', borderColor: '#B8963E', width: 80, height: 56, borderRadius: 0 },
   circleBtnText: { fontSize: 20, fontWeight: '700', color: '#B8963E' },
 
   reminderCard: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF9EE',
-    borderRadius: 14, padding: 14, marginBottom: 20, borderWidth: 1.5, borderColor: '#D4B96A',
+    borderRadius: 0, padding: 14, marginBottom: 20, borderWidth: 1.5, borderColor: '#D4B96A',
   },
   reminderEmoji: { fontSize: 28, marginRight: 12 },
   reminderText: { fontSize: 14, color: '#8A7A5A', fontFamily: bodySerif, flex: 1, lineHeight: 22 },
@@ -272,14 +272,14 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '600', color: '#3A3A3A', fontFamily: bodySerif, marginBottom: 12 },
   goalRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   goalBtn: {
-    width: 44, height: 44, borderRadius: 22, borderWidth: 1.5, borderColor: '#D4B96A',
+    width: 44, height: 44, borderRadius: 0, borderWidth: 1.5, borderColor: '#D4B96A',
     alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF',
   },
   goalBtnText: { fontSize: 22, color: '#B8963E', fontWeight: '600' },
   goalValue: { fontSize: 20, color: '#3A3A3A', fontFamily: bodySerif, marginHorizontal: 24, minWidth: 100, textAlign: 'center' },
 
   weekCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, marginBottom: 20,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20, marginBottom: 20,
     ...(Platform.OS === 'web'
       ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
@@ -287,14 +287,14 @@ const styles = StyleSheet.create({
   chartRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', marginBottom: 12, minHeight: 100 },
   chartCol: { alignItems: 'center', gap: 4 },
   chartVal: { fontSize: 12, fontWeight: '600', color: '#B8963E', fontFamily: bodySerif },
-  chartBar: { width: 28, borderRadius: 6, minHeight: 8 },
+  chartBar: { width: 28, borderRadius: 0, minHeight: 8 },
   chartDay: { fontSize: 11, color: '#999', fontFamily: bodySerif },
   weekStats: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 8 },
   weekStat: { fontSize: 13, color: '#8A7A5A', fontFamily: bodySerif },
 
   factCard: {
     flexDirection: 'row', alignItems: 'flex-start', backgroundColor: '#FFF9EE',
-    borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#EDE3CC',
+    borderRadius: 0, padding: 16, borderWidth: 1, borderColor: '#EDE3CC',
   },
   factEmoji: { fontSize: 20, marginRight: 10 },
   factText: { fontSize: 14, lineHeight: 22, color: '#3A3A3A', fontFamily: bodySerif, flex: 1 },

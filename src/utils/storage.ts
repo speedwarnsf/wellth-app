@@ -77,12 +77,12 @@ export const updateStreak = () => {
 };
 
 export const getStreakMilestone = (streak: number): string | null => {
-  if (streak === 7) return '🔥 One week streak!';
-  if (streak === 14) return '⚡ Two weeks strong!';
-  if (streak === 21) return '🌟 Three weeks! Habit formed!';
-  if (streak === 30) return '🏆 30 days! Incredible!';
-  if (streak === 60) return '💎 60 days! Unstoppable!';
-  if (streak === 90) return '👑 90 days! You are legendary!';
-  if (streak === 365) return '🏆 One full year! Incredible dedication.';
+  if (streak === 7) return 'One week streak — well done.';
+  if (streak === 14) return 'Two weeks strong. The habit is forming.';
+  if (streak === 21) return 'Three weeks — this is who you are now.';
+  if (streak === 30) return '30 days of consistency. Remarkable.';
+  if (streak === 60) return '60 days. Unstoppable.';
+  if (streak === 90) return '90 days. You are legendary.';
+  if (streak === 365) return 'One full year. Incredible dedication.';
   return null;
 };

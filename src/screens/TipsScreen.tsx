@@ -14,12 +14,12 @@ const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : 
 type Category = 'all' | 'nutrition' | 'mental' | 'exercise' | 'sleep' | 'mindfulness';
 
 const CATEGORIES: { key: Category; label: string; emoji: string }[] = [
-  { key: 'all', label: 'All', emoji: '✨' },
-  { key: 'nutrition', label: 'Nutrition', emoji: '🥗' },
-  { key: 'mental', label: 'Mental Health', emoji: '🧠' },
-  { key: 'exercise', label: 'Exercise', emoji: '🏃' },
-  { key: 'sleep', label: 'Sleep', emoji: '😴' },
-  { key: 'mindfulness', label: 'Mindfulness', emoji: '🧘' },
+  { key: 'all', label: 'All', emoji: '' },
+  { key: 'nutrition', label: 'Nutrition', emoji: '' },
+  { key: 'mental', label: 'Mental Health', emoji: '' },
+  { key: 'exercise', label: 'Exercise', emoji: '' },
+  { key: 'sleep', label: 'Sleep', emoji: '' },
+  { key: 'mindfulness', label: 'Mindfulness', emoji: '' },
 ];
 
 const categorize = (tip: string): Category[] => {
@@ -74,7 +74,7 @@ const TipsScreen = ({ navigation }: { navigation: any }) => {
             activeOpacity={0.7}
           >
             <Text style={[styles.pillText, activeCategory === cat.key && styles.pillTextActive]}>
-              {cat.emoji} {cat.label}
+              {cat.label}
             </Text>
           </TouchableOpacity>
         ))}
@@ -91,7 +91,7 @@ const TipsScreen = ({ navigation }: { navigation: any }) => {
                 {cats.map(c => {
                   const cat = CATEGORIES.find(x => x.key === c);
                   return cat ? (
-                    <Text key={c} style={styles.catTag}>{cat.emoji}</Text>
+                    <Text key={c} style={styles.catTag}>{cat.label}</Text>
                   ) : null;
                 })}
               </View>
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   pillsScroll: { marginBottom: 24, flexGrow: 0 },
   pillsRow: { flexDirection: 'row', gap: 8 },
   pill: {
-    paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24,
+    paddingHorizontal: 16, paddingVertical: 10, borderRadius: 0,
     borderWidth: 1.5, borderColor: '#EDE3CC', backgroundColor: '#FFFFFF',
   },
   pillActive: { borderColor: '#B8963E', backgroundColor: '#FFF9EE' },
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   pillTextActive: { color: '#B8963E', fontWeight: '600' },
 
   card: {
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, marginBottom: 16,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20, marginBottom: 16,
     ...(Platform.OS === 'web'
       ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),

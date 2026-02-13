@@ -6,6 +6,40 @@ import {
 import { wealthTips, wellnessTips } from '../data/tipData';
 import { getStreak, getStreakMilestone, getCheckIn, todayKey } from '../utils/storage';
 import OnboardingScreen, { hasOnboarded } from './OnboardingScreen';
+import {
+  initNotifications,
+  isNotificationsSupported,
+  isNotificationsEnabled,
+  requestNotificationPermission,
+  disableNotifications,
+  sendTestNotification,
+  getNotificationPermission,
+} from '../utils/notifications';
+
+// ── Feature Icons (extracted from Dustin's design) ───────
+const iconPaths: Record<string, string> = {
+  checkIn: '/icons/checkin.png',
+  checkedIn: '/icons/checkin.png',
+  tips: '/icons/tips.png',
+  breathe: '/icons/breathe.png',
+  journal: '/icons/journal.png',
+  hydration: '/icons/hydration.png',
+  report: '/icons/report.png',
+};
+
+const FeatureIcon = ({ name, size = 40 }: { name: string; size?: number }) => {
+  if (Platform.OS !== 'web') return null;
+  const src = iconPaths[name] || iconPaths.checkIn;
+  return (
+    <img
+      src={src}
+      width={size}
+      height={size}
+      style={{ marginBottom: 4 }}
+      alt={name}
+    /> as any
+  );
+};
 
 // ── helpers ──────────────────────────────────────────────
 const getGreeting = () => {
@@ -104,7 +138,7 @@ const injectCSS = () => {
       animation: splashFadeOut 0.8s ease-out forwards;
     }
     .splash-video {
-      border-radius: 50%; width: 240px; height: 240px; object-fit: cover;
+      border-radius: 0; width: 240px; height: 240px; object-fit: cover;
       animation: logoReveal 1s ease-out both;
       box-shadow: 0 8px 40px rgba(184,150,62,0.2);
     }
@@ -118,17 +152,17 @@ const injectCSS = () => {
       margin-top: 8px;
     }
     .owl-video-container {
-      border-radius: 20px; overflow: hidden;
+      overflow: hidden;
       animation: videoGlow 4s ease-in-out infinite;
       cursor: pointer; position: relative;
     }
     .owl-video-container video {
-      display: block; width: 100%; border-radius: 20px;
+      display: block; width: 100%;
     }
     .owl-video-label {
       position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
       background: rgba(184,150,62,0.85); color: white;
-      padding: 4px 16px; border-radius: 20px; font-size: 12px;
+      padding: 4px 16px; border-radius: 0; font-size: 12px;
       font-family: Georgia, "Times New Roman", serif; font-style: italic;
       backdrop-filter: blur(4px); white-space: nowrap;
     }
@@ -138,6 +172,8 @@ const injectCSS = () => {
     .wellth-header-logo:hover {
       transform: scale(1.05);
     }
+    [data-testid="title"], div[style*="Playfair"] { text-wrap: balance; }
+    * { text-wrap: balance; border-radius: 0 !important; }
     html { scroll-behavior: smooth; }
     body { -webkit-font-smoothing: antialiased; }
   `;
@@ -193,9 +229,9 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
 const OwlVideoSection = () => {
   const [currentVideo, setCurrentVideo] = useState(0);
   const videos = [
-    { src: '/videos/owl-looking.mp4', label: '🦉 Owl is watching over your wealth' },
-    { src: '/videos/owl-maturing.mp4', label: '✨ Growing wiser every day' },
-    { src: '/videos/owl-emerging.mp4', label: '🌱 Growing together' },
+    { src: '/videos/owl-looking.mp4', label: 'Owl is watching over your wealth' },
+    { src: '/videos/owl-maturing.mp4', label: 'Growing wiser every day' },
+    { src: '/videos/owl-emerging.mp4', label: 'Growing together' },
   ];
 
   const cycleVideo = () => {
@@ -205,7 +241,9 @@ const OwlVideoSection = () => {
   if (Platform.OS !== 'web') return null;
 
   return (
-    <div onClick={cycleVideo} style={{ marginBottom: 24, textAlign: 'center' as const }}>
+    <div onClick={cycleVideo} style={{ marginBottom: 24, marginLeft: -28, marginRight: -28, position: 'relative' as const, overflow: 'hidden' }}>
+      <div style={{ position: 'absolute' as const, top: 0, left: 0, right: 0, height: 4, backgroundColor: '#FFFFFF', zIndex: 2 }} />
+      <div style={{ position: 'absolute' as const, bottom: 0, left: 0, right: 0, height: 4, backgroundColor: '#FFFFFF', zIndex: 2 }} />
       <video
         key={videos[currentVideo].src}
         autoPlay
@@ -213,12 +251,8 @@ const OwlVideoSection = () => {
         playsInline
         loop
         src={videos[currentVideo].src}
-        style={{ width: '100%', maxWidth: 400, borderRadius: 20 }}
+        style={{ width: '100%', display: 'block' }}
       />
-      <div style={{
-        marginTop: 8, fontSize: 13, color: '#8A7A5A',
-        fontFamily: 'Georgia, serif', fontStyle: 'italic'
-      }}>{videos[currentVideo].label}</div>
     </div>
   );
 };
@@ -331,7 +365,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
 
   const [favorites, setFavorites] = useState<string[]>(loadFavorites);
   const [showFavs, setShowFavs] = useState(false);
-  const [showSplash, setShowSplash] = useState(!hasSplashBeenSeen());
+  const [showSplash, setShowSplash] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(!hasOnboarded());
   const [streak, setStreak] = useState(0);
   const [checkedInToday, setCheckedInToday] = useState(false);
@@ -344,6 +378,10 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   // RN animated values for non-web fade-in
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(24)).current;
+
+  useEffect(() => {
+    initNotifications();
+  }, []);
 
   useEffect(() => {
     injectCSS();
@@ -372,7 +410,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   }
 
   return (
-    <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]}>
+    <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]} accessibilityRole="main" accessibilityLabel="Wellth home screen">
       <Animated.View style={Platform.OS !== 'web' ? { opacity: fadeAnim, transform: [{ translateY: slideAnim }] } : undefined}>
 
         {/* Header */}
@@ -387,19 +425,21 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         </View>
         {/* gold hairline removed per Dustin */}
 
-        {/* Greeting */}
+        {/* Owl Video — full frame, white bg above, off-white below */}
+        <OwlVideoSection />
+
+        {/* Greeting — below owl */}
         <View style={styles.greetingRow}>
           <Text style={styles.greetingText}>{getGreeting()}, </Text>
           <Text style={styles.greetingDate}>{getFormattedDate()}</Text>
         </View>
 
-        {/* Owl Video — no box */}
-        <OwlVideoSection />
+        {/* Off-white background for rest of content */}
+        <View style={{ backgroundColor: '#FAF8F3', marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28, paddingTop: 20 }}>
 
         {/* Streak Banner */}
         {streak > 0 && (
           <View style={styles.streakBanner}>
-            <Text style={styles.streakEmoji}>🔥</Text>
             <Text style={styles.streakCount}>{streak}</Text>
             <Text style={styles.streakText}>day streak</Text>
             {getStreakMilestone(streak) && (
@@ -414,24 +454,30 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             style={[styles.featureBtn, !checkedInToday && styles.featureBtnHighlight]}
             onPress={() => navigation?.navigate('CheckIn')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={checkedInToday ? 'Already checked in today' : 'Daily check in'}
           >
-            <Text style={styles.featureBtnEmoji}>{checkedInToday ? '✅' : '📝'}</Text>
+            <FeatureIcon name={checkedInToday ? 'checkedIn' : 'checkIn'} />
             <Text style={styles.featureBtnLabel}>{checkedInToday ? 'Checked In' : 'Check In'}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('Tips')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="View all tips"
           >
-            <Text style={styles.featureBtnEmoji}>💡</Text>
+            <FeatureIcon name="tips" />
             <Text style={styles.featureBtnLabel}>All Tips</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('Breathing')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Breathing exercises"
           >
-            <Text style={styles.featureBtnEmoji}>🧘</Text>
+            <FeatureIcon name="breathe" />
             <Text style={styles.featureBtnLabel}>Breathe</Text>
           </TouchableOpacity>
         </View>
@@ -441,31 +487,37 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('Journal')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Open journal"
           >
-            <Text style={styles.featureBtnEmoji}>📖</Text>
+            <FeatureIcon name="journal" />
             <Text style={styles.featureBtnLabel}>Journal</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('Hydration')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Track hydration"
           >
-            <Text style={styles.featureBtnEmoji}>💧</Text>
+            <FeatureIcon name="hydration" />
             <Text style={styles.featureBtnLabel}>Hydration</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('WeeklyReport')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="View weekly report"
           >
-            <Text style={styles.featureBtnEmoji}>📊</Text>
+            <FeatureIcon name="report" />
             <Text style={styles.featureBtnLabel}>Report</Text>
           </TouchableOpacity>
         </View>
 
         {/* Tip Cards */}
-        <AnimatedTipCard label="Wealth tip" emoji="🪴" tips={wealthTips} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
-        <AnimatedTipCard label="Wellness tip" emoji="💛" tips={wellnessTips} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
+        <AnimatedTipCard label="Wealth tip" emoji="" tips={wealthTips} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
+        <AnimatedTipCard label="Wellness tip" emoji="" tips={wellnessTips} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
 
         {/* Favorites toggle */}
         <TouchableOpacity
@@ -484,6 +536,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         <Text style={styles.footer}>Grow your wealth. Nourish your wellness.</Text>
         <Text style={styles.copyright}>© {new Date().getFullYear()} Wellth</Text>
 
+        </View>{/* end off-white wrapper */}
       </Animated.View>
     </ScrollView>
   );
@@ -494,7 +547,7 @@ const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New R
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
 
 const styles = StyleSheet.create({
-  scrollView: { flex: 1, backgroundColor: '#FAF8F3' },
+  scrollView: { flex: 1, backgroundColor: '#FFFFFF' },
   container: {
     paddingHorizontal: 28,
     paddingTop: Platform.OS === 'web' ? 48 : 60,
@@ -516,7 +569,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     width: 60, height: 2, backgroundColor: '#D4B96A',
-    alignSelf: 'center', marginBottom: 28, borderRadius: 1,
+    alignSelf: 'center', marginBottom: 28, borderRadius: 0,
   },
 
   greetingRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', marginBottom: 24 },
@@ -526,7 +579,7 @@ const styles = StyleSheet.create({
   // Streak banner
   streakBanner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#FFF9EE', borderRadius: 16, padding: 14, marginBottom: 20,
+    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 14, marginBottom: 20,
     borderWidth: 1.5, borderColor: '#D4B96A', flexWrap: 'wrap',
   },
   streakEmoji: { fontSize: 22, marginRight: 6 },
@@ -537,17 +590,17 @@ const styles = StyleSheet.create({
   // Feature buttons
   featureGrid: { flexDirection: 'row', gap: 10, marginBottom: 12 },
   featureBtn: {
-    flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 18,
-    alignItems: 'center', borderWidth: 1.5, borderColor: '#EDE3CC',
+    flex: 1, backgroundColor: 'transparent', borderRadius: 0, paddingVertical: 18,
+    alignItems: 'center', borderWidth: 0,
   },
-  featureBtnHighlight: { borderColor: '#B8963E', backgroundColor: '#FFF9EE' },
+  featureBtnHighlight: { backgroundColor: 'transparent' },
   featureBtnEmoji: { fontSize: 26, marginBottom: 6 },
   featureBtnLabel: { fontSize: 13, fontWeight: '600', color: '#8A7A5A', fontFamily: bodySerif },
 
   // Tip card
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 0,
     padding: 22,
     marginBottom: 20,
     ...(Platform.OS === 'web'
@@ -579,14 +632,14 @@ const styles = StyleSheet.create({
   // Fav toggle button
   favToggle: {
     alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 24,
-    borderRadius: 24, borderWidth: 1.5, borderColor: '#D4B96A',
+    borderRadius: 0, borderWidth: 1.5, borderColor: '#D4B96A',
     marginBottom: 12,
   },
   favToggleText: { fontSize: 15, color: '#B8963E', fontWeight: '600', fontFamily: bodySerif },
 
   // Fav panel
   favPanel: {
-    backgroundColor: '#FFF9EE', borderRadius: 16, padding: 20, marginBottom: 20,
+    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 20, marginBottom: 20,
     borderWidth: 1, borderColor: '#EDE3CC',
   },
   favPanelHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },

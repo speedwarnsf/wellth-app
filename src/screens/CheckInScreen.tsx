@@ -10,11 +10,11 @@ const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New R
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
 
 const MOODS = [
-  { emoji: '😞', label: 'Rough' },
-  { emoji: '😕', label: 'Low' },
-  { emoji: '😐', label: 'Okay' },
-  { emoji: '🙂', label: 'Good' },
-  { emoji: '😄', label: 'Great' },
+  { emoji: '', label: 'Rough' },
+  { emoji: '', label: 'Low' },
+  { emoji: '', label: 'Okay' },
+  { emoji: '', label: 'Good' },
+  { emoji: '', label: 'Great' },
 ];
 
 const CheckInScreen = ({ navigation }: { navigation: any }) => {
@@ -67,7 +67,7 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
       {streak > 0 && (
         <View style={styles.streakBadge}>
           <Text style={styles.streakNumber}>{streak}</Text>
-          <Text style={styles.streakLabel}>day streak 🔥</Text>
+          <Text style={styles.streakLabel}>day streak</Text>
           {milestone && <Text style={styles.milestone}>{milestone}</Text>}
         </View>
       )}
@@ -83,7 +83,7 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
               style={[styles.moodBtn, mood === i + 1 && styles.moodBtnActive]}
               activeOpacity={0.7}
             >
-              <Text style={styles.moodEmoji}>{m.emoji}</Text>
+              <Text style={styles.moodEmoji}>{['1','2','3','4','5'][i]}</Text>
               <Text style={[styles.moodLabel, mood === i + 1 && styles.moodLabelActive]}>{m.label}</Text>
             </TouchableOpacity>
           ))}
@@ -92,7 +92,7 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
 
       {/* Water */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Water intake 💧</Text>
+        <Text style={styles.sectionTitle}>Water intake</Text>
         <View style={styles.counterRow}>
           <TouchableOpacity onPress={() => setWater(Math.max(0, water - 1))} style={styles.counterBtn}>
             <Text style={styles.counterBtnText}>−</Text>
@@ -106,7 +106,7 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
 
       {/* Sleep */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Sleep last night 😴</Text>
+        <Text style={styles.sectionTitle}>Sleep last night</Text>
         <View style={styles.counterRow}>
           <TouchableOpacity onPress={() => setSleep(Math.max(0, sleep - 0.5))} style={styles.counterBtn}>
             <Text style={styles.counterBtnText}>−</Text>
@@ -120,13 +120,13 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
 
       {/* Exercise */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Did you exercise? 🏃</Text>
+        <Text style={styles.sectionTitle}>Did you exercise?</Text>
         <View style={styles.toggleRow}>
           <TouchableOpacity
             onPress={() => setExercise(true)}
             style={[styles.toggleBtn, exercise && styles.toggleBtnActive]}
           >
-            <Text style={[styles.toggleText, exercise && styles.toggleTextActive]}>Yes ✓</Text>
+            <Text style={[styles.toggleText, exercise && styles.toggleTextActive]}>Yes</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setExercise(false)}
@@ -144,12 +144,12 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
         disabled={mood === 0}
         activeOpacity={0.7}
       >
-        <Text style={styles.saveBtnText}>{saved ? '✓ Updated' : 'Save Check-In'}</Text>
+        <Text style={styles.saveBtnText}>{saved ? 'Updated' : 'Save Check-In'}</Text>
       </TouchableOpacity>
 
       {/* Weekly Summary Toggle */}
       <TouchableOpacity onPress={() => setShowWeekly(!showWeekly)} style={styles.weeklyToggle}>
-        <Text style={styles.weeklyToggleText}>{showWeekly ? 'Hide Weekly Summary' : '📊 View Weekly Summary'}</Text>
+        <Text style={styles.weeklyToggleText}>{showWeekly ? 'Hide Weekly Summary' : 'View Weekly Summary'}</Text>
       </TouchableOpacity>
 
       {showWeekly && <WeeklySummary />}
@@ -187,7 +187,7 @@ const WeeklySummary = () => {
             <View key={i} style={styles.dayDot}>
               <Text style={styles.dayDotLabel}>{dayLabel}</Text>
               <View style={[styles.dot, d.checkin ? styles.dotFilled : styles.dotEmpty]}>
-                {d.checkin && <Text style={styles.dotEmoji}>{MOODS[(d.checkin.mood || 1) - 1]?.emoji}</Text>}
+                {d.checkin && <Text style={styles.dotEmoji}>{MOODS[(d.checkin.mood || 1) - 1]?.label?.charAt(0)}</Text>}
               </View>
             </View>
           );
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 24 },
 
   streakBadge: {
-    backgroundColor: '#FFF9EE', borderRadius: 16, padding: 16, marginBottom: 24,
+    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 16, marginBottom: 24,
     borderWidth: 1.5, borderColor: '#D4B96A', alignItems: 'center',
   },
   streakNumber: { fontSize: 36, fontWeight: '700', color: '#B8963E', fontFamily: serif },
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   moodRow: { flexDirection: 'row', justifyContent: 'space-between' },
   moodBtn: {
     alignItems: 'center', paddingVertical: 12, paddingHorizontal: 8,
-    borderRadius: 14, borderWidth: 1.5, borderColor: '#EDE3CC', flex: 1, marginHorizontal: 3,
+    borderRadius: 0, borderWidth: 1.5, borderColor: '#EDE3CC', flex: 1, marginHorizontal: 3,
     backgroundColor: '#FFFFFF',
   },
   moodBtnActive: { borderColor: '#B8963E', backgroundColor: '#FFF9EE' },
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
 
   counterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   counterBtn: {
-    width: 44, height: 44, borderRadius: 22, borderWidth: 1.5, borderColor: '#D4B96A',
+    width: 44, height: 44, borderRadius: 0, borderWidth: 1.5, borderColor: '#D4B96A',
     alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF',
   },
   counterBtnText: { fontSize: 22, color: '#B8963E', fontWeight: '600' },
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
 
   toggleRow: { flexDirection: 'row', gap: 12 },
   toggleBtn: {
-    flex: 1, paddingVertical: 14, borderRadius: 14, borderWidth: 1.5, borderColor: '#EDE3CC',
+    flex: 1, paddingVertical: 14, borderRadius: 0, borderWidth: 1.5, borderColor: '#EDE3CC',
     alignItems: 'center', backgroundColor: '#FFFFFF',
   },
   toggleBtnActive: { borderColor: '#B8963E', backgroundColor: '#FFF9EE' },
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   toggleTextActive: { color: '#B8963E', fontWeight: '600' },
 
   saveBtn: {
-    backgroundColor: '#B8963E', borderRadius: 14, paddingVertical: 16,
+    backgroundColor: '#B8963E', borderRadius: 0, paddingVertical: 16,
     alignItems: 'center', marginTop: 8, marginBottom: 20,
   },
   saveBtnDisabled: { opacity: 0.5 },
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   weeklyToggleText: { fontSize: 15, color: '#B8963E', fontWeight: '600', fontFamily: bodySerif },
 
   weeklyCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, marginBottom: 12,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20, marginBottom: 12,
     ...(Platform.OS === 'web'
       ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
@@ -291,14 +291,14 @@ const styles = StyleSheet.create({
   dayDotsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
   dayDot: { alignItems: 'center' },
   dayDotLabel: { fontSize: 12, color: '#999', fontFamily: bodySerif, marginBottom: 6 },
-  dot: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  dot: { width: 36, height: 36, borderRadius: 0, alignItems: 'center', justifyContent: 'center' },
   dotFilled: { backgroundColor: '#FFF9EE', borderWidth: 1.5, borderColor: '#D4B96A' },
   dotEmpty: { backgroundColor: '#F0ECE4', borderWidth: 1.5, borderColor: '#E0D8C8' },
   dotEmoji: { fontSize: 18 },
 
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   statBox: {
-    width: '48%' as any, backgroundColor: '#FAF8F3', borderRadius: 12, padding: 14,
+    width: '48%' as any, backgroundColor: '#FAF8F3', borderRadius: 0, padding: 14,
     marginBottom: 10, alignItems: 'center',
   },
   statValue: { fontSize: 22, fontWeight: '700', color: '#B8963E', fontFamily: serif },
