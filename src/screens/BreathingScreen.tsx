@@ -9,15 +9,15 @@ const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New R
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
 
 const PHASES = [
-  { label: 'Breathe In', duration: 4000, emoji: '' },
-  { label: 'Hold', duration: 4000, emoji: '' },
-  { label: 'Breathe Out', duration: 4000, emoji: '' },
-  { label: 'Hold', duration: 4000, emoji: '' },
+  { label: 'Breathe In', duration: 4000 },
+  { label: 'Hold', duration: 4000 },
+  { label: 'Breathe Out', duration: 4000 },
+  { label: 'Hold', duration: 4000 },
 ];
 
 const CALM_MESSAGES = [
-  "Let the calm wash over you...",
-  "You're doing beautifully.",
+  "Let the calm wash over you.",
+  "You are doing beautifully.",
   "Feel each breath nourish your body.",
   "Breathe with intention.",
   "Stillness is your superpower.",
@@ -26,42 +26,26 @@ const CALM_MESSAGES = [
   "You are exactly where you need to be.",
 ];
 
-// Inject CSS for breathing animation
 const injectBreathingCSS = () => {
   if (Platform.OS !== 'web') return;
   if (document.getElementById('wellth-breathing-css')) return;
   const style = document.createElement('style');
   style.id = 'wellth-breathing-css';
   style.textContent = `
-    @keyframes breatheIn {
-      from { transform: scale(1); }
-      to { transform: scale(1.4); }
-    }
-    @keyframes breatheOut {
-      from { transform: scale(1.4); }
-      to { transform: scale(1); }
-    }
-    @keyframes holdBreath {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.85; }
-    }
     @keyframes gentlePulse {
-      0%, 100% { box-shadow: 0 0 30px rgba(184,150,62,0.2); }
-      50% { box-shadow: 0 0 60px rgba(184,150,62,0.4); }
+      0%, 100% { box-shadow: 0 0 30px rgba(184,150,62,0.15); }
+      50% { box-shadow: 0 0 60px rgba(184,150,62,0.35); }
     }
     .breathing-circle {
-      transition: transform 4s ease-in-out;
-      animation: gentlePulse 4s ease-in-out infinite;
+      transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 4s ease-in-out;
     }
-    .breathing-circle.inhale { transform: scale(1.4); }
-    .breathing-circle.hold { transform: scale(1.4); }
-    .breathing-circle.exhale { transform: scale(1); }
-    .breathing-circle.pause { transform: scale(1); }
-    .breathing-calm {
-      transition: transform 4s ease-in-out, opacity 0.5s ease;
+    .breathing-circle.inhale { transform: scale(1.35); box-shadow: 0 0 60px rgba(184,150,62,0.35); }
+    .breathing-circle.hold { transform: scale(1.35); box-shadow: 0 0 40px rgba(184,150,62,0.25); }
+    .breathing-circle.exhale { transform: scale(1); box-shadow: 0 0 20px rgba(184,150,62,0.12); }
+    .breathing-circle.pause { transform: scale(1); box-shadow: 0 0 20px rgba(184,150,62,0.12); }
+    .breathing-message {
+      transition: opacity 0.8s ease;
     }
-    .breathing-calm.inhale { transform: scale(1.1) translateY(-5px); }
-    .breathing-calm.exhale { transform: scale(1) translateY(0); }
   `;
   document.head.appendChild(style);
 };
@@ -76,7 +60,7 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
   const [countdown, setCountdown] = useState(4);
   const [cycleCount, setCycleCount] = useState(0);
   const [calmMsg, setCalmMsg] = useState(0);
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [totalSeconds, setTotalSeconds] = useState(0);
 
   useEffect(() => { injectBreathingCSS(); }, []);
 
@@ -86,15 +70,14 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
     const phase = PHASES[phaseIndex];
     setCountdown(phase.duration / 1000);
 
-    // Countdown timer
     const countdownInterval = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) return phase.duration / 1000;
         return prev - 1;
       });
+      setTotalSeconds(s => s + 1);
     }, 1000);
 
-    // Phase transition
     const phaseTimeout = setTimeout(() => {
       const nextPhase = (phaseIndex + 1) % PHASES.length;
       setPhaseIndex(nextPhase);
@@ -115,6 +98,7 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
     setPhaseIndex(0);
     setCycleCount(0);
     setCountdown(4);
+    setTotalSeconds(0);
   };
 
   const stop = () => {
@@ -125,15 +109,17 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
 
   const phase = PHASES[phaseIndex];
   const phaseClass = phaseIndex === 0 ? 'inhale' : phaseIndex === 1 ? 'hold' : phaseIndex === 2 ? 'exhale' : 'pause';
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.screen, { maxWidth, alignSelf: 'center' as any }]}>
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-        <Text style={styles.backText}>← Back</Text>
+        <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
       <Text style={styles.title}>Box Breathing</Text>
-      <Text style={styles.subtitle}>4-4-4-4 guided breathing</Text>
+      <Text style={styles.subtitle}>4 - 4 - 4 - 4</Text>
 
       {/* Breathing Circle */}
       <View style={styles.circleContainer}>
@@ -141,47 +127,53 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
           <div
             className={`breathing-circle ${isActive ? phaseClass : ''}`}
             style={{
-              width: 200, height: 200, borderRadius: 0,
-              backgroundColor: '#FFF9EE', border: '3px solid #D4B96A',
+              width: 220, height: 220, borderRadius: 0,
+              backgroundColor: '#FFF9EE', border: '2px solid #D4B96A',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexDirection: 'column',
             }}
           >
-            <span style={{ fontSize: 40 }}>{isActive ? phase.emoji : ''}</span>
             <span style={{
-              fontSize: 36, fontWeight: '700', color: '#B8963E',
+              fontSize: 48, fontWeight: '700', color: '#B8963E',
               fontFamily: '"Playfair Display", Georgia, serif',
-              marginTop: 4,
+              lineHeight: 1.1,
             }}>
-              {isActive ? countdown : '4'}
+              {isActive ? countdown : '\u00B7'}
+            </span>
+            <span style={{
+              fontSize: 13, color: '#8A7A5A',
+              fontFamily: 'Georgia, serif',
+              marginTop: 8,
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+            }}>
+              {isActive ? phase.label : 'ready'}
             </span>
           </div>
         ) : (
           <View style={styles.circle}>
-            <Text style={{ fontSize: 40 }}>{isActive ? phase.emoji : ''}</Text>
-            <Text style={styles.circleCount}>{isActive ? countdown : '4'}</Text>
+            <Text style={styles.circleCount}>{isActive ? countdown : '\u00B7'}</Text>
+            <Text style={styles.circleLabel}>{isActive ? phase.label : 'ready'}</Text>
           </View>
         )}
       </View>
 
-      {/* Phase label */}
-      <Text style={styles.phaseLabel}>
-        {isActive ? phase.label : 'Ready when you are'}
-      </Text>
-
-      {/* Breathing message */}
+      {/* Calming message */}
       {isActive && (
         <View style={styles.calmMsgContainer}>
-          <Text style={{ fontSize: 20, textAlign: 'center' as const, marginBottom: 4, color: '#B8963E', fontFamily: serif, fontWeight: '600' }}
-            {...(Platform.OS === 'web' ? { className: `breathing-calm ${phaseClass}` } as any : {})}
-          >~</Text>
           <Text style={styles.calmMsgText}>{CALM_MESSAGES[calmMsg]}</Text>
         </View>
       )}
 
-      {/* Cycle count */}
-      {cycleCount > 0 && (
-        <Text style={styles.cycleText}>{cycleCount} cycle{cycleCount !== 1 ? 's' : ''} completed</Text>
+      {/* Session stats */}
+      {isActive && (
+        <View style={styles.sessionStats}>
+          <Text style={styles.sessionStatText}>
+            {cycleCount} {cycleCount === 1 ? 'cycle' : 'cycles'}
+            {' \u00B7 '}
+            {minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`}
+          </Text>
+        </View>
       )}
 
       {/* Start/Stop */}
@@ -190,17 +182,41 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
         style={[styles.actionBtn, isActive && styles.actionBtnStop]}
         activeOpacity={0.7}
       >
-        <Text style={styles.actionBtnText}>{isActive ? 'Stop' : 'Begin Breathing'}</Text>
+        <Text style={styles.actionBtnText}>{isActive ? 'End Session' : 'Begin Breathing'}</Text>
       </TouchableOpacity>
 
+      {/* Post-session summary */}
+      {!isActive && cycleCount > 0 && (
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryTitle}>Session Complete</Text>
+          <Text style={styles.summaryText}>
+            {cycleCount} {cycleCount === 1 ? 'cycle' : 'cycles'} completed.
+            {' '}Take a moment to notice how you feel.
+          </Text>
+        </View>
+      )}
+
       {/* Instructions */}
-      {!isActive && (
+      {!isActive && cycleCount === 0 && (
         <View style={styles.instructions}>
           <Text style={styles.instructTitle}>How Box Breathing Works</Text>
-          <Text style={styles.instructText}>Breathe in slowly for 4 seconds</Text>
-          <Text style={styles.instructText}>Hold your breath for 4 seconds</Text>
-          <Text style={styles.instructText}>Exhale slowly for 4 seconds</Text>
-          <Text style={styles.instructText}>Hold empty for 4 seconds</Text>
+          <View style={styles.instructStep}>
+            <Text style={styles.instructNum}>1</Text>
+            <Text style={styles.instructText}>Breathe in slowly for 4 seconds</Text>
+          </View>
+          <View style={styles.instructStep}>
+            <Text style={styles.instructNum}>2</Text>
+            <Text style={styles.instructText}>Hold your breath for 4 seconds</Text>
+          </View>
+          <View style={styles.instructStep}>
+            <Text style={styles.instructNum}>3</Text>
+            <Text style={styles.instructText}>Exhale slowly for 4 seconds</Text>
+          </View>
+          <View style={styles.instructStep}>
+            <Text style={styles.instructNum}>4</Text>
+            <Text style={styles.instructText}>Hold empty for 4 seconds</Text>
+          </View>
+          <View style={styles.instructDivider} />
           <Text style={styles.instructNote}>Used by Navy SEALs and yogis alike to calm the nervous system.</Text>
         </View>
       )}
@@ -218,44 +234,54 @@ const styles = StyleSheet.create({
     paddingBottom: 40, width: '100%',
   },
 
-  backBtn: { marginBottom: 16 },
-  backText: { fontSize: 16, color: '#B8963E', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined },
+  backBtn: { marginBottom: 20 },
+  backText: { fontSize: 15, color: '#B8963E', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, letterSpacing: 0.3 },
 
-  title: { fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 4, textAlign: 'center' },
-  subtitle: { fontSize: 16, color: '#8A7A5A', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, fontStyle: 'italic', marginBottom: 32, textAlign: 'center' },
+  title: { fontSize: 28, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 4, textAlign: 'center', letterSpacing: 0.5 },
+  subtitle: { fontSize: 18, color: '#8A7A5A', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, fontStyle: 'italic', marginBottom: 36, textAlign: 'center', letterSpacing: 4 },
 
-  circleContainer: { alignItems: 'center', marginBottom: 24 },
+  circleContainer: { alignItems: 'center', marginBottom: 28 },
   circle: {
-    width: 200, height: 200, borderRadius: 0,
-    backgroundColor: '#FFF9EE', borderWidth: 3, borderColor: '#D4B96A',
+    width: 220, height: 220, borderRadius: 0,
+    backgroundColor: '#FFF9EE', borderWidth: 2, borderColor: '#D4B96A',
     alignItems: 'center', justifyContent: 'center',
   },
-  circleCount: { fontSize: 36, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginTop: 4 },
+  circleCount: { fontSize: 48, fontWeight: '700', color: '#B8963E', fontFamily: serif },
+  circleLabel: { fontSize: 13, color: '#8A7A5A', fontFamily: bodySerif, marginTop: 8, textTransform: 'uppercase' as any, letterSpacing: 2 },
 
-  phaseLabel: { fontSize: 22, fontWeight: '600', color: '#3A3A3A', textAlign: 'center', fontFamily: serif, marginBottom: 20 },
+  calmMsgContainer: { alignItems: 'center', marginBottom: 20, paddingHorizontal: 20 },
+  calmMsgText: { fontSize: 16, color: '#8A7A5A', fontStyle: 'italic', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, textAlign: 'center', lineHeight: 26 },
 
-  calmMsgContainer: { alignItems: 'center', marginBottom: 20 },
-  calmSmall: { width: 80, height: 80, marginBottom: 8 },
-  calmMsgText: { fontSize: 15, color: '#8A7A5A', fontStyle: 'italic', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, textAlign: 'center' },
-
-  cycleText: { fontSize: 14, color: '#B8963E', textAlign: 'center', marginBottom: 16, fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined },
+  sessionStats: { alignItems: 'center', marginBottom: 20 },
+  sessionStatText: { fontSize: 13, color: '#BBAA88', fontFamily: bodySerif, letterSpacing: 1 },
 
   actionBtn: {
     backgroundColor: '#B8963E', borderRadius: 0, paddingVertical: 16,
-    alignItems: 'center', marginBottom: 24,
+    alignItems: 'center', marginBottom: 28,
   },
   actionBtnStop: { backgroundColor: '#8A7A5A' },
-  actionBtnText: { fontSize: 17, fontWeight: '700', color: '#FFFFFF', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined },
+  actionBtnText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, letterSpacing: 0.5 },
+
+  summaryCard: {
+    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 22, marginBottom: 20,
+    borderWidth: 1.5, borderColor: '#D4B96A', alignItems: 'center',
+  },
+  summaryTitle: { fontSize: 18, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 8 },
+  summaryText: { fontSize: 15, color: '#5A5A5A', fontFamily: bodySerif, textAlign: 'center', lineHeight: 24 },
 
   instructions: {
-    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 24,
+    borderWidth: 1, borderColor: '#EDE3CC',
     ...(Platform.OS === 'web'
-      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
+      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.08)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
-  instructTitle: { fontSize: 18, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 12 },
-  instructText: { fontSize: 15, color: '#3A3A3A', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, marginBottom: 8, lineHeight: 24 },
-  instructNote: { fontSize: 13, color: '#8A7A5A', fontStyle: 'italic', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, marginTop: 8 },
+  instructTitle: { fontSize: 18, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 18 },
+  instructStep: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
+  instructNum: { fontSize: 18, fontWeight: '700', color: '#D4B96A', fontFamily: serif, width: 28 },
+  instructText: { fontSize: 15, color: '#3A3A3A', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, lineHeight: 24, flex: 1 },
+  instructDivider: { width: 30, height: 1, backgroundColor: '#EDE3CC', marginVertical: 14 },
+  instructNote: { fontSize: 13, color: '#8A7A5A', fontStyle: 'italic', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined },
 });
 
 export default BreathingScreen;

@@ -10,16 +10,15 @@ import QuickNav from '../components/QuickNav';
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
 
-// Categorize wellness tips by keyword matching
 type Category = 'all' | 'nutrition' | 'mental' | 'exercise' | 'sleep' | 'mindfulness';
 
-const CATEGORIES: { key: Category; label: string; emoji: string }[] = [
-  { key: 'all', label: 'All', emoji: '' },
-  { key: 'nutrition', label: 'Nutrition', emoji: '' },
-  { key: 'mental', label: 'Mental Health', emoji: '' },
-  { key: 'exercise', label: 'Exercise', emoji: '' },
-  { key: 'sleep', label: 'Sleep', emoji: '' },
-  { key: 'mindfulness', label: 'Mindfulness', emoji: '' },
+const CATEGORIES: { key: Category; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'nutrition', label: 'Nutrition' },
+  { key: 'mental', label: 'Mental Health' },
+  { key: 'exercise', label: 'Exercise' },
+  { key: 'sleep', label: 'Sleep' },
+  { key: 'mindfulness', label: 'Mindfulness' },
 ];
 
 const categorize = (tip: string): Category[] => {
@@ -30,7 +29,7 @@ const categorize = (tip: string): Category[] => {
   if (/exercise|move|movement|walk|stretch|dance|body|posture|cold exposure|shower/.test(t)) cats.push('exercise');
   if (/sleep|rest|bed|screen|circadian|melatonin|digital sunset|morning|sunlight/.test(t)) cats.push('sleep');
   if (/breath|meditat|stillness|quiet|mindful|grounding|gratitude|attention|focus|boredom|laugh|nature|hug/.test(t)) cats.push('mindfulness');
-  if (cats.length === 0) cats.push('mindfulness'); // default
+  if (cats.length === 0) cats.push('mindfulness');
   return cats;
 };
 
@@ -63,7 +62,7 @@ const TipsScreen = ({ navigation }: { navigation: any }) => {
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as any }]}>
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-        <Text style={styles.backText}>← Back</Text>
+        <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
       <Text style={styles.title}>Wellness Tips</Text>
@@ -102,7 +101,7 @@ const TipsScreen = ({ navigation }: { navigation: any }) => {
               </View>
               <TouchableOpacity onPress={() => toggleFav(tip)} activeOpacity={0.7}>
                 <Text style={[styles.favHeart, isFav && styles.favHeartActive]}>
-                  {isFav ? '♥' : '♡'}
+                  {isFav ? '\u2665' : '\u2661'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -121,34 +120,35 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1, backgroundColor: '#FAF8F3' },
   container: { paddingHorizontal: 28, paddingTop: Platform.OS === 'web' ? 48 : 60, paddingBottom: 40, width: '100%' },
 
-  backBtn: { marginBottom: 16 },
-  backText: { fontSize: 16, color: '#B8963E', fontFamily: bodySerif },
+  backBtn: { marginBottom: 20 },
+  backText: { fontSize: 15, color: '#B8963E', fontFamily: bodySerif, letterSpacing: 0.3 },
 
-  title: { fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 4 },
-  subtitle: { fontSize: 16, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 20 },
+  title: { fontSize: 28, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 4, letterSpacing: 0.5 },
+  subtitle: { fontSize: 15, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 20 },
 
   pillsScroll: { marginBottom: 24, flexGrow: 0 },
   pillsRow: { flexDirection: 'row', gap: 8 },
   pill: {
     paddingHorizontal: 16, paddingVertical: 10, borderRadius: 0,
-    borderWidth: 1.5, borderColor: '#EDE3CC', backgroundColor: '#FFFFFF',
+    borderWidth: 1, borderColor: '#EDE3CC', backgroundColor: '#FFFFFF',
   },
   pillActive: { borderColor: '#B8963E', backgroundColor: '#FFF9EE' },
-  pillText: { fontSize: 14, color: '#999', fontFamily: bodySerif },
+  pillText: { fontSize: 13, color: '#999', fontFamily: bodySerif, letterSpacing: 0.3 },
   pillTextActive: { color: '#B8963E', fontWeight: '600' },
 
   card: {
-    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20, marginBottom: 16,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 22, marginBottom: 16,
+    borderWidth: 1, borderColor: '#EDE3CC',
     ...(Platform.OS === 'web'
-      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
+      ? { boxShadow: '0 2px 12px rgba(184,150,62,0.06)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  catTags: { flexDirection: 'row', gap: 4 },
-  catTag: { fontSize: 16 },
-  favHeart: { fontSize: 24, color: '#CCBBAA', paddingLeft: 8 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  catTags: { flexDirection: 'row', gap: 8 },
+  catTag: { fontSize: 11, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1 },
+  favHeart: { fontSize: 22, color: '#CCBBAA', paddingLeft: 8 },
   favHeartActive: { color: '#D4536A' },
-  tipText: { fontSize: 16, lineHeight: 26, color: '#3A3A3A', fontFamily: bodySerif },
+  tipText: { fontSize: 16, lineHeight: 28, color: '#3A3A3A', fontFamily: bodySerif },
 });
 
 export default TipsScreen;

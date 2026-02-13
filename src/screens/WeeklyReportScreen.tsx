@@ -9,7 +9,6 @@ import QuickNav from '../components/QuickNav';
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
 
-const MOODS = ['1', '2', '3', '4', '5'];
 const MOOD_LABELS = ['Rough', 'Low', 'Okay', 'Good', 'Great'];
 const HYDRATION_PREFIX = 'wellth_hydration_';
 const JOURNAL_PREFIX = 'wellth_journal_';
@@ -23,56 +22,51 @@ interface WeekStats {
   totalGlasses: number;
   journalEntries: number;
   bestDay: string | null;
-  moodTrend: number[]; // daily moods
-  sleepTrend: number[]; // daily sleep
-  waterTrend: number[]; // daily water (from hydration tracker)
+  moodTrend: number[];
+  sleepTrend: number[];
+  waterTrend: number[];
 }
 
 const getInsights = (stats: WeekStats, streak: number): string[] => {
   const insights: string[] = [];
 
-  if (stats.checkins === 7) insights.push("Perfect week — you checked in every single day.");
-  else if (stats.checkins >= 5) insights.push(`Solid consistency — ${stats.checkins}/7 check-ins this week.`);
+  if (stats.checkins === 7) insights.push("Perfect week -- you checked in every single day.");
+  else if (stats.checkins >= 5) insights.push(`Solid consistency -- ${stats.checkins}/7 check-ins this week.`);
   else if (stats.checkins > 0) insights.push(`${stats.checkins} check-in${stats.checkins > 1 ? 's' : ''} this week. Try to build the habit.`);
 
-  if (stats.avgMood >= 4) insights.push("Your mood has been great this week. Keep doing what you're doing.");
+  if (stats.avgMood >= 4) insights.push("Your mood has been great this week. Keep doing what you are doing.");
   else if (stats.avgMood >= 3) insights.push("Steady mood this week. Small wins add up.");
-  else if (stats.avgMood > 0) insights.push("Tougher week mood-wise. Be gentle with yourself — better days are ahead.");
+  else if (stats.avgMood > 0) insights.push("Tougher week mood-wise. Be gentle with yourself -- better days are ahead.");
 
-  if (stats.avgSleep >= 7.5) insights.push("Excellent sleep habits — averaging over 7.5 hours.");
+  if (stats.avgSleep >= 7.5) insights.push("Excellent sleep habits -- averaging over 7.5 hours.");
   else if (stats.avgSleep >= 6.5) insights.push("Decent sleep, but aiming for 7-8 hours could help even more.");
   else if (stats.avgSleep > 0) insights.push("Sleep is below 6.5 hours on average. Your body needs more rest.");
 
-  if (stats.avgWater >= 8) insights.push("Hydration champion — great water intake this week.");
+  if (stats.avgWater >= 8) insights.push("Hydration champion -- great water intake this week.");
   else if (stats.avgWater >= 5) insights.push("Good hydration. Try adding one more glass per day.");
   else if (stats.avgWater > 0) insights.push("Your water intake could use a boost. Aim for 8 glasses daily.");
 
-  if (stats.exerciseDays >= 5) insights.push("Active lifestyle — " + stats.exerciseDays + " exercise days this week.");
-  else if (stats.exerciseDays >= 3) insights.push(stats.exerciseDays + " exercise days — nice momentum.");
+  if (stats.exerciseDays >= 5) insights.push("Active lifestyle -- " + stats.exerciseDays + " exercise days this week.");
+  else if (stats.exerciseDays >= 3) insights.push(stats.exerciseDays + " exercise days -- nice momentum.");
   else if (stats.exerciseDays > 0) insights.push(stats.exerciseDays + " exercise day" + (stats.exerciseDays > 1 ? 's' : '') + ". Can you add one more next week?");
 
-  if (stats.journalEntries >= 5) insights.push("Reflective week — " + stats.journalEntries + " journal entries. Writing heals.");
+  if (stats.journalEntries >= 5) insights.push("Reflective week -- " + stats.journalEntries + " journal entries. Writing heals.");
   else if (stats.journalEntries > 0) insights.push(stats.journalEntries + " journal entr" + (stats.journalEntries > 1 ? 'ies' : 'y') + ". Keep reflecting.");
 
-  if (streak >= 7) insights.push("You're on a " + streak + "-day streak. Incredible discipline.");
+  if (streak >= 7) insights.push("You are on a " + streak + "-day streak. Incredible discipline.");
 
   return insights;
 };
 
 const getWellnessScore = (stats: WeekStats): number => {
   let score = 0;
-  // Checkins: up to 20 points
   score += Math.min(stats.checkins / 7, 1) * 20;
-  // Mood: up to 20 points
   if (stats.avgMood > 0) score += (stats.avgMood / 5) * 20;
-  // Sleep: up to 20 points (7-9 hrs is optimal)
   if (stats.avgSleep > 0) {
     const sleepScore = stats.avgSleep >= 7 && stats.avgSleep <= 9 ? 1 : stats.avgSleep >= 6 ? 0.7 : 0.4;
     score += sleepScore * 20;
   }
-  // Water: up to 20 points
   if (stats.avgWater > 0) score += Math.min(stats.avgWater / 8, 1) * 20;
-  // Exercise: up to 20 points
   score += Math.min(stats.exerciseDays / 5, 1) * 20;
   return Math.round(score);
 };
@@ -106,7 +100,6 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
       if (storage.getJSON(`${JOURNAL_PREFIX}${d}`, null)) journalEntries++;
     });
 
-    // Best day = highest mood
     let bestDay: string | null = null;
     let bestMood = 0;
     dates.forEach((d, i) => {
@@ -141,10 +134,10 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
   const dates = getWeekDates();
 
   const getScoreLabel = (s: number) => {
-    if (s >= 80) return { label: 'Excellent', emoji: '', color: '#4CAF50' };
-    if (s >= 60) return { label: 'Good', emoji: '', color: '#B8963E' };
-    if (s >= 40) return { label: 'Fair', emoji: '', color: '#FF9800' };
-    return { label: 'Getting Started', emoji: '', color: '#8A7A5A' };
+    if (s >= 80) return { label: 'Excellent', color: '#4CAF50' };
+    if (s >= 60) return { label: 'Good', color: '#B8963E' };
+    if (s >= 40) return { label: 'Fair', color: '#D4B96A' };
+    return { label: 'Getting Started', color: '#8A7A5A' };
   };
 
   const scoreInfo = getScoreLabel(score);
@@ -152,7 +145,7 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]}>
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-        <Text style={styles.backText}>← Back</Text>
+        <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
       <Text style={styles.title}>Weekly Report</Text>
@@ -162,19 +155,19 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
       <View style={styles.scoreCard}>
         {Platform.OS === 'web' ? (
           <div style={{
-            width: 160, height: 160, borderRadius: 0, position: 'relative',
+            width: 160, height: 160, position: 'relative' as const,
             background: `conic-gradient(${scoreInfo.color} ${score}%, #EDE3CC ${score}%)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto',
           }}>
             <div style={{
-              width: 130, height: 130, borderRadius: 0, backgroundColor: '#FFFFFF',
+              width: 130, height: 130, backgroundColor: '#FFFFFF',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
             }}>
               <span style={{ fontSize: 36, fontWeight: '700', color: scoreInfo.color, fontFamily: '"Playfair Display", Georgia, serif' }}>
                 {score}
               </span>
-              <span style={{ fontSize: 12, color: '#8A7A5A', fontFamily: 'Georgia, serif' }}>/ 100</span>
+              <span style={{ fontSize: 12, color: '#8A7A5A', fontFamily: 'Georgia, serif', letterSpacing: 1 }}>/ 100</span>
             </div>
           </div>
         ) : (
@@ -183,17 +176,17 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
             <Text style={styles.scoreOf}>/ 100</Text>
           </View>
         )}
-        <Text style={styles.scoreLabel}>{scoreInfo.label}</Text>
+        <Text style={[styles.scoreLabel, { color: scoreInfo.color }]}>{scoreInfo.label}</Text>
       </View>
 
       {/* Stat Grid */}
       <View style={styles.statGrid}>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{stats.avgMood > 0 ? stats.avgMood.toFixed(1) : '—'}</Text>
+          <Text style={styles.statValue}>{stats.avgMood > 0 ? stats.avgMood.toFixed(1) : '\u2014'}</Text>
           <Text style={styles.statLabel}>Avg Mood</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{stats.avgSleep > 0 ? stats.avgSleep.toFixed(1) + 'h' : '—'}</Text>
+          <Text style={styles.statValue}>{stats.avgSleep > 0 ? stats.avgSleep.toFixed(1) + 'h' : '\u2014'}</Text>
           <Text style={styles.statLabel}>Avg Sleep</Text>
         </View>
         <View style={styles.statBox}>
@@ -202,7 +195,7 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>{stats.exerciseDays}</Text>
-          <Text style={styles.statLabel}>Exercise Days</Text>
+          <Text style={styles.statLabel}>Exercise</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>{stats.checkins}/7</Text>
@@ -224,7 +217,8 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
               const dayLabel = new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2);
               return (
                 <View key={i} style={styles.trendCol}>
-                  <Text style={{ fontSize: 20 }}>{mood > 0 ? MOODS[mood - 1] : '·'}</Text>
+                  <Text style={styles.trendMoodVal}>{mood > 0 ? mood : '\u00B7'}</Text>
+                  <Text style={styles.trendMoodLabel}>{mood > 0 ? MOOD_LABELS[mood - 1] : ''}</Text>
                   <Text style={styles.trendDay}>{dayLabel}</Text>
                 </View>
               );
@@ -281,7 +275,10 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
         <View style={styles.insightsCard}>
           <Text style={styles.insightsTitle}>Weekly Insights</Text>
           {insights.map((insight, i) => (
-            <Text key={i} style={styles.insightText}>{insight}</Text>
+            <View key={i} style={styles.insightRow}>
+              <View style={styles.insightBullet} />
+              <Text style={styles.insightText}>{insight}</Text>
+            </View>
           ))}
         </View>
       )}
@@ -289,13 +286,14 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
       {/* Best Day */}
       {stats.bestDay && (
         <View style={styles.bestDayCard}>
-          <Text style={styles.bestDayTitle}>Best Day</Text>
+          <Text style={styles.bestDayLabel}>Best Day</Text>
           <Text style={styles.bestDayText}>
             {new Date(stats.bestDay + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
           </Text>
         </View>
       )}
 
+      <View style={styles.footerDivider} />
       <Text style={styles.footer}>Keep building your wellness, one day at a time.</Text>
 
       <QuickNav navigation={navigation} currentScreen="WeeklyReport" />
@@ -308,72 +306,72 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1, backgroundColor: '#FAF8F3' },
   container: { paddingHorizontal: 28, paddingTop: Platform.OS === 'web' ? 48 : 60, paddingBottom: 40, width: '100%' },
 
-  backBtn: { marginBottom: 16 },
-  backText: { fontSize: 16, color: '#B8963E', fontFamily: bodySerif },
+  backBtn: { marginBottom: 20 },
+  backText: { fontSize: 15, color: '#B8963E', fontFamily: bodySerif, letterSpacing: 0.3 },
 
-  title: { fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 4 },
-  subtitle: { fontSize: 16, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 24 },
+  title: { fontSize: 28, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 4, letterSpacing: 0.5 },
+  subtitle: { fontSize: 15, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 28 },
 
   scoreCard: {
     backgroundColor: '#FFFFFF', borderRadius: 0, padding: 28, marginBottom: 20, alignItems: 'center',
+    borderWidth: 1, borderColor: '#EDE3CC',
     ...(Platform.OS === 'web'
-      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
+      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.08)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
   scoreBubble: {
     width: 160, height: 160, borderRadius: 0, backgroundColor: '#FFF9EE',
-    borderWidth: 6, borderColor: '#D4B96A', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 4, borderColor: '#D4B96A', alignItems: 'center', justifyContent: 'center',
   },
   scoreNum: { fontSize: 36, fontWeight: '700', fontFamily: serif },
-  scoreOf: { fontSize: 14, color: '#8A7A5A', fontFamily: bodySerif },
-  scoreLabel: { fontSize: 18, fontWeight: '600', color: '#3A3A3A', fontFamily: bodySerif, marginTop: 12 },
+  scoreOf: { fontSize: 14, color: '#8A7A5A', fontFamily: bodySerif, letterSpacing: 1 },
+  scoreLabel: { fontSize: 16, fontWeight: '600', fontFamily: bodySerif, marginTop: 14, letterSpacing: 0.5 },
 
   statGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 20 },
   statBox: {
-    width: '31%' as any, backgroundColor: '#FFFFFF', borderRadius: 0, padding: 14,
-    marginBottom: 10, alignItems: 'center',
-    ...(Platform.OS === 'web'
-      ? { boxShadow: '0 1px 8px rgba(184,150,62,0.08)' } as any
-      : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 1 }),
+    width: '31%' as any, backgroundColor: '#FFFFFF', borderRadius: 0, padding: 16,
+    marginBottom: 10, alignItems: 'center', borderWidth: 1, borderColor: '#EDE3CC',
   },
-  statEmoji: { fontSize: 22, marginBottom: 4 },
   statValue: { fontSize: 20, fontWeight: '700', color: '#B8963E', fontFamily: serif },
-  statLabel: { fontSize: 11, color: '#8A7A5A', fontFamily: bodySerif, marginTop: 2, textAlign: 'center' },
+  statLabel: { fontSize: 10, color: '#8A7A5A', fontFamily: bodySerif, marginTop: 4, textTransform: 'uppercase' as any, letterSpacing: 0.8, textAlign: 'center' },
 
   trendCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20, marginBottom: 16,
-    ...(Platform.OS === 'web'
-      ? { boxShadow: '0 2px 12px rgba(184,150,62,0.08)' } as any
-      : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 2 }),
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 22, marginBottom: 16,
+    borderWidth: 1, borderColor: '#EDE3CC',
   },
-  trendTitle: { fontSize: 16, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 14, textAlign: 'center' },
+  trendTitle: { fontSize: 14, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 16, textAlign: 'center', textTransform: 'uppercase' as any, letterSpacing: 1 },
   trendRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' },
-  trendCol: { alignItems: 'center', gap: 4 },
-  trendDay: { fontSize: 11, color: '#999', fontFamily: bodySerif },
+  trendCol: { alignItems: 'center', gap: 2 },
+  trendMoodVal: { fontSize: 18, fontWeight: '700', color: '#B8963E', fontFamily: serif },
+  trendMoodLabel: { fontSize: 9, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 0.5 },
+  trendDay: { fontSize: 10, color: '#999', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 0.5, marginTop: 2 },
 
   chartRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', minHeight: 100 },
   chartCol: { alignItems: 'center', gap: 4 },
   chartVal: { fontSize: 11, fontWeight: '600', color: '#B8963E', fontFamily: bodySerif },
   chartBar: { width: 28, borderRadius: 0, minHeight: 4 },
-  chartDay: { fontSize: 11, color: '#999', fontFamily: bodySerif },
+  chartDay: { fontSize: 10, color: '#999', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 0.5 },
 
   insightsCard: {
-    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 20, marginBottom: 16,
+    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 22, marginBottom: 16,
     borderWidth: 1.5, borderColor: '#D4B96A',
   },
-  insightsTitle: { fontSize: 18, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 12 },
-  insightText: { fontSize: 15, lineHeight: 24, color: '#3A3A3A', fontFamily: bodySerif, marginBottom: 8 },
+  insightsTitle: { fontSize: 16, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 14, letterSpacing: 0.5 },
+  insightRow: { flexDirection: 'row', marginBottom: 10, alignItems: 'flex-start' },
+  insightBullet: { width: 4, height: 4, backgroundColor: '#D4B96A', marginTop: 10, marginRight: 12 },
+  insightText: { fontSize: 15, lineHeight: 24, color: '#3A3A3A', fontFamily: bodySerif, flex: 1 },
 
   bestDayCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 16, marginBottom: 16,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 18, marginBottom: 16,
     alignItems: 'center', borderWidth: 1.5, borderColor: '#D4B96A',
   },
-  bestDayTitle: { fontSize: 16, fontWeight: '700', color: '#B8963E', fontFamily: serif },
-  bestDayText: { fontSize: 15, color: '#3A3A3A', fontFamily: bodySerif, marginTop: 4 },
+  bestDayLabel: { fontSize: 11, color: '#8A7A5A', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 4 },
+  bestDayText: { fontSize: 16, fontWeight: '600', color: '#B8963E', fontFamily: serif },
 
+  footerDivider: { width: 30, height: 1, backgroundColor: '#D4B96A', alignSelf: 'center', marginTop: 12, marginBottom: 12 },
   footer: {
     textAlign: 'center', fontSize: 14, color: '#BBAA88', fontStyle: 'italic',
-    fontFamily: bodySerif, marginTop: 8,
+    fontFamily: bodySerif,
   },
 });
 

@@ -15,14 +15,14 @@ const todayKey = () => new Date().toISOString().slice(0, 10);
 
 interface HydrationLog {
   glasses: number;
-  timestamps: number[]; // when each glass was logged
+  timestamps: number[];
 }
 
 const WATER_FACTS = [
   "Even mild dehydration can impair mood, memory, and concentration.",
   "Water helps your kidneys flush toxins from your body.",
   "Drinking water before meals can help with healthy weight management.",
-  "Your brain is about 75% water — keep it hydrated for clear thinking.",
+  "Your brain is about 75% water -- keep it hydrated for clear thinking.",
   "Water lubricates your joints and helps prevent muscle cramps.",
   "Proper hydration keeps your skin looking healthy and radiant.",
   "Cold water can boost your metabolism by up to 30% for about an hour.",
@@ -99,7 +99,6 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
     : '0';
   const daysMetGoal = weekData.filter(d => d.glasses >= goal).length;
 
-  // Time since last glass
   const lastGlassTime = timestamps.length > 0
     ? Math.round((Date.now() - timestamps[timestamps.length - 1]) / 60000)
     : null;
@@ -107,70 +106,66 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]}>
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-        <Text style={styles.backText}>← Back</Text>
+        <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Hydration Tracker</Text>
+      <Text style={styles.title}>Hydration</Text>
       <Text style={styles.subtitle}>Stay refreshed, stay sharp</Text>
 
-      {/* Progress Ring */}
+      {/* Progress Display */}
       <View style={styles.progressCard}>
         {Platform.OS === 'web' ? (
           <div style={{
-            width: 180, height: 180, borderRadius: 0, position: 'relative',
+            width: 200, height: 200, position: 'relative' as const,
             background: `conic-gradient(#B8963E ${progressPercent}%, #EDE3CC ${progressPercent}%)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto',
           }}>
             <div style={{
-              width: 150, height: 150, borderRadius: 0, backgroundColor: '#FAF8F3',
+              width: 168, height: 168, backgroundColor: '#FAF8F3',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
             }}>
-              <img src="/icons/hydration.png" width="48" height="48" alt="water" />
-              <span style={{ fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: '"Playfair Display", Georgia, serif' }}>
-                {glasses}/{goal}
+              <span style={{ fontSize: 36, fontWeight: '700', color: '#B8963E', fontFamily: '"Playfair Display", Georgia, serif' }}>
+                {glasses}
               </span>
-              <span style={{ fontSize: 13, color: '#8A7A5A', fontFamily: 'Georgia, serif' }}>glasses</span>
+              <span style={{ fontSize: 13, color: '#8A7A5A', fontFamily: 'Georgia, serif', letterSpacing: 1 }}>
+                of {goal}
+              </span>
             </div>
           </div>
         ) : (
           <View style={styles.progressCircle}>
-            <Image source={{ uri: '/icons/hydration.png' }} style={{ width: 48, height: 48 }} />
-            <Text style={styles.progressCount}>{glasses}/{goal}</Text>
-            <Text style={styles.progressLabel}>glasses</Text>
+            <Text style={styles.progressCount}>{glasses}</Text>
+            <Text style={styles.progressLabel}>of {goal}</Text>
           </View>
         )}
 
         {glasses >= goal && (
-          <Text style={styles.goalReached}>Goal reached — great job staying hydrated.</Text>
+          <Text style={styles.goalReached}>Goal reached. Well done.</Text>
         )}
 
         {lastGlassTime !== null && (
           <Text style={styles.lastGlass}>
-            Last glass: {lastGlassTime < 1 ? 'just now' : `${lastGlassTime} min ago`}
+            Last glass: {lastGlassTime < 1 ? 'just now' : `${lastGlassTime}m ago`}
           </Text>
         )}
 
         {/* Buttons */}
         <View style={styles.btnRow}>
-          <TouchableOpacity onPress={removeGlass} style={styles.circleBtn} activeOpacity={0.7}>
-            <Text style={styles.circleBtnText}>−</Text>
+          <TouchableOpacity onPress={removeGlass} style={styles.actionBtn} activeOpacity={0.7}>
+            <Text style={styles.actionBtnText}>{'\u2212'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={addGlass} style={[styles.circleBtn, styles.circleBtnPrimary]} activeOpacity={0.7}>
-            <Text style={[styles.circleBtnText, { color: '#FFF' }]}>+</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={removeGlass} style={[styles.circleBtn, { opacity: 0 }]} disabled>
-            <Text style={styles.circleBtnText}>−</Text>
+          <TouchableOpacity onPress={addGlass} style={[styles.actionBtn, styles.actionBtnPrimary]} activeOpacity={0.7}>
+            <Text style={[styles.actionBtnText, { color: '#FFF' }]}>+ glass</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Reminder tip */}
+      {/* Gentle reminder */}
       {lastGlassTime !== null && lastGlassTime > 60 && (
         <View style={styles.reminderCard}>
-          <Text style={styles.reminderEmoji}></Text>
           <Text style={styles.reminderText}>
-            It's been over an hour since your last glass. Time for a sip!
+            It has been over an hour since your last glass. Time for a sip.
           </Text>
         </View>
       )}
@@ -180,7 +175,7 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
         <Text style={styles.sectionTitle}>Daily Goal</Text>
         <View style={styles.goalRow}>
           <TouchableOpacity onPress={() => changeGoal(-1)} style={styles.goalBtn}>
-            <Text style={styles.goalBtnText}>−</Text>
+            <Text style={styles.goalBtnText}>{'\u2212'}</Text>
           </TouchableOpacity>
           <Text style={styles.goalValue}>{goal} glasses</Text>
           <TouchableOpacity onPress={() => changeGoal(1)} style={styles.goalBtn}>
@@ -211,13 +206,13 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
         </View>
         <View style={styles.weekStats}>
           <Text style={styles.weekStat}>Avg: {weekAvg}/day</Text>
-          <Text style={styles.weekStat}>Goal met: {daysMetGoal}/7 days</Text>
+          <Text style={styles.weekStat}>Goal met: {daysMetGoal}/7</Text>
         </View>
       </View>
 
       {/* Water Fact */}
       <View style={styles.factCard}>
-        <Text style={styles.factEmoji}>·</Text>
+        <Text style={styles.factLabel}>Did you know</Text>
         <Text style={styles.factText}>{WATER_FACTS[factIndex]}</Text>
       </View>
 
@@ -231,45 +226,45 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1, backgroundColor: '#FAF8F3' },
   container: { paddingHorizontal: 28, paddingTop: Platform.OS === 'web' ? 48 : 60, paddingBottom: 40, width: '100%' },
 
-  backBtn: { marginBottom: 16 },
-  backText: { fontSize: 16, color: '#B8963E', fontFamily: bodySerif },
+  backBtn: { marginBottom: 20 },
+  backText: { fontSize: 15, color: '#B8963E', fontFamily: bodySerif, letterSpacing: 0.3 },
 
-  title: { fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 4 },
-  subtitle: { fontSize: 16, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 24 },
+  title: { fontSize: 28, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 4, letterSpacing: 0.5 },
+  subtitle: { fontSize: 15, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 28 },
 
   progressCard: {
     backgroundColor: '#FFFFFF', borderRadius: 0, padding: 28, marginBottom: 20, alignItems: 'center',
+    borderWidth: 1, borderColor: '#EDE3CC',
     ...(Platform.OS === 'web'
-      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
+      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.08)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
   progressCircle: {
-    width: 180, height: 180, borderRadius: 0, backgroundColor: '#FFF9EE',
-    borderWidth: 6, borderColor: '#D4B96A', alignItems: 'center', justifyContent: 'center',
+    width: 200, height: 200, borderRadius: 0, backgroundColor: '#FFF9EE',
+    borderWidth: 4, borderColor: '#D4B96A', alignItems: 'center', justifyContent: 'center',
   },
-  progressCount: { fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: serif },
-  progressLabel: { fontSize: 13, color: '#8A7A5A', fontFamily: bodySerif },
+  progressCount: { fontSize: 36, fontWeight: '700', color: '#B8963E', fontFamily: serif },
+  progressLabel: { fontSize: 13, color: '#8A7A5A', fontFamily: bodySerif, letterSpacing: 1 },
 
-  goalReached: { fontSize: 15, color: '#B8963E', fontFamily: bodySerif, fontStyle: 'italic', marginTop: 12, textAlign: 'center' },
-  lastGlass: { fontSize: 13, color: '#8A7A5A', fontFamily: bodySerif, marginTop: 8 },
+  goalReached: { fontSize: 14, color: '#B8963E', fontFamily: bodySerif, fontStyle: 'italic', marginTop: 14, textAlign: 'center' },
+  lastGlass: { fontSize: 12, color: '#8A7A5A', fontFamily: bodySerif, marginTop: 8, letterSpacing: 0.3 },
 
-  btnRow: { flexDirection: 'row', gap: 16, marginTop: 20, alignItems: 'center', justifyContent: 'center' },
-  circleBtn: {
-    width: 56, height: 56, borderRadius: 0, borderWidth: 2, borderColor: '#D4B96A',
+  btnRow: { flexDirection: 'row', gap: 12, marginTop: 22, alignItems: 'center', justifyContent: 'center' },
+  actionBtn: {
+    height: 48, paddingHorizontal: 24, borderWidth: 1.5, borderColor: '#D4B96A',
     alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF',
   },
-  circleBtnPrimary: { backgroundColor: '#B8963E', borderColor: '#B8963E', width: 80, height: 56, borderRadius: 0 },
-  circleBtnText: { fontSize: 20, fontWeight: '700', color: '#B8963E' },
+  actionBtnPrimary: { backgroundColor: '#B8963E', borderColor: '#B8963E', paddingHorizontal: 32 },
+  actionBtnText: { fontSize: 16, fontWeight: '700', color: '#B8963E', fontFamily: bodySerif },
 
   reminderCard: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF9EE',
-    borderRadius: 0, padding: 14, marginBottom: 20, borderWidth: 1.5, borderColor: '#D4B96A',
+    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 16, marginBottom: 20,
+    borderWidth: 1, borderColor: '#EDE3CC',
   },
-  reminderEmoji: { fontSize: 28, marginRight: 12 },
-  reminderText: { fontSize: 14, color: '#8A7A5A', fontFamily: bodySerif, flex: 1, lineHeight: 22 },
+  reminderText: { fontSize: 14, color: '#8A7A5A', fontFamily: bodySerif, lineHeight: 22, fontStyle: 'italic' },
 
   goalSection: { marginBottom: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: '#3A3A3A', fontFamily: bodySerif, marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#3A3A3A', fontFamily: bodySerif, marginBottom: 12, letterSpacing: 0.3 },
   goalRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   goalBtn: {
     width: 44, height: 44, borderRadius: 0, borderWidth: 1.5, borderColor: '#D4B96A',
@@ -279,25 +274,26 @@ const styles = StyleSheet.create({
   goalValue: { fontSize: 20, color: '#3A3A3A', fontFamily: bodySerif, marginHorizontal: 24, minWidth: 100, textAlign: 'center' },
 
   weekCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20, marginBottom: 20,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 22, marginBottom: 20,
+    borderWidth: 1, borderColor: '#EDE3CC',
     ...(Platform.OS === 'web'
-      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
+      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.08)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
   chartRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', marginBottom: 12, minHeight: 100 },
   chartCol: { alignItems: 'center', gap: 4 },
-  chartVal: { fontSize: 12, fontWeight: '600', color: '#B8963E', fontFamily: bodySerif },
+  chartVal: { fontSize: 12, fontWeight: '700', color: '#B8963E', fontFamily: bodySerif },
   chartBar: { width: 28, borderRadius: 0, minHeight: 8 },
-  chartDay: { fontSize: 11, color: '#999', fontFamily: bodySerif },
+  chartDay: { fontSize: 10, color: '#999', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 0.5 },
   weekStats: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 8 },
   weekStat: { fontSize: 13, color: '#8A7A5A', fontFamily: bodySerif },
 
   factCard: {
-    flexDirection: 'row', alignItems: 'flex-start', backgroundColor: '#FFF9EE',
-    borderRadius: 0, padding: 16, borderWidth: 1, borderColor: '#EDE3CC',
+    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 20, marginBottom: 8,
+    borderWidth: 1, borderColor: '#EDE3CC',
   },
-  factEmoji: { fontSize: 20, marginRight: 10 },
-  factText: { fontSize: 14, lineHeight: 22, color: '#3A3A3A', fontFamily: bodySerif, flex: 1 },
+  factLabel: { fontSize: 11, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 8 },
+  factText: { fontSize: 15, lineHeight: 24, color: '#3A3A3A', fontFamily: bodySerif },
 });
 
 export default HydrationScreen;

@@ -10,11 +10,11 @@ const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New R
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
 
 const MOODS = [
-  { emoji: '', label: 'Rough' },
-  { emoji: '', label: 'Low' },
-  { emoji: '', label: 'Okay' },
-  { emoji: '', label: 'Good' },
-  { emoji: '', label: 'Great' },
+  { label: 'Rough', value: 1 },
+  { label: 'Low', value: 2 },
+  { label: 'Okay', value: 3 },
+  { label: 'Good', value: 4 },
+  { label: 'Great', value: 5 },
 ];
 
 const CheckInScreen = ({ navigation }: { navigation: any }) => {
@@ -55,9 +55,8 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]}>
-      {/* Header */}
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-        <Text style={styles.backText}>← Back</Text>
+        <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
       <Text style={styles.title}>Daily Check-In</Text>
@@ -67,7 +66,7 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
       {streak > 0 && (
         <View style={styles.streakBadge}>
           <Text style={styles.streakNumber}>{streak}</Text>
-          <Text style={styles.streakLabel}>day streak</Text>
+          <Text style={styles.streakLabel}>{streak === 1 ? 'day' : 'days'} consistent</Text>
           {milestone && <Text style={styles.milestone}>{milestone}</Text>}
         </View>
       )}
@@ -76,15 +75,15 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>How are you feeling?</Text>
         <View style={styles.moodRow}>
-          {MOODS.map((m, i) => (
+          {MOODS.map((m) => (
             <TouchableOpacity
-              key={i}
-              onPress={() => setMood(i + 1)}
-              style={[styles.moodBtn, mood === i + 1 && styles.moodBtnActive]}
+              key={m.value}
+              onPress={() => setMood(m.value)}
+              style={[styles.moodBtn, mood === m.value && styles.moodBtnActive]}
               activeOpacity={0.7}
             >
-              <Text style={styles.moodEmoji}>{['1','2','3','4','5'][i]}</Text>
-              <Text style={[styles.moodLabel, mood === i + 1 && styles.moodLabelActive]}>{m.label}</Text>
+              <Text style={[styles.moodValue, mood === m.value && styles.moodValueActive]}>{m.value}</Text>
+              <Text style={[styles.moodLabel, mood === m.value && styles.moodLabelActive]}>{m.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -95,9 +94,12 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
         <Text style={styles.sectionTitle}>Water intake</Text>
         <View style={styles.counterRow}>
           <TouchableOpacity onPress={() => setWater(Math.max(0, water - 1))} style={styles.counterBtn}>
-            <Text style={styles.counterBtnText}>−</Text>
+            <Text style={styles.counterBtnText}>{'\u2212'}</Text>
           </TouchableOpacity>
-          <Text style={styles.counterValue}>{water} glasses</Text>
+          <View style={styles.counterCenter}>
+            <Text style={styles.counterValue}>{water}</Text>
+            <Text style={styles.counterUnit}>glasses</Text>
+          </View>
           <TouchableOpacity onPress={() => setWater(water + 1)} style={styles.counterBtn}>
             <Text style={styles.counterBtnText}>+</Text>
           </TouchableOpacity>
@@ -109,9 +111,12 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
         <Text style={styles.sectionTitle}>Sleep last night</Text>
         <View style={styles.counterRow}>
           <TouchableOpacity onPress={() => setSleep(Math.max(0, sleep - 0.5))} style={styles.counterBtn}>
-            <Text style={styles.counterBtnText}>−</Text>
+            <Text style={styles.counterBtnText}>{'\u2212'}</Text>
           </TouchableOpacity>
-          <Text style={styles.counterValue}>{sleep} hours</Text>
+          <View style={styles.counterCenter}>
+            <Text style={styles.counterValue}>{sleep}</Text>
+            <Text style={styles.counterUnit}>hours</Text>
+          </View>
           <TouchableOpacity onPress={() => setSleep(sleep + 0.5)} style={styles.counterBtn}>
             <Text style={styles.counterBtnText}>+</Text>
           </TouchableOpacity>
@@ -147,6 +152,10 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
         <Text style={styles.saveBtnText}>{saved ? 'Updated' : 'Save Check-In'}</Text>
       </TouchableOpacity>
 
+      {saved && (
+        <Text style={styles.savedConfirm}>Your check-in has been saved.</Text>
+      )}
+
       {/* Weekly Summary Toggle */}
       <TouchableOpacity onPress={() => setShowWeekly(!showWeekly)} style={styles.weeklyToggle}>
         <Text style={styles.weeklyToggleText}>{showWeekly ? 'Hide Weekly Summary' : 'View Weekly Summary'}</Text>
@@ -166,20 +175,19 @@ const WeeklySummary = () => {
   const completed = data.filter(d => d.checkin).length;
   const avgMood = completed > 0
     ? (data.reduce((s, d) => s + (d.checkin?.mood || 0), 0) / completed).toFixed(1)
-    : '—';
+    : '\u2014';
   const avgWater = completed > 0
     ? (data.reduce((s, d) => s + (d.checkin?.water || 0), 0) / completed).toFixed(1)
-    : '—';
+    : '\u2014';
   const avgSleep = completed > 0
     ? (data.reduce((s, d) => s + (d.checkin?.sleep || 0), 0) / completed).toFixed(1)
-    : '—';
+    : '\u2014';
   const exerciseDays = data.filter(d => d.checkin?.exercise).length;
 
   return (
     <View style={styles.weeklyCard}>
       <Text style={styles.weeklyTitle}>This Week</Text>
 
-      {/* Day dots */}
       <View style={styles.dayDotsRow}>
         {data.map((d, i) => {
           const dayLabel = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2);
@@ -187,14 +195,13 @@ const WeeklySummary = () => {
             <View key={i} style={styles.dayDot}>
               <Text style={styles.dayDotLabel}>{dayLabel}</Text>
               <View style={[styles.dot, d.checkin ? styles.dotFilled : styles.dotEmpty]}>
-                {d.checkin && <Text style={styles.dotEmoji}>{MOODS[(d.checkin.mood || 1) - 1]?.label?.charAt(0)}</Text>}
+                {d.checkin && <Text style={styles.dotText}>{d.checkin.mood}</Text>}
               </View>
             </View>
           );
         })}
       </View>
 
-      {/* Stats */}
       <View style={styles.statsGrid}>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>{completed}/7</Text>
@@ -214,7 +221,7 @@ const WeeklySummary = () => {
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>{exerciseDays}</Text>
-          <Text style={styles.statLabel}>Exercise Days</Text>
+          <Text style={styles.statLabel}>Exercise</Text>
         </View>
       </View>
     </View>
@@ -225,41 +232,44 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1, backgroundColor: '#FAF8F3' },
   container: { paddingHorizontal: 28, paddingTop: Platform.OS === 'web' ? 48 : 60, paddingBottom: 40, width: '100%' },
 
-  backBtn: { marginBottom: 16 },
-  backText: { fontSize: 16, color: '#B8963E', fontFamily: bodySerif },
+  backBtn: { marginBottom: 20 },
+  backText: { fontSize: 15, color: '#B8963E', fontFamily: bodySerif, letterSpacing: 0.3 },
 
-  title: { fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 4 },
-  subtitle: { fontSize: 16, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 24 },
+  title: { fontSize: 28, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 4, letterSpacing: 0.5 },
+  subtitle: { fontSize: 15, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 28 },
 
   streakBadge: {
-    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 16, marginBottom: 24,
+    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 18, marginBottom: 28,
     borderWidth: 1.5, borderColor: '#D4B96A', alignItems: 'center',
   },
   streakNumber: { fontSize: 36, fontWeight: '700', color: '#B8963E', fontFamily: serif },
-  streakLabel: { fontSize: 16, color: '#8A7A5A', fontFamily: bodySerif },
-  milestone: { fontSize: 15, color: '#B8963E', fontFamily: bodySerif, fontStyle: 'italic', marginTop: 4, textAlign: 'center' },
+  streakLabel: { fontSize: 15, color: '#8A7A5A', fontFamily: bodySerif, marginTop: 2 },
+  milestone: { fontSize: 14, color: '#B8963E', fontFamily: bodySerif, fontStyle: 'italic', marginTop: 6, textAlign: 'center' },
 
-  section: { marginBottom: 28 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: '#3A3A3A', fontFamily: bodySerif, marginBottom: 12 },
+  section: { marginBottom: 32 },
+  sectionTitle: { fontSize: 17, fontWeight: '600', color: '#3A3A3A', fontFamily: bodySerif, marginBottom: 14 },
 
   moodRow: { flexDirection: 'row', justifyContent: 'space-between' },
   moodBtn: {
-    alignItems: 'center', paddingVertical: 12, paddingHorizontal: 8,
+    alignItems: 'center', paddingVertical: 14, paddingHorizontal: 6,
     borderRadius: 0, borderWidth: 1.5, borderColor: '#EDE3CC', flex: 1, marginHorizontal: 3,
     backgroundColor: '#FFFFFF',
   },
   moodBtnActive: { borderColor: '#B8963E', backgroundColor: '#FFF9EE' },
-  moodEmoji: { fontSize: 28, marginBottom: 4 },
-  moodLabel: { fontSize: 12, color: '#999', fontFamily: bodySerif },
+  moodValue: { fontSize: 24, fontWeight: '700', color: '#CCBBAA', fontFamily: serif, marginBottom: 4 },
+  moodValueActive: { color: '#B8963E' },
+  moodLabel: { fontSize: 11, color: '#999', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 0.5 },
   moodLabelActive: { color: '#B8963E', fontWeight: '600' },
 
   counterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   counterBtn: {
-    width: 44, height: 44, borderRadius: 0, borderWidth: 1.5, borderColor: '#D4B96A',
+    width: 48, height: 48, borderRadius: 0, borderWidth: 1.5, borderColor: '#D4B96A',
     alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF',
   },
   counterBtnText: { fontSize: 22, color: '#B8963E', fontWeight: '600' },
-  counterValue: { fontSize: 20, color: '#3A3A3A', fontFamily: bodySerif, marginHorizontal: 24, minWidth: 100, textAlign: 'center' },
+  counterCenter: { alignItems: 'center', marginHorizontal: 28, minWidth: 80 },
+  counterValue: { fontSize: 28, fontWeight: '700', color: '#B8963E', fontFamily: serif },
+  counterUnit: { fontSize: 12, color: '#8A7A5A', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1 },
 
   toggleRow: { flexDirection: 'row', gap: 12 },
   toggleBtn: {
@@ -267,34 +277,36 @@ const styles = StyleSheet.create({
     alignItems: 'center', backgroundColor: '#FFFFFF',
   },
   toggleBtnActive: { borderColor: '#B8963E', backgroundColor: '#FFF9EE' },
-  toggleText: { fontSize: 16, color: '#999', fontFamily: bodySerif },
+  toggleText: { fontSize: 15, color: '#999', fontFamily: bodySerif },
   toggleTextActive: { color: '#B8963E', fontWeight: '600' },
 
   saveBtn: {
     backgroundColor: '#B8963E', borderRadius: 0, paddingVertical: 16,
-    alignItems: 'center', marginTop: 8, marginBottom: 20,
+    alignItems: 'center', marginTop: 8, marginBottom: 12,
   },
-  saveBtnDisabled: { opacity: 0.5 },
-  saveBtnText: { fontSize: 17, fontWeight: '700', color: '#FFFFFF', fontFamily: bodySerif },
+  saveBtnDisabled: { opacity: 0.4 },
+  saveBtnText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', fontFamily: bodySerif, letterSpacing: 0.5 },
+  savedConfirm: { textAlign: 'center', fontSize: 14, color: '#B8963E', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 16 },
 
-  weeklyToggle: { alignSelf: 'center', marginBottom: 16 },
-  weeklyToggleText: { fontSize: 15, color: '#B8963E', fontWeight: '600', fontFamily: bodySerif },
+  weeklyToggle: { alignSelf: 'center', marginBottom: 16, paddingVertical: 8 },
+  weeklyToggleText: { fontSize: 14, color: '#B8963E', fontWeight: '600', fontFamily: bodySerif, letterSpacing: 0.3 },
 
   weeklyCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20, marginBottom: 12,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 22, marginBottom: 12,
+    borderWidth: 1, borderColor: '#EDE3CC',
     ...(Platform.OS === 'web'
-      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
+      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.08)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
-  weeklyTitle: { fontSize: 20, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 16, textAlign: 'center' },
+  weeklyTitle: { fontSize: 20, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 18, textAlign: 'center' },
 
   dayDotsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
   dayDot: { alignItems: 'center' },
-  dayDotLabel: { fontSize: 12, color: '#999', fontFamily: bodySerif, marginBottom: 6 },
+  dayDotLabel: { fontSize: 11, color: '#999', fontFamily: bodySerif, marginBottom: 6, textTransform: 'uppercase' as any, letterSpacing: 0.5 },
   dot: { width: 36, height: 36, borderRadius: 0, alignItems: 'center', justifyContent: 'center' },
   dotFilled: { backgroundColor: '#FFF9EE', borderWidth: 1.5, borderColor: '#D4B96A' },
-  dotEmpty: { backgroundColor: '#F0ECE4', borderWidth: 1.5, borderColor: '#E0D8C8' },
-  dotEmoji: { fontSize: 18 },
+  dotEmpty: { backgroundColor: '#F5F0E8', borderWidth: 1, borderColor: '#E0D8C8' },
+  dotText: { fontSize: 14, fontWeight: '700', color: '#B8963E', fontFamily: serif },
 
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   statBox: {
@@ -302,7 +314,7 @@ const styles = StyleSheet.create({
     marginBottom: 10, alignItems: 'center',
   },
   statValue: { fontSize: 22, fontWeight: '700', color: '#B8963E', fontFamily: serif },
-  statLabel: { fontSize: 13, color: '#8A7A5A', fontFamily: bodySerif, marginTop: 2 },
+  statLabel: { fontSize: 12, color: '#8A7A5A', fontFamily: bodySerif, marginTop: 2, textTransform: 'uppercase' as any, letterSpacing: 0.5 },
 });
 
 export default CheckInScreen;

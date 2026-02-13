@@ -25,13 +25,7 @@ const QuickNav = ({ navigation, currentScreen }: QuickNavProps) => {
         {NAV_ITEMS.filter(item => item.screen !== currentScreen).map(item => (
           <TouchableOpacity
             key={item.screen}
-            onPress={() => {
-              if (item.screen === 'Home') {
-                navigation.navigate('Home');
-              } else {
-                navigation.navigate(item.screen);
-              }
-            }}
+            onPress={() => navigation.navigate(item.screen)}
             style={styles.navBtn}
             activeOpacity={0.7}
           >
@@ -44,21 +38,20 @@ const QuickNav = ({ navigation, currentScreen }: QuickNavProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: { marginTop: 24, marginBottom: 8 },
+  container: { marginTop: 28, marginBottom: 8 },
   divider: {
-    width: 40, height: 2, backgroundColor: '#EDE3CC',
-    alignSelf: 'center', marginBottom: 16, borderRadius: 0,
+    width: 30, height: 1, backgroundColor: '#D4B96A',
+    alignSelf: 'center', marginBottom: 18, borderRadius: 0,
   },
   row: {
     flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8,
   },
   navBtn: {
-    alignItems: 'center', paddingVertical: 10, paddingHorizontal: 12,
-    borderRadius: 0, backgroundColor: '#FFF9EE', borderWidth: 1, borderColor: '#EDE3CC',
+    alignItems: 'center', paddingVertical: 10, paddingHorizontal: 14,
+    borderRadius: 0, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE3CC',
     minWidth: 60,
   },
-  navEmoji: { fontSize: 18, marginBottom: 2 },
-  navLabel: { fontSize: 10, color: '#8A7A5A', fontFamily: bodySerif },
+  navLabel: { fontSize: 11, color: '#8A7A5A', fontFamily: bodySerif, letterSpacing: 0.5, textTransform: 'uppercase' as any },
 });
 
 export default QuickNav;

@@ -8,15 +8,9 @@ import { getStreak, getStreakMilestone, getCheckIn, todayKey } from '../utils/st
 import OnboardingScreen, { hasOnboarded } from './OnboardingScreen';
 import {
   initNotifications,
-  isNotificationsSupported,
-  isNotificationsEnabled,
-  requestNotificationPermission,
-  disableNotifications,
-  sendTestNotification,
-  getNotificationPermission,
 } from '../utils/notifications';
 
-// ── Feature Icons (extracted from Dustin's design) ───────
+// ── Feature Icons ───────────────────────────────────────
 const iconPaths: Record<string, string> = {
   checkIn: '/icons/checkin.png',
   checkedIn: '/icons/checkin.png',
@@ -27,7 +21,7 @@ const iconPaths: Record<string, string> = {
   report: '/icons/report.png',
 };
 
-const FeatureIcon = ({ name, size = 40 }: { name: string; size?: number }) => {
+const FeatureIcon = ({ name, size = 36 }: { name: string; size?: number }) => {
   if (Platform.OS !== 'web') return null;
   const src = iconPaths[name] || iconPaths.checkIn;
   return (
@@ -35,7 +29,7 @@ const FeatureIcon = ({ name, size = 40 }: { name: string; size?: number }) => {
       src={src}
       width={size}
       height={size}
-      style={{ marginBottom: 4 }}
+      style={{ marginBottom: 6, opacity: 0.85 }}
       alt={name}
     /> as any
   );
@@ -44,9 +38,11 @@ const FeatureIcon = ({ name, size = 40 }: { name: string; size?: number }) => {
 // ── helpers ──────────────────────────────────────────────
 const getGreeting = () => {
   const h = new Date().getHours();
+  if (h < 6) return 'Still up? Rest well';
   if (h < 12) return 'Good morning';
   if (h < 17) return 'Good afternoon';
-  return 'Good evening';
+  if (h < 21) return 'Good evening';
+  return 'Winding down';
 };
 
 const getFormattedDate = () => {
@@ -92,12 +88,6 @@ const injectCSS = () => {
   const style = document.createElement('style');
   style.id = 'wellth-css';
   style.textContent = `
-    /* owlFloat animation removed */
-    @keyframes owlFloat_UNUSED {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      25% { transform: translateY(-8px) rotate(1.5deg); }
-      75% { transform: translateY(4px) rotate(-1deg); }
-    }
     @keyframes fadeSlideIn {
       from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -105,10 +95,6 @@ const injectCSS = () => {
     @keyframes pulseHeart {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.25); }
-    }
-    @keyframes shimmer {
-      0% { background-position: -200% center; }
-      100% { background-position: 200% center; }
     }
     @keyframes splashFadeOut {
       from { opacity: 1; }
@@ -122,7 +108,6 @@ const injectCSS = () => {
       0%, 100% { box-shadow: 0 4px 30px rgba(184,150,62,0.15); }
       50% { box-shadow: 0 8px 50px rgba(184,150,62,0.3); }
     }
-    /* owl-mascot class removed (banned asset) */
     .tip-card { animation: fadeSlideIn 0.7s ease-out both; }
     .tip-card:nth-child(2) { animation-delay: 0.15s; }
     .fav-btn { transition: transform 0.2s ease, color 0.2s ease; }
@@ -136,11 +121,6 @@ const injectCSS = () => {
     }
     .splash-screen.fade-out {
       animation: splashFadeOut 0.8s ease-out forwards;
-    }
-    .splash-video {
-      border-radius: 0; width: 240px; height: 240px; object-fit: cover;
-      animation: logoReveal 1s ease-out both;
-      box-shadow: 0 8px 40px rgba(184,150,62,0.2);
     }
     .splash-logo {
       animation: logoReveal 1s ease-out 0.3s both;
@@ -159,18 +139,22 @@ const injectCSS = () => {
     .owl-video-container video {
       display: block; width: 100%;
     }
-    .owl-video-label {
-      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
-      background: rgba(184,150,62,0.85); color: white;
-      padding: 4px 16px; border-radius: 0; font-size: 12px;
-      font-family: Georgia, "Times New Roman", serif; font-style: italic;
-      backdrop-filter: blur(4px); white-space: nowrap;
-    }
     .wellth-header-logo {
       transition: transform 0.3s ease;
     }
     .wellth-header-logo:hover {
       transform: scale(1.05);
+    }
+    .feature-btn-web {
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    }
+    .feature-btn-web:hover {
+      background-color: #FFF9EE !important;
+      border-color: #D4B96A !important;
+      transform: translateY(-2px);
+    }
+    .feature-btn-web:active {
+      transform: translateY(0);
     }
     [data-testid="title"], div[style*="Playfair"] { text-wrap: balance; }
     * { text-wrap: balance; border-radius: 0 !important; }
@@ -225,7 +209,7 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
   );
 };
 
-// ── Owl Video Section (no box/container — Dustin wants it clean) ──
+// ── Owl Video Section (no box/container — full frame, edge to edge) ──
 const OwlVideoSection = () => {
   const [currentVideo, setCurrentVideo] = useState(0);
   const videos = [
@@ -258,8 +242,8 @@ const OwlVideoSection = () => {
 };
 
 // ── AnimatedTipCard with cycling ─────────────────────────
-const AnimatedTipCard = ({ label, emoji, tips, dayIndex, favorites, onToggleFav }: {
-  label: string; emoji: string; tips: string[]; dayIndex: number;
+const AnimatedTipCard = ({ label, tips, dayIndex, favorites, onToggleFav }: {
+  label: string; tips: string[]; dayIndex: number;
   favorites: string[]; onToggleFav: (tip: string) => void;
 }) => {
   const [tipIdx, setTipIdx] = useState(dayIndex % tips.length);
@@ -283,7 +267,6 @@ const AnimatedTipCard = ({ label, emoji, tips, dayIndex, favorites, onToggleFav 
     });
   }, [tips.length]);
 
-  // Initial entrance animation
   const entranceFade = useRef(new Animated.Value(0)).current;
   const entranceSlide = useRef(new Animated.Value(18)).current;
   useEffect(() => {
@@ -301,8 +284,6 @@ const AnimatedTipCard = ({ label, emoji, tips, dayIndex, favorites, onToggleFav 
         <View style={styles.tipHeaderRow}>
           <Text style={styles.tipLabel}>Your daily </Text>
           <Text style={styles.tipLabelBoldGold}>{label}</Text>
-          <Text style={styles.tipLabel}> </Text>
-          <Text style={styles.tipIcon}>{emoji}</Text>
         </View>
         <TouchableOpacity
           onPress={() => onToggleFav(tip)}
@@ -310,7 +291,7 @@ const AnimatedTipCard = ({ label, emoji, tips, dayIndex, favorites, onToggleFav 
           {...(Platform.OS === 'web' ? { className: `fav-btn ${isFav ? 'active' : ''}` } : {})}
         >
           <Text style={[styles.favHeart, isFav && styles.favHeartActive]}>
-            {isFav ? '♥' : '♡'}
+            {isFav ? '\u2665' : '\u2661'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -319,14 +300,13 @@ const AnimatedTipCard = ({ label, emoji, tips, dayIndex, favorites, onToggleFav 
         <Text style={styles.tipText}>{tip}</Text>
       </Animated.View>
 
-      {/* Navigation arrows */}
       <View style={styles.tipNav}>
         <TouchableOpacity onPress={() => cycleTip(-1)} activeOpacity={0.6} style={styles.tipNavBtn}>
-          <Text style={styles.tipNavArrow}>‹</Text>
+          <Text style={styles.tipNavArrow}>{'\u2039'}</Text>
         </TouchableOpacity>
         <Text style={styles.tipNavCounter}>{tipIdx + 1} / {tips.length}</Text>
         <TouchableOpacity onPress={() => cycleTip(1)} activeOpacity={0.6} style={styles.tipNavBtn}>
-          <Text style={styles.tipNavArrow}>›</Text>
+          <Text style={styles.tipNavArrow}>{'\u203A'}</Text>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -339,9 +319,9 @@ const FavoritesPanel = ({ favorites, onClose }: { favorites: string[]; onClose: 
   return (
     <View style={styles.favPanel} {...webProps}>
       <View style={styles.favPanelHeader}>
-        <Text style={styles.favPanelTitle}>♥ Saved Tips</Text>
+        <Text style={styles.favPanelTitle}>Saved Tips</Text>
         <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
-          <Text style={styles.favPanelClose}>✕</Text>
+          <Text style={styles.favPanelClose}>{'\u2715'}</Text>
         </TouchableOpacity>
       </View>
       {favorites.length === 0 ? (
@@ -379,7 +359,6 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
     });
   }, []);
 
-  // RN animated values for non-web fade-in
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(24)).current;
 
@@ -414,7 +393,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   }
 
   return (
-    <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]} accessibilityRole="main" accessibilityLabel="Wellth home screen">
+    <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]} accessibilityLabel="Wellth home screen">
       <Animated.View style={Platform.OS !== 'web' ? { opacity: fadeAnim, transform: [{ translateY: slideAnim }] } : undefined}>
 
         {/* Header */}
@@ -427,25 +406,24 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             accessibilityLabel="Wellth"
           />
         </View>
-        {/* gold hairline removed per Dustin */}
 
-        {/* Owl Video — full frame, white bg above, off-white below */}
+        {/* Owl Video — full frame, edge to edge — DO NOT TOUCH */}
         <OwlVideoSection />
 
-        {/* Greeting — below owl */}
+        {/* Greeting */}
         <View style={styles.greetingRow}>
-          <Text style={styles.greetingText}>{getGreeting()}, </Text>
-          <Text style={styles.greetingDate}>{getFormattedDate()}</Text>
+          <Text style={styles.greetingText}>{getGreeting()}</Text>
         </View>
+        <Text style={styles.greetingDate}>{getFormattedDate()}</Text>
 
         {/* Off-white background for rest of content */}
-        <View style={{ backgroundColor: '#FAF8F3', marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28, paddingTop: 20 }}>
+        <View style={{ backgroundColor: '#FAF8F3', marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28, paddingTop: 24 }}>
 
         {/* Streak Banner */}
         {streak > 0 && (
           <View style={styles.streakBanner}>
             <Text style={styles.streakCount}>{streak}</Text>
-            <Text style={styles.streakText}>day streak</Text>
+            <Text style={styles.streakText}>{streak === 1 ? 'day' : 'days'} consistent</Text>
             {getStreakMilestone(streak) && (
               <Text style={styles.streakMilestone}>{getStreakMilestone(streak)}</Text>
             )}
@@ -460,9 +438,11 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel={checkedInToday ? 'Already checked in today' : 'Daily check in'}
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name={checkedInToday ? 'checkedIn' : 'checkIn'} />
             <Text style={styles.featureBtnLabel}>{checkedInToday ? 'Checked In' : 'Check In'}</Text>
+            {!checkedInToday && <View style={styles.featureDot} />}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
@@ -470,6 +450,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel="View all tips"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="tips" />
             <Text style={styles.featureBtnLabel}>All Tips</Text>
@@ -480,6 +461,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel="Breathing exercises"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="breathe" />
             <Text style={styles.featureBtnLabel}>Breathe</Text>
@@ -493,6 +475,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel="Open journal"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="journal" />
             <Text style={styles.featureBtnLabel}>Journal</Text>
@@ -503,6 +486,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel="Track hydration"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="hydration" />
             <Text style={styles.featureBtnLabel}>Hydration</Text>
@@ -513,6 +497,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel="View weekly report"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="report" />
             <Text style={styles.featureBtnLabel}>Report</Text>
@@ -520,8 +505,8 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         </View>
 
         {/* Tip Cards */}
-        <AnimatedTipCard label="Wealth tip" emoji="" tips={liveTips.wealth} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
-        <AnimatedTipCard label="Wellness tip" emoji="" tips={liveTips.wellness} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
+        <AnimatedTipCard label="wealth tip" tips={liveTips.wealth} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
+        <AnimatedTipCard label="wellness tip" tips={liveTips.wellness} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
 
         {/* Favorites toggle */}
         <TouchableOpacity
@@ -530,17 +515,18 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           activeOpacity={0.7}
         >
           <Text style={styles.favToggleText}>
-            {showFavs ? 'Hide Saved Tips' : `♥ Saved Tips (${favorites.length})`}
+            {showFavs ? 'Hide Saved Tips' : `Saved Tips (${favorites.length})`}
           </Text>
         </TouchableOpacity>
 
         {showFavs && <FavoritesPanel favorites={favorites} onClose={() => setShowFavs(false)} />}
 
         {/* Footer */}
+        <View style={styles.footerDivider} />
         <Text style={styles.footer}>Grow your wealth. Nourish your wellness.</Text>
-        <Text style={styles.copyright}>© {new Date().getFullYear()} Wellth</Text>
+        <Text style={styles.copyright}>{'\u00A9'} {new Date().getFullYear()} Wellth</Text>
 
-        </View>{/* end off-white wrapper */}
+        </View>
       </Animated.View>
     </ScrollView>
   );
@@ -566,71 +552,65 @@ const styles = StyleSheet.create({
   headerLogo: {
     width: 278, height: 84,
   },
-  header: {
-    fontSize: 52, fontWeight: '700', color: '#B8963E',
-    textAlign: 'center', letterSpacing: 12, marginBottom: 8,
-    fontFamily: serif,
-  },
-  divider: {
-    width: 60, height: 2, backgroundColor: '#D4B96A',
-    alignSelf: 'center', marginBottom: 28, borderRadius: 0,
-  },
 
-  greetingRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', marginBottom: 24 },
-  greetingText: { fontSize: 18, color: '#3A3A3A', fontFamily: bodySerif },
-  greetingDate: { fontSize: 18, color: '#3A3A3A', fontStyle: 'italic', fontWeight: '600', fontFamily: bodySerif },
+  greetingRow: { marginBottom: 4, marginTop: 4 },
+  greetingText: { fontSize: 22, color: '#3A3A3A', fontFamily: serif, fontWeight: '600', letterSpacing: 0.3 },
+  greetingDate: { fontSize: 15, color: '#8A7A5A', fontStyle: 'italic', fontFamily: bodySerif, marginBottom: 24 },
 
   // Streak banner
   streakBanner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 14, marginBottom: 20,
+    backgroundColor: '#FFF9EE', borderRadius: 0, padding: 16, marginBottom: 24,
     borderWidth: 1.5, borderColor: '#D4B96A', flexWrap: 'wrap',
   },
-  streakEmoji: { fontSize: 22, marginRight: 6 },
-  streakCount: { fontSize: 28, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginRight: 6 },
+  streakCount: { fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginRight: 8 },
   streakText: { fontSize: 16, color: '#8A7A5A', fontFamily: bodySerif },
-  streakMilestone: { width: '100%' as any, textAlign: 'center', fontSize: 14, color: '#B8963E', fontStyle: 'italic', fontFamily: bodySerif, marginTop: 4 },
+  streakMilestone: { width: '100%' as any, textAlign: 'center', fontSize: 14, color: '#B8963E', fontStyle: 'italic', fontFamily: bodySerif, marginTop: 6 },
 
   // Feature buttons
   featureGrid: { flexDirection: 'row', gap: 10, marginBottom: 12 },
   featureBtn: {
-    flex: 1, backgroundColor: 'transparent', borderRadius: 0, paddingVertical: 18,
-    alignItems: 'center', borderWidth: 0,
+    flex: 1, backgroundColor: '#FFFFFF', borderRadius: 0, paddingVertical: 18,
+    alignItems: 'center', borderWidth: 1, borderColor: '#EDE3CC',
   },
-  featureBtnHighlight: { backgroundColor: 'transparent' },
-  featureBtnEmoji: { fontSize: 26, marginBottom: 6 },
-  featureBtnLabel: { fontSize: 13, fontWeight: '600', color: '#8A7A5A', fontFamily: bodySerif },
+  featureBtnHighlight: { borderColor: '#D4B96A', borderWidth: 1.5 },
+  featureBtnLabel: { fontSize: 12, fontWeight: '600', color: '#8A7A5A', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 0.8 },
+  featureDot: {
+    width: 6, height: 6, backgroundColor: '#D4B96A', borderRadius: 0,
+    position: 'absolute' as any, top: 8, right: 8,
+  },
 
   // Tip card
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 0,
-    padding: 22,
+    padding: 24,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#EDE3CC',
     ...(Platform.OS === 'web'
-      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.10)' } as any
+      ? { boxShadow: '0 2px 16px rgba(184,150,62,0.08)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
   cardHeader: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14,
   },
   tipHeaderRow: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', flex: 1 },
-  tipLabel: { fontSize: 16, color: '#5A5A5A', fontFamily: bodySerif },
-  tipLabelBoldGold: { fontSize: 19, fontWeight: '700', fontStyle: 'italic', color: '#B8963E', fontFamily: serif },
-  tipIcon: { fontSize: 18 },
-  tipText: { fontSize: 17, lineHeight: 28, color: '#3A3A3A', fontFamily: bodySerif },
+  tipLabel: { fontSize: 14, color: '#8A7A5A', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.2 },
+  tipLabelBoldGold: { fontSize: 14, fontWeight: '700', color: '#B8963E', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.2 },
+  tipText: { fontSize: 17, lineHeight: 30, color: '#3A3A3A', fontFamily: bodySerif },
 
   // Tip navigation
   tipNav: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-    marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#F0E8D8',
+    marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: '#F0E8D8',
   },
   tipNavBtn: { paddingHorizontal: 16, paddingVertical: 4 },
   tipNavArrow: { fontSize: 24, color: '#B8963E', fontWeight: '600' },
-  tipNavCounter: { fontSize: 13, color: '#BBAA88', fontFamily: bodySerif, minWidth: 60, textAlign: 'center' },
+  tipNavCounter: { fontSize: 12, color: '#BBAA88', fontFamily: bodySerif, minWidth: 60, textAlign: 'center', letterSpacing: 1 },
 
   // Favorite heart
-  favHeart: { fontSize: 26, color: '#CCBBAA', paddingLeft: 12 },
+  favHeart: { fontSize: 24, color: '#CCBBAA', paddingLeft: 12 },
   favHeartActive: { color: '#D4536A' },
 
   // Fav toggle button
@@ -639,7 +619,7 @@ const styles = StyleSheet.create({
     borderRadius: 0, borderWidth: 1.5, borderColor: '#D4B96A',
     marginBottom: 12,
   },
-  favToggleText: { fontSize: 15, color: '#B8963E', fontWeight: '600', fontFamily: bodySerif },
+  favToggleText: { fontSize: 14, color: '#B8963E', fontWeight: '600', fontFamily: bodySerif, letterSpacing: 0.5 },
 
   // Fav panel
   favPanel: {
@@ -653,12 +633,13 @@ const styles = StyleSheet.create({
   favItem: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#EDE3CC' },
   favItemText: { fontSize: 15, lineHeight: 24, color: '#3A3A3A', fontFamily: bodySerif },
 
-  // (mascot styles removed — banned asset)
-
   // Footer
+  footerDivider: {
+    width: 40, height: 1, backgroundColor: '#D4B96A', alignSelf: 'center', marginTop: 16, marginBottom: 16,
+  },
   footer: {
     textAlign: 'center', fontSize: 13, color: '#BBAA88',
-    marginTop: 4, marginBottom: 4, fontStyle: 'italic', fontFamily: bodySerif,
+    marginBottom: 4, fontStyle: 'italic', fontFamily: bodySerif,
   },
   copyright: {
     textAlign: 'center', fontSize: 11, color: '#CCBBAA',
