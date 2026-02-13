@@ -18,15 +18,28 @@ const AppNavigator = () => {
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           transitionSpec: {
-            open: { animation: 'timing', config: { duration: 300 } },
-            close: { animation: 'timing', config: { duration: 250 } },
+            open: {
+              animation: 'timing',
+              config: { duration: 350 },
+            },
+            close: {
+              animation: 'timing',
+              config: { duration: 300 },
+            },
           },
           gestureEnabled: Platform.OS !== 'web',
+          cardStyle: { backgroundColor: '#FAF8F3' },
         }}
       >
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter,
+          }}
+        />
         <Stack.Screen name="CheckIn" component={CheckInScreen} />
         <Stack.Screen name="Tips" component={TipsScreen} />
         <Stack.Screen name="Breathing" component={BreathingScreen} />

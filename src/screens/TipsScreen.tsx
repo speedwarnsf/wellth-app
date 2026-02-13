@@ -137,18 +137,18 @@ const styles = StyleSheet.create({
   pillTextActive: { color: '#B8963E', fontWeight: '600' },
 
   card: {
-    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 22, marginBottom: 16,
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 28, marginBottom: 16,
     borderWidth: 1, borderColor: '#EDE3CC',
     ...(Platform.OS === 'web'
       ? { boxShadow: '0 2px 12px rgba(184,150,62,0.06)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   catTags: { flexDirection: 'row', gap: 8 },
-  catTag: { fontSize: 11, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1 },
+  catTag: { fontSize: 11, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.2 },
   favHeart: { fontSize: 22, color: '#CCBBAA', paddingLeft: 8 },
   favHeartActive: { color: '#D4536A' },
-  tipText: { fontSize: 16, lineHeight: 28, color: '#3A3A3A', fontFamily: bodySerif },
+  tipText: { fontSize: 19, lineHeight: 34, color: '#3A3A3A', fontFamily: serif, letterSpacing: 0.2 },
 });
 
 export default TipsScreen;

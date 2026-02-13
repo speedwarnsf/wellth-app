@@ -45,6 +45,17 @@ const getGreeting = () => {
   return 'Winding down';
 };
 
+const getPersonalGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 6) return 'The quiet hours are yours.';
+  if (h < 9) return 'A fresh start awaits.';
+  if (h < 12) return 'Make this morning count.';
+  if (h < 14) return 'Midday — pause and recalibrate.';
+  if (h < 17) return 'The afternoon is still full of possibility.';
+  if (h < 21) return 'Settle in. Reflect on today.';
+  return 'Let the day go gently.';
+};
+
 const getFormattedDate = () => {
   const now = new Date();
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -108,6 +119,13 @@ const injectCSS = () => {
       0%, 100% { box-shadow: 0 4px 30px rgba(184,150,62,0.15); }
       50% { box-shadow: 0 8px 50px rgba(184,150,62,0.3); }
     }
+    @keyframes streakPulse {
+      0%, 100% { transform: scaleX(1); }
+      50% { transform: scaleX(1.02); }
+    }
+    @keyframes streakFillIn {
+      from { width: 0%; }
+    }
     .tip-card { animation: fadeSlideIn 0.7s ease-out both; }
     .tip-card:nth-child(2) { animation-delay: 0.15s; }
     .fav-btn { transition: transform 0.2s ease, color 0.2s ease; }
@@ -155,6 +173,16 @@ const injectCSS = () => {
     }
     .feature-btn-web:active {
       transform: translateY(0);
+    }
+    .streak-bar-fill {
+      animation: streakFillIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: 0.3s;
+    }
+    .streak-segment {
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .streak-segment:hover {
+      transform: scaleY(1.15);
     }
     [data-testid="title"], div[style*="Playfair"] { text-wrap: balance; }
     * { text-wrap: balance; border-radius: 0 !important; }
@@ -237,6 +265,111 @@ const OwlVideoSection = () => {
         src={videos[currentVideo].src}
         style={{ width: '100%', display: 'block' }}
       />
+    </div>
+  );
+};
+
+// ── Streak Visualization ─────────────────────────────────
+const StreakVisualization = ({ streak }: { streak: number }) => {
+  if (streak <= 0) return null;
+
+  const milestone = getStreakMilestone(streak);
+  // Show last 7 days as segments
+  const segments = [];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const hasCheckIn = !!getCheckIn(key);
+    const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2);
+    segments.push({ key, hasCheckIn, dayLabel, isToday: i === 0 });
+  }
+
+  // Progress toward next milestone
+  const milestones = [7, 14, 21, 30, 60, 90, 365];
+  const nextMilestone = milestones.find(m => m > streak) || streak + 10;
+  const prevMilestone = milestones.filter(m => m <= streak).pop() || 0;
+  const progress = ((streak - prevMilestone) / (nextMilestone - prevMilestone)) * 100;
+
+  if (Platform.OS !== 'web') {
+    return (
+      <View style={styles.streakBanner}>
+        <Text style={styles.streakCount}>{streak}</Text>
+        <Text style={styles.streakText}>{streak === 1 ? 'day' : 'days'} consistent</Text>
+        {milestone && <Text style={styles.streakMilestone}>{milestone}</Text>}
+      </View>
+    );
+  }
+
+  return (
+    <div style={{
+      backgroundColor: '#FFFFFF', border: '1.5px solid #D4B96A', padding: '20px 24px',
+      marginBottom: 24,
+    }}>
+      {/* Top row: count + label */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 16 }}>
+        <span style={{
+          fontSize: 42, fontWeight: '700', color: '#B8963E',
+          fontFamily: '"Playfair Display", Georgia, serif', lineHeight: '1',
+        }}>{streak}</span>
+        <span style={{
+          fontSize: 15, color: '#8A7A5A',
+          fontFamily: 'Georgia, serif',
+        }}>{streak === 1 ? 'day' : 'days'} consistent</span>
+      </div>
+
+      {/* 7-day segments */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
+        {segments.map((seg) => (
+          <div key={seg.key} className="streak-segment" style={{
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+          }}>
+            <div style={{
+              width: '100%', height: 32,
+              backgroundColor: seg.hasCheckIn ? '#B8963E' : '#F0E8D8',
+              border: seg.isToday ? '2px solid #8A7030' : 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {seg.hasCheckIn && (
+                <span style={{ color: '#FFF', fontSize: 11, fontWeight: '700', fontFamily: 'Georgia, serif' }}>
+                  {'\u2713'}
+                </span>
+              )}
+            </div>
+            <span style={{
+              fontSize: 10, color: seg.isToday ? '#B8963E' : '#999',
+              fontFamily: 'Georgia, serif', textTransform: 'uppercase', letterSpacing: 0.5,
+              fontWeight: seg.isToday ? '700' : '400',
+            }}>{seg.dayLabel}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Progress bar toward next milestone */}
+      <div style={{ marginBottom: milestone ? 10 : 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+          <span style={{ fontSize: 10, color: '#BBAA88', fontFamily: 'Georgia, serif', textTransform: 'uppercase', letterSpacing: 1 }}>
+            Progress
+          </span>
+          <span style={{ fontSize: 10, color: '#BBAA88', fontFamily: 'Georgia, serif' }}>
+            {nextMilestone} day{nextMilestone !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <div style={{ height: 6, backgroundColor: '#F0E8D8', width: '100%' }}>
+          <div className="streak-bar-fill" style={{
+            height: '100%', backgroundColor: '#B8963E',
+            width: `${Math.min(progress, 100)}%`,
+          }} />
+        </div>
+      </div>
+
+      {milestone && (
+        <div style={{
+          fontSize: 14, color: '#B8963E', fontStyle: 'italic',
+          fontFamily: 'Georgia, serif', textAlign: 'center', marginTop: 10,
+        }}>{milestone}</div>
+      )}
     </div>
   );
 };
@@ -414,21 +547,14 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         <View style={styles.greetingRow}>
           <Text style={styles.greetingText}>{getGreeting()}</Text>
         </View>
+        <Text style={styles.greetingSubtext}>{getPersonalGreeting()}</Text>
         <Text style={styles.greetingDate}>{getFormattedDate()}</Text>
 
         {/* Off-white background for rest of content */}
         <View style={{ backgroundColor: '#FAF8F3', marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28, paddingTop: 24 }}>
 
-        {/* Streak Banner */}
-        {streak > 0 && (
-          <View style={styles.streakBanner}>
-            <Text style={styles.streakCount}>{streak}</Text>
-            <Text style={styles.streakText}>{streak === 1 ? 'day' : 'days'} consistent</Text>
-            {getStreakMilestone(streak) && (
-              <Text style={styles.streakMilestone}>{getStreakMilestone(streak)}</Text>
-            )}
-          </View>
-        )}
+        {/* Streak Visualization */}
+        <StreakVisualization streak={streak} />
 
         {/* Feature Buttons */}
         <View style={styles.featureGrid}>
@@ -553,11 +679,12 @@ const styles = StyleSheet.create({
     width: 278, height: 84,
   },
 
-  greetingRow: { marginBottom: 4, marginTop: 4 },
-  greetingText: { fontSize: 22, color: '#3A3A3A', fontFamily: serif, fontWeight: '600', letterSpacing: 0.3 },
-  greetingDate: { fontSize: 15, color: '#8A7A5A', fontStyle: 'italic', fontFamily: bodySerif, marginBottom: 24 },
+  greetingRow: { marginBottom: 2, marginTop: 4 },
+  greetingText: { fontSize: 24, color: '#3A3A3A', fontFamily: serif, fontWeight: '600', letterSpacing: 0.3 },
+  greetingSubtext: { fontSize: 16, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 4, lineHeight: 24 },
+  greetingDate: { fontSize: 14, color: '#BBAA88', fontFamily: bodySerif, marginBottom: 24, letterSpacing: 0.3 },
 
-  // Streak banner
+  // Streak banner (native fallback)
   streakBanner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     backgroundColor: '#FFF9EE', borderRadius: 0, padding: 16, marginBottom: 24,
@@ -584,7 +711,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 0,
-    padding: 24,
+    padding: 28,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: '#EDE3CC',
@@ -593,17 +720,17 @@ const styles = StyleSheet.create({
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
   cardHeader: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18,
   },
   tipHeaderRow: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', flex: 1 },
-  tipLabel: { fontSize: 14, color: '#8A7A5A', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.2 },
-  tipLabelBoldGold: { fontSize: 14, fontWeight: '700', color: '#B8963E', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.2 },
-  tipText: { fontSize: 17, lineHeight: 30, color: '#3A3A3A', fontFamily: bodySerif },
+  tipLabel: { fontSize: 12, color: '#8A7A5A', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.5 },
+  tipLabelBoldGold: { fontSize: 12, fontWeight: '700', color: '#B8963E', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.5 },
+  tipText: { fontSize: 19, lineHeight: 34, color: '#3A3A3A', fontFamily: serif, letterSpacing: 0.2 },
 
   // Tip navigation
   tipNav: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-    marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: '#F0E8D8',
+    marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#F0E8D8',
   },
   tipNavBtn: { paddingHorizontal: 16, paddingVertical: 4 },
   tipNavArrow: { fontSize: 24, color: '#B8963E', fontWeight: '600' },
@@ -631,7 +758,7 @@ const styles = StyleSheet.create({
   favPanelClose: { fontSize: 20, color: '#999', paddingLeft: 12 },
   favEmpty: { fontSize: 15, color: '#999', fontStyle: 'italic', fontFamily: bodySerif },
   favItem: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#EDE3CC' },
-  favItemText: { fontSize: 15, lineHeight: 24, color: '#3A3A3A', fontFamily: bodySerif },
+  favItemText: { fontSize: 16, lineHeight: 28, color: '#3A3A3A', fontFamily: serif },
 
   // Footer
   footerDivider: {

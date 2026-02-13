@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform,
   useWindowDimensions,
@@ -29,6 +29,57 @@ const WATER_FACTS = [
   "Dehydration is one of the most common causes of daytime fatigue.",
 ];
 
+// ── inject CSS for hydration animations ──────────────────
+const injectHydrationCSS = () => {
+  if (Platform.OS !== 'web') return;
+  if (document.getElementById('wellth-hydration-css')) return;
+  const style = document.createElement('style');
+  style.id = 'wellth-hydration-css';
+  style.textContent = `
+    @keyframes waterRise {
+      from { height: 0%; }
+    }
+    @keyframes waterRipple {
+      0% { transform: translateY(0); }
+      25% { transform: translateY(-3px); }
+      50% { transform: translateY(0); }
+      75% { transform: translateY(-1px); }
+      100% { transform: translateY(0); }
+    }
+    @keyframes dropSplash {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      50% { opacity: 0.8; transform: translateY(20px) scale(0.8); }
+      100% { opacity: 0; transform: translateY(40px) scale(0.5); }
+    }
+    @keyframes glassAppear {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .water-fill {
+      transition: height 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .water-surface {
+      animation: waterRipple 3s ease-in-out infinite;
+    }
+    .drop-splash {
+      animation: dropSplash 0.6s ease-out forwards;
+    }
+    .glass-count {
+      animation: glassAppear 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .hydration-btn {
+      transition: transform 0.15s ease, background-color 0.2s ease;
+    }
+    .hydration-btn:hover {
+      transform: translateY(-2px);
+    }
+    .hydration-btn:active {
+      transform: translateY(0);
+    }
+  `;
+  document.head.appendChild(style);
+};
+
 const HydrationScreen = ({ navigation }: { navigation: any }) => {
   const onBack = () => navigation.goBack();
   const { width } = useWindowDimensions();
@@ -39,8 +90,10 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
   const [timestamps, setTimestamps] = useState<number[]>([]);
   const [goal, setGoal] = useState(8);
   const [weekData, setWeekData] = useState<{ date: string; glasses: number }[]>([]);
+  const [showSplash, setShowSplash] = useState(false);
 
   useEffect(() => {
+    if (Platform.OS === 'web') injectHydrationCSS();
     const savedGoal = storage.getJSON<number>(HYDRATION_GOAL_KEY, 8);
     setGoal(savedGoal);
     const todayLog = storage.getJSON<HydrationLog | null>(`${HYDRATION_PREFIX}${today}`, null);
@@ -72,6 +125,9 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
     const log: HydrationLog = { glasses: newGlasses, timestamps: newTimestamps };
     storage.setJSON(`${HYDRATION_PREFIX}${today}`, log);
     loadWeek();
+    // Trigger splash animation
+    setShowSplash(true);
+    setTimeout(() => setShowSplash(false), 600);
   };
 
   const removeGlass = () => {
@@ -103,6 +159,75 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
     ? Math.round((Date.now() - timestamps[timestamps.length - 1]) / 60000)
     : null;
 
+  // Water fill visualization (web)
+  const renderWaterFill = () => {
+    if (Platform.OS !== 'web') {
+      return (
+        <View style={styles.progressCircle}>
+          <Text style={styles.progressCount}>{glasses}</Text>
+          <Text style={styles.progressLabel}>of {goal}</Text>
+        </View>
+      );
+    }
+
+    const fillHeight = Math.min(progressPercent, 100);
+    const waterColor = glasses >= goal ? '#7BA68A' : '#5B8FA8';
+    const waterColorLight = glasses >= goal ? '#A8D5B8' : '#8CBFD4';
+
+    return (
+      <div style={{
+        width: 200, height: 240, position: 'relative',
+        border: '2px solid #D4B96A', overflow: 'hidden',
+        margin: '0 auto',
+      }}>
+        {/* Water fill */}
+        <div className="water-fill" style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0,
+          height: `${fillHeight}%`,
+          background: `linear-gradient(to top, ${waterColor}, ${waterColorLight})`,
+        }}>
+          {/* Surface ripple */}
+          {fillHeight > 0 && fillHeight < 100 && (
+            <div className="water-surface" style={{
+              position: 'absolute', top: -3, left: -4, right: -4, height: 8,
+              background: `linear-gradient(to bottom, transparent, ${waterColorLight}40)`,
+            }} />
+          )}
+        </div>
+
+        {/* Drop splash */}
+        {showSplash && (
+          <div className="drop-splash" style={{
+            position: 'absolute', top: '20%', left: '50%', marginLeft: -4,
+            width: 8, height: 12,
+            backgroundColor: waterColor,
+            clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+          }} />
+        )}
+
+        {/* Count overlay */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexDirection: 'column', zIndex: 2,
+        }}>
+          <span className="glass-count" key={glasses} style={{
+            fontSize: 42, fontWeight: '700',
+            color: fillHeight > 50 ? '#FFFFFF' : '#B8963E',
+            fontFamily: '"Playfair Display", Georgia, serif',
+            lineHeight: '1', textShadow: fillHeight > 50 ? '0 1px 4px rgba(0,0,0,0.2)' : 'none',
+          }}>{glasses}</span>
+          <span style={{
+            fontSize: 13, letterSpacing: 1,
+            color: fillHeight > 50 ? 'rgba(255,255,255,0.85)' : '#8A7A5A',
+            fontFamily: 'Georgia, serif',
+            textShadow: fillHeight > 50 ? '0 1px 2px rgba(0,0,0,0.2)' : 'none',
+          }}>of {goal}</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]}>
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
@@ -114,31 +239,7 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
 
       {/* Progress Display */}
       <View style={styles.progressCard}>
-        {Platform.OS === 'web' ? (
-          <div style={{
-            width: 200, height: 200, position: 'relative' as const,
-            background: `conic-gradient(#B8963E ${progressPercent}%, #EDE3CC ${progressPercent}%)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto',
-          }}>
-            <div style={{
-              width: 168, height: 168, backgroundColor: '#FAF8F3',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
-            }}>
-              <span style={{ fontSize: 36, fontWeight: '700', color: '#B8963E', fontFamily: '"Playfair Display", Georgia, serif' }}>
-                {glasses}
-              </span>
-              <span style={{ fontSize: 13, color: '#8A7A5A', fontFamily: 'Georgia, serif', letterSpacing: 1 }}>
-                of {goal}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <View style={styles.progressCircle}>
-            <Text style={styles.progressCount}>{glasses}</Text>
-            <Text style={styles.progressLabel}>of {goal}</Text>
-          </View>
-        )}
+        {renderWaterFill()}
 
         {glasses >= goal && (
           <Text style={styles.goalReached}>Goal reached. Well done.</Text>
@@ -152,10 +253,14 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
 
         {/* Buttons */}
         <View style={styles.btnRow}>
-          <TouchableOpacity onPress={removeGlass} style={styles.actionBtn} activeOpacity={0.7}>
+          <TouchableOpacity onPress={removeGlass} style={styles.actionBtn} activeOpacity={0.7}
+            {...(Platform.OS === 'web' ? { className: 'hydration-btn' } as any : {})}
+          >
             <Text style={styles.actionBtnText}>{'\u2212'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={addGlass} style={[styles.actionBtn, styles.actionBtnPrimary]} activeOpacity={0.7}>
+          <TouchableOpacity onPress={addGlass} style={[styles.actionBtn, styles.actionBtnPrimary]} activeOpacity={0.7}
+            {...(Platform.OS === 'web' ? { className: 'hydration-btn' } as any : {})}
+          >
             <Text style={[styles.actionBtnText, { color: '#FFF' }]}>+ glass</Text>
           </TouchableOpacity>
         </View>
@@ -240,10 +345,10 @@ const styles = StyleSheet.create({
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
   progressCircle: {
-    width: 200, height: 200, borderRadius: 0, backgroundColor: '#FFF9EE',
-    borderWidth: 4, borderColor: '#D4B96A', alignItems: 'center', justifyContent: 'center',
+    width: 200, height: 240, borderRadius: 0, backgroundColor: '#FFF9EE',
+    borderWidth: 2, borderColor: '#D4B96A', alignItems: 'center', justifyContent: 'center',
   },
-  progressCount: { fontSize: 36, fontWeight: '700', color: '#B8963E', fontFamily: serif },
+  progressCount: { fontSize: 42, fontWeight: '700', color: '#B8963E', fontFamily: serif },
   progressLabel: { fontSize: 13, color: '#8A7A5A', fontFamily: bodySerif, letterSpacing: 1 },
 
   goalReached: { fontSize: 14, color: '#B8963E', fontFamily: bodySerif, fontStyle: 'italic', marginTop: 14, textAlign: 'center' },
@@ -293,7 +398,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#EDE3CC',
   },
   factLabel: { fontSize: 11, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 8 },
-  factText: { fontSize: 15, lineHeight: 24, color: '#3A3A3A', fontFamily: bodySerif },
+  factText: { fontSize: 16, lineHeight: 28, color: '#3A3A3A', fontFamily: serif },
 });
 
 export default HydrationScreen;
