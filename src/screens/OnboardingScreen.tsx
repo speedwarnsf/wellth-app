@@ -146,9 +146,9 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         {/* Video for steps that have one */}
         {Platform.OS === 'web' && current.video ? (
           <div style={{
-            width: '100vw', marginLeft: '-36px', marginRight: '-36px',
+            width: '100vw', marginLeft: 'calc(-50vw + 50%)',
             overflow: 'hidden', marginBottom: 20,
-            backgroundColor: '#FAF8F3',
+            backgroundColor: '#FFFFFF',
           } as any}>
             <video
               key={step}
@@ -166,7 +166,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         {isNotifStep && Platform.OS === 'web' && (
           <div style={{
             width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 28px', backgroundColor: '#FAF8F3',
+            margin: '0 auto 28px', backgroundColor: '#FFFFFF',
           }}>
             <img src="/icons/tips.png" width="64" height="64" alt="notifications" />
           </div>
@@ -224,7 +224,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, backgroundColor: '#FAF8F3', justifyContent: 'center', alignItems: 'center',
+    flex: 1, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center',
     paddingHorizontal: 36, paddingTop: 60, paddingBottom: 40, width: '100%',
   },
   progressBar: {
