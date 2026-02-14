@@ -146,12 +146,15 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         {/* Video for steps that have one */}
         {Platform.OS === 'web' && current.video ? (
           <div style={{
-            width: '100vw', marginLeft: 'calc(-50vw + 50%)',
+            marginLeft: -36, marginRight: -36,
             overflow: 'hidden', marginBottom: 20,
-            backgroundColor: '#FFFFFF',
+            position: 'relative',
           } as any}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, backgroundColor: '#FFFFFF', zIndex: 2 }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 4, backgroundColor: '#FFFFFF', zIndex: 2 }} />
             <video
               key={step}
+              ref={(el: HTMLVideoElement | null) => { if (el) el.play().catch(() => {}); }}
               src={current.video}
               autoPlay
               muted
