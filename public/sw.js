@@ -1,13 +1,22 @@
 /* Wellth Service Worker — Push Notifications for Daily Tips */
 
-const CACHE_NAME = 'wellth-v1';
+const CACHE_NAME = 'wellth-v3';
 
 self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.keys().then(names => Promise.all(
+      names.filter(n => n !== 'wellth-v3').map(n => caches.delete(n))
+    ))
+  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    caches.keys().then(names => Promise.all(
+      names.filter(n => n !== 'wellth-v3').map(n => caches.delete(n))
+    )).then(() => clients.claim())
+  );
 });
 
 self.addEventListener('push', (event) => {
