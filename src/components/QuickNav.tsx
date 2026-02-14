@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { screen: 'Hydration', label: 'Water' },
   { screen: 'Breathing', label: 'Breathe' },
   { screen: 'WeeklyReport', label: 'Report' },
+  { screen: 'Settings', label: 'Settings' },
 ];
 
 interface QuickNavProps {

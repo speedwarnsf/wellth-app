@@ -147,11 +147,20 @@ const CompletionState = ({ streak, mood }: { streak: number; mood: number }) => 
       }}>{getMessage()}</div>
 
       {milestone && (
-        <div style={{
-          marginTop: 16, padding: '10px 20px', backgroundColor: '#FFF9EE',
-          border: '1px solid #D4B96A', fontSize: 14, color: '#B8963E',
-          fontFamily: 'Georgia, serif', fontStyle: 'italic',
-        }}>{milestone}</div>
+        <div className="completion-message" style={{
+          marginTop: 20, padding: '18px 24px', backgroundColor: '#FFF9EE',
+          border: '1.5px solid #D4B96A', textAlign: 'center',
+        }}>
+          <div style={{
+            fontSize: 10, color: '#BBAA88', fontFamily: 'Georgia, serif',
+            textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 6,
+          }}>Milestone Reached</div>
+          <div style={{
+            fontSize: 17, color: '#B8963E',
+            fontFamily: '"Playfair Display", Georgia, serif', fontStyle: 'italic',
+            lineHeight: '1.6',
+          }}>{milestone}</div>
+        </div>
       )}
     </div>
   );
@@ -192,6 +201,11 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
     const newStreak = getStreak();
     setStreak(newStreak);
     setShowCompletion(true);
+
+    // Haptic feedback on mobile
+    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate([50, 30, 80]);
+    }
   };
 
   return (

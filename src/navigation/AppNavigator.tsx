@@ -9,6 +9,7 @@ import BreathingScreen from '../screens/BreathingScreen';
 import JournalScreen from '../screens/JournalScreen';
 import HydrationScreen from '../screens/HydrationScreen';
 import WeeklyReportScreen from '../screens/WeeklyReportScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -46,6 +47,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Journal" component={JournalScreen} />
         <Stack.Screen name="Hydration" component={HydrationScreen} />
         <Stack.Screen name="WeeklyReport" component={WeeklyReportScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

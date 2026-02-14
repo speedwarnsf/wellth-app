@@ -9,6 +9,7 @@ import OnboardingScreen, { hasOnboarded } from './OnboardingScreen';
 import {
   initNotifications,
 } from '../utils/notifications';
+import { getSettings } from './SettingsScreen';
 
 // ── Feature Icons ───────────────────────────────────────
 const iconPaths: Record<string, string> = {
@@ -183,6 +184,14 @@ const injectCSS = () => {
     }
     .streak-segment:hover {
       transform: scaleY(1.15);
+    }
+    @keyframes milestonePulse {
+      0% { border-color: #D4B96A; }
+      50% { border-color: #B8963E; box-shadow: 0 0 20px rgba(184,150,62,0.2); }
+      100% { border-color: #D4B96A; }
+    }
+    .milestone-celebration {
+      animation: milestonePulse 2s ease-in-out 3;
     }
     [data-testid="title"], div[style*="Playfair"] { text-wrap: balance; }
     * { text-wrap: balance; border-radius: 0 !important; }
@@ -369,13 +378,54 @@ const StreakVisualization = ({ streak }: { streak: number }) => {
       </div>
 
       {milestone && (
-        <div style={{
-          fontSize: 14, color: '#B8963E', fontStyle: 'italic',
-          fontFamily: 'Georgia, serif', textAlign: 'center', marginTop: 10,
-        }}>{milestone}</div>
+        <div className="milestone-celebration" style={{
+          marginTop: 14, padding: '16px 20px', backgroundColor: '#FFF9EE',
+          border: '1.5px solid #D4B96A', textAlign: 'center',
+        }}>
+          <div style={{
+            fontSize: 11, color: '#BBAA88', fontFamily: 'Georgia, serif',
+            textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 6,
+          }}>Milestone Reached</div>
+          <div style={{
+            fontSize: 16, color: '#B8963E', fontStyle: 'italic',
+            fontFamily: '"Playfair Display", Georgia, serif', lineHeight: '1.6',
+          }}>{milestone}</div>
+        </div>
       )}
     </div>
   );
+};
+
+// ── Daily Reflection Prompts ─────────────────────────────
+const WEALTH_REFLECTIONS: string[] = [
+  'What is one purchase you made recently that truly added value to your life?',
+  'Where does your money go when you are not paying attention?',
+  'What would financial peace look like for you, specifically?',
+  'If you could teach one money lesson to your younger self, what would it be?',
+  'What is one expense you could release without missing it?',
+  'How do you define "enough" — and has that definition changed?',
+  'What is the relationship between your spending and your happiness?',
+  'When did you last feel genuinely proud of a financial decision?',
+  'What fear drives your financial behavior the most?',
+  'If money were no concern, how would your daily life actually change?',
+];
+
+const WELLNESS_REFLECTIONS: string[] = [
+  'What did your body need today that you may have overlooked?',
+  'When did you last feel truly at peace — and what were you doing?',
+  'What habit serves you well that you rarely acknowledge?',
+  'How does your energy shift between morning and evening?',
+  'What would you do differently today if rest were your priority?',
+  'Who in your life makes you feel most like yourself?',
+  'What is one boundary you need to set — or reinforce?',
+  'When did you last do something purely for the joy of it?',
+  'What is your body telling you right now, in this moment?',
+  'How would you describe your relationship with stillness?',
+];
+
+const getReflection = (label: string, tipIdx: number): string => {
+  const reflections = label.includes('wealth') ? WEALTH_REFLECTIONS : WELLNESS_REFLECTIONS;
+  return reflections[tipIdx % reflections.length];
 };
 
 // ── AnimatedTipCard with cycling ─────────────────────────
@@ -435,6 +485,10 @@ const AnimatedTipCard = React.memo(({ label, tips, dayIndex, favorites, onToggle
 
       <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
         <Text style={styles.tipText}>{tip}</Text>
+        <View style={styles.reflectionBox}>
+          <Text style={styles.reflectionLabel}>Daily Reflection</Text>
+          <Text style={styles.reflectionText}>{getReflection(label, tipIdx)}</Text>
+        </View>
       </Animated.View>
 
       <View style={styles.tipNav}>
@@ -634,6 +688,18 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           </TouchableOpacity>
         </View>
 
+        {/* Settings Button */}
+        <TouchableOpacity
+          style={styles.settingsBtn}
+          onPress={() => navigation?.navigate('Settings')}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Settings"
+          {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+        >
+          <Text style={styles.settingsBtnText}>Settings</Text>
+        </TouchableOpacity>
+
         {/* Tip Cards */}
         <AnimatedTipCard label="wealth tip" tips={liveTips.wealth} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
         <AnimatedTipCard label="wellness tip" tips={liveTips.wellness} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
@@ -730,6 +796,30 @@ const styles = StyleSheet.create({
   tipLabel: { fontSize: 12, color: '#8A7A5A', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.5 },
   tipLabelBoldGold: { fontSize: 12, fontWeight: '700', color: '#B8963E', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.5 },
   tipText: { fontSize: 19, lineHeight: 34, color: '#3A3A3A', fontFamily: serif, letterSpacing: 0.2 },
+
+  // Daily Reflection
+  reflectionBox: {
+    marginTop: 20, paddingTop: 18, borderTopWidth: 1, borderTopColor: '#F0E8D8',
+  },
+  reflectionLabel: {
+    fontSize: 10, color: '#BBAA88', fontFamily: bodySerif,
+    textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 8,
+  },
+  reflectionText: {
+    fontSize: 16, lineHeight: 28, color: '#8A7A5A', fontFamily: serif,
+    fontStyle: 'italic',
+  },
+
+  // Settings button
+  settingsBtn: {
+    alignSelf: 'center', paddingVertical: 12, paddingHorizontal: 28,
+    borderWidth: 1, borderColor: '#EDE3CC', backgroundColor: '#FFFFFF',
+    marginBottom: 24,
+  },
+  settingsBtnText: {
+    fontSize: 12, fontWeight: '600', color: '#8A7A5A', fontFamily: bodySerif,
+    textTransform: 'uppercase' as any, letterSpacing: 0.8,
+  },
 
   // Tip navigation
   tipNav: {
