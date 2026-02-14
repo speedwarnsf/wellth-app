@@ -186,8 +186,12 @@ const injectCSS = () => {
     }
     [data-testid="title"], div[style*="Playfair"] { text-wrap: balance; }
     * { text-wrap: balance; border-radius: 0 !important; }
+    
+    /* Fix scrolling on web */
+    html, body { height: 100vh; }
+    body { overflow: auto !important; -webkit-font-smoothing: antialiased; }
+    #root { height: 100vh; min-height: 100vh; }
     html { scroll-behavior: smooth; }
-    body { -webkit-font-smoothing: antialiased; }
   `;
   document.head.appendChild(style);
 };
@@ -663,7 +667,7 @@ const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New R
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
 
 const styles = StyleSheet.create({
-  scrollView: { flex: 1, backgroundColor: '#FFFFFF' },
+  scrollView: Platform.OS === 'web' ? { minHeight: '100vh', backgroundColor: '#FFFFFF' } : { flex: 1, backgroundColor: '#FFFFFF' },
   container: {
     paddingHorizontal: 28,
     paddingTop: Platform.OS === 'web' ? 48 : 60,
