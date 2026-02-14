@@ -32,7 +32,7 @@ const STEPS = [
   },
   {
     title: 'Daily Wisdom',
-    body: 'Each day brings a fresh wealth tip and wellness tip — curated insights to help you make better decisions, one day at a time.',
+    body: 'Each day brings a fresh Wellth tip and wellness tip — curated insights to help you make better decisions, one day at a time.',
     video: '/videos/owl-looking.mp4',
     accent: '#D4B96A',
   },
@@ -146,8 +146,9 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         {/* Video for steps that have one */}
         {Platform.OS === 'web' && current.video ? (
           <div style={{
-            width: '100%', maxWidth: 280, aspectRatio: '1/1',
-            overflow: 'hidden', marginBottom: 28, alignSelf: 'center',
+            width: '100%', maxWidth: 220, aspectRatio: '1/1',
+            overflow: 'hidden', marginBottom: 20, alignSelf: 'center',
+            backgroundColor: '#FAF8F3',
           } as any}>
             <video
               key={step}
@@ -156,7 +157,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
               muted
               playsInline
               loop
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', mixBlendMode: 'multiply' }}
             />
           </div>
         ) as any : null}
@@ -224,7 +225,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1, backgroundColor: '#FAF8F3', justifyContent: 'center', alignItems: 'center',
-    paddingHorizontal: 36, width: '100%',
+    paddingHorizontal: 36, paddingTop: 60, paddingBottom: 40, width: '100%',
   },
   progressBar: {
     position: 'absolute', top: 0, left: 0, right: 0, height: 3,
@@ -241,13 +242,13 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase' as any, marginBottom: 12, fontFamily: bodySerif,
   },
   title: {
-    fontSize: 32, fontWeight: '700', color: '#B8963E', fontFamily: serif,
-    textAlign: 'center', marginBottom: 16,
+    fontSize: 28, fontWeight: '700', color: '#B8963E', fontFamily: serif,
+    textAlign: 'center', marginBottom: 12,
     ...(Platform.OS === 'web' ? { textWrap: 'balance' } as any : {}),
   },
   body: {
-    fontSize: 17, lineHeight: 28, color: '#5A5A5A', fontFamily: bodySerif,
-    textAlign: 'center', maxWidth: 360,
+    fontSize: 15, lineHeight: 24, color: '#5A5A5A', fontFamily: bodySerif,
+    textAlign: 'center', maxWidth: 320,
   },
   notifBtn: {
     backgroundColor: '#D4B96A', borderRadius: 0, paddingVertical: 14, paddingHorizontal: 36,
@@ -258,7 +259,7 @@ const styles = StyleSheet.create({
     fontSize: 15, color: '#B8963E', fontFamily: bodySerif, fontStyle: 'italic',
     marginTop: 20, textAlign: 'center',
   },
-  bottomSection: { position: 'absolute', bottom: 60, alignItems: 'center' },
+  bottomSection: { marginTop: 'auto' as any, alignItems: 'center', paddingTop: 20 },
   dots: { flexDirection: 'row', gap: 10, marginBottom: 28 },
   dot: { width: 10, height: 10, borderRadius: 0, backgroundColor: '#EDE3CC' },
   dotActive: { backgroundColor: '#B8963E', width: 28 },
