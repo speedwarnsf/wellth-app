@@ -21,8 +21,8 @@ const metaTags = `
     <meta property="og:title" content="Wellth — Grow your wealth. Nourish your wellness." />
     <meta property="og:description" content="Daily wealth & wellness tips to help you build a richer life — inside and out." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://wellth-mvp.vercel.app" />
-    <meta property="og:image" content="https://wellth-mvp.vercel.app/assets/src/assets/wellth-logo.68ee2022b770a54940c44ca1c39a28f8.png" />
+    <meta property="og:url" content="https://wellth-real.vercel.app" />
+    <meta property="og:image" content="https://wellth-real.vercel.app/assets/src/assets/wellth-logo.68ee2022b770a54940c44ca1c39a28f8.png" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Wellth" />
     <meta name="twitter:description" content="Daily wealth & wellness tips to help you build a richer life." />
