@@ -143,11 +143,12 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
       )}
 
       <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-        {/* Video for steps that have one */}
+        {/* Video for steps that have one — full bleed edge to edge, no box */}
         {Platform.OS === 'web' && current.video ? (
           <div style={{
-            marginLeft: -36, marginRight: -36,
-            overflow: 'hidden', marginBottom: 20,
+            width: '100vw', position: 'relative', left: '50%', right: '50%',
+            marginLeft: '-50vw', marginRight: '-50vw',
+            overflow: 'hidden', background: '#FFFFFF', marginBottom: 24,
           } as any}>
             <video
               key={step}
@@ -224,9 +225,9 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, justifyContent: 'center', alignItems: 'center',
+    flex: 1, justifyContent: 'flex-start', alignItems: 'center',
     paddingHorizontal: 36, paddingTop: 60, paddingBottom: 40, width: '100%',
-    ...(Platform.OS === 'web' ? { background: 'linear-gradient(to bottom, #FFFFFF 50%, #FAF8F3 50%)' } as any : { backgroundColor: '#FFFFFF' }),
+    backgroundColor: '#FFFFFF',
   },
   progressBar: {
     position: 'absolute', top: 0, left: 0, right: 0, height: 3,
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
   },
   skipBtn: { position: 'absolute', top: Platform.OS === 'web' ? 48 : 60, right: 28 },
   skipText: { fontSize: 16, color: '#BBAA88', fontFamily: bodySerif },
-  content: { alignItems: 'center', paddingBottom: 20 },
+  content: { alignItems: 'center', paddingBottom: 32, flex: 1, justifyContent: 'center' },
   stepIndicator: {
     fontSize: 13, fontWeight: '600', letterSpacing: 2,
     textTransform: 'uppercase' as any, marginBottom: 12, fontFamily: bodySerif,
