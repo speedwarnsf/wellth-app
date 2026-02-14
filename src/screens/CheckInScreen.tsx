@@ -40,6 +40,10 @@ const injectCheckInCSS = () => {
     @keyframes completionBarFill {
       from { width: 0%; }
     }
+    @keyframes pulse-gold {
+      0%, 100% { border-color: #D4B96A; box-shadow: 0 0 0 0 rgba(212,185,106,0.4); }
+      50% { border-color: #B8963E; box-shadow: 0 0 12px 4px rgba(184,150,62,0.3); }
+    }
     .completion-card {
       animation: completionReveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
@@ -150,6 +154,7 @@ const CompletionState = ({ streak, mood }: { streak: number; mood: number }) => 
         <div className="completion-message" style={{
           marginTop: 20, padding: '18px 24px', backgroundColor: '#FFF9EE',
           border: '1.5px solid #D4B96A', textAlign: 'center',
+          animation: 'pulse-gold 2s ease-in-out infinite',
         }}>
           <div style={{
             fontSize: 10, color: '#BBAA88', fontFamily: 'Georgia, serif',
