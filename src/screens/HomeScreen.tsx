@@ -428,7 +428,7 @@ const AnimatedTipCard = React.memo(({ label, tips, dayIndex, favorites, onToggle
           {...(Platform.OS === 'web' ? { className: `fav-btn ${isFav ? 'active' : ''}` } : {})}
         >
           <Text style={[styles.favHeart, isFav && styles.favHeartActive]}>
-            {isFav ? '\u2665' : '\u2661'}
+            {isFav ? 'SAVED' : 'SAVE'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -462,7 +462,7 @@ const FavoritesPanel = ({ favorites, onClose }: { favorites: string[]; onClose: 
         </TouchableOpacity>
       </View>
       {favorites.length === 0 ? (
-        <Text style={styles.favEmpty}>Tap the heart on any tip to save it here.</Text>
+        <Text style={styles.favEmpty}>Tap SAVE on any tip to keep it here.</Text>
       ) : (
         favorites.map((tip, i) => (
           <View key={i} style={styles.favItem}>
@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
   tipNavCounter: { fontSize: 12, color: '#BBAA88', fontFamily: bodySerif, minWidth: 60, textAlign: 'center', letterSpacing: 1 },
 
   // Favorite heart
-  favHeart: { fontSize: 24, color: '#CCBBAA', paddingLeft: 12 },
+  favHeart: { fontSize: 10, color: '#CCBBAA', paddingLeft: 12, letterSpacing: 1, fontWeight: '600' as const },
   favHeartActive: { color: '#D4536A' },
 
   // Fav toggle button

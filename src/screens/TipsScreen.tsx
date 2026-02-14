@@ -101,7 +101,7 @@ const TipsScreen = ({ navigation }: { navigation: any }) => {
               </View>
               <TouchableOpacity onPress={() => toggleFav(tip)} activeOpacity={0.7}>
                 <Text style={[styles.favHeart, isFav && styles.favHeartActive]}>
-                  {isFav ? '\u2665' : '\u2661'}
+                  {isFav ? 'SAVED' : 'SAVE'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   catTags: { flexDirection: 'row', gap: 8 },
   catTag: { fontSize: 11, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.2 },
-  favHeart: { fontSize: 22, color: '#CCBBAA', paddingLeft: 8 },
+  favHeart: { fontSize: 10, color: '#CCBBAA', paddingLeft: 8, letterSpacing: 1, fontWeight: '600' as any },
   favHeartActive: { color: '#D4536A' },
   tipText: { fontSize: 19, lineHeight: 34, color: '#3A3A3A', fontFamily: serif, letterSpacing: 0.2 },
 });
