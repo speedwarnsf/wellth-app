@@ -238,7 +238,7 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
 };
 
 // ── Owl Video Section (no box/container — full frame, edge to edge) ──
-const OwlVideoSection = () => {
+const OwlVideoSection = React.memo(() => {
   const [currentVideo, setCurrentVideo] = useState(0);
   const videos = [
     { src: '/videos/owl-looking.mp4', label: 'Owl is watching over your wealth' },
@@ -267,7 +267,7 @@ const OwlVideoSection = () => {
       />
     </div>
   );
-};
+});
 
 // ── Streak Visualization ─────────────────────────────────
 const StreakVisualization = ({ streak }: { streak: number }) => {
@@ -375,7 +375,7 @@ const StreakVisualization = ({ streak }: { streak: number }) => {
 };
 
 // ── AnimatedTipCard with cycling ─────────────────────────
-const AnimatedTipCard = ({ label, tips, dayIndex, favorites, onToggleFav }: {
+const AnimatedTipCard = React.memo(({ label, tips, dayIndex, favorites, onToggleFav }: {
   label: string; tips: string[]; dayIndex: number;
   favorites: string[]; onToggleFav: (tip: string) => void;
 }) => {
@@ -444,7 +444,7 @@ const AnimatedTipCard = ({ label, tips, dayIndex, favorites, onToggleFav }: {
       </View>
     </Animated.View>
   );
-};
+});
 
 // ── FavoritesPanel ───────────────────────────────────────
 const FavoritesPanel = ({ favorites, onClose }: { favorites: string[]; onClose: () => void }) => {
