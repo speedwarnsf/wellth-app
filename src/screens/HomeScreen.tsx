@@ -639,7 +639,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="tips" />
-            <Text style={styles.featureBtnLabel}>All Tips</Text>
+            <Text style={styles.featureBtnLabel}>More Tips</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
@@ -703,7 +703,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         </TouchableOpacity>
 
         {/* Tip Cards */}
-        <AnimatedTipCard label="wealth tip" tips={liveTips.wealth} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
+        <AnimatedTipCard label="Wellth tip" tips={liveTips.wealth} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
         <AnimatedTipCard label="wellness tip" tips={liveTips.wellness} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
 
         {/* Favorites toggle */}
