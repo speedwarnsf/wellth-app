@@ -30,6 +30,8 @@ const FeatureIcon = ({ name, size = 36 }: { name: string; size?: number }) => {
       src={src}
       width={size}
       height={size}
+      loading="lazy"
+      decoding="async"
       style={{ marginBottom: 6, opacity: 0.85 }}
       alt={name}
     /> as any

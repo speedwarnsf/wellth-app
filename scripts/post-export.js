@@ -28,7 +28,8 @@ const metaTags = `
     <meta name="twitter:description" content="Daily wealth & wellness tips to help you build a richer life." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />`;
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" /></noscript>`;
 
 html = html.replace('</title>', '</title>' + metaTags);
 
@@ -77,21 +78,29 @@ const scrollFix = `
         document.addEventListener('DOMContentLoaded', forceScroll);
         window.addEventListener('load', function() {
           forceScroll();
-          // Keep enforcing for 5 seconds after load (RNW hydration)
+          // Keep enforcing for 2 seconds after load (RNW hydration)
           var count = 0;
           var interval = setInterval(function() {
             forceScroll();
-            if (++count > 50) clearInterval(interval);
-          }, 100);
+            if (++count > 10) clearInterval(interval);
+          }, 200);
         });
         // MutationObserver to catch RNW style changes
         var observer = new MutationObserver(function(mutations) {
           forceScroll();
         });
-        observer.observe(document.documentElement, {
+        // Only observe root and body — not entire subtree (performance)
+        observer.observe(document.body, {
           attributes: true, attributeFilter: ['style'],
-          subtree: true, childList: true
+          childList: true
         });
+        var rootEl = document.getElementById('root');
+        if (rootEl) {
+          observer.observe(rootEl, {
+            attributes: true, attributeFilter: ['style'],
+            childList: true
+          });
+        }
       })();
     </script>`;
 html = html.replace('</head>', scrollFix + '\n  </head>');
