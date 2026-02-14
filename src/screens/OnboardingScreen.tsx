@@ -148,10 +148,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
           <div style={{
             marginLeft: -36, marginRight: -36,
             overflow: 'hidden', marginBottom: 20,
-            position: 'relative',
           } as any}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, backgroundColor: '#FFFFFF', zIndex: 2 }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 4, backgroundColor: '#FFFFFF', zIndex: 2 }} />
             <video
               key={step}
               ref={(el: HTMLVideoElement | null) => { if (el) el.play().catch(() => {}); }}
@@ -227,8 +224,9 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center',
+    flex: 1, justifyContent: 'center', alignItems: 'center',
     paddingHorizontal: 36, paddingTop: 60, paddingBottom: 40, width: '100%',
+    ...(Platform.OS === 'web' ? { background: 'linear-gradient(to bottom, #FFFFFF 50%, #FAF8F3 50%)' } as any : { backgroundColor: '#FFFFFF' }),
   },
   progressBar: {
     position: 'absolute', top: 0, left: 0, right: 0, height: 3,
