@@ -146,8 +146,8 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         {/* Video for steps that have one */}
         {Platform.OS === 'web' && current.video ? (
           <div style={{
-            width: '100%', maxWidth: 220, aspectRatio: '1/1',
-            overflow: 'hidden', marginBottom: 20, alignSelf: 'center',
+            width: '100vw', marginLeft: '-36px', marginRight: '-36px',
+            overflow: 'hidden', marginBottom: 20,
             backgroundColor: '#FAF8F3',
           } as any}>
             <video
@@ -157,7 +157,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
               muted
               playsInline
               loop
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', mixBlendMode: 'multiply' }}
+              style={{ width: '100%', display: 'block' }}
             />
           </div>
         ) as any : null}
@@ -166,7 +166,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         {isNotifStep && Platform.OS === 'web' && (
           <div style={{
             width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 28px', border: '2px solid #D4B96A', backgroundColor: '#FFF9EE',
+            margin: '0 auto 28px', backgroundColor: '#FAF8F3',
           }}>
             <img src="/icons/tips.png" width="64" height="64" alt="notifications" />
           </div>
