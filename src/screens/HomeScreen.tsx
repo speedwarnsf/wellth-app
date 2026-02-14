@@ -13,13 +13,13 @@ import { getSettings } from './SettingsScreen';
 
 // ── Feature Icons ───────────────────────────────────────
 const iconPaths: Record<string, string> = {
-  checkIn: '/icons/checkin.png',
-  checkedIn: '/icons/checkin.png',
-  tips: '/icons/tips.png',
-  breathe: '/icons/breathe.png',
-  journal: '/icons/journal.png',
-  hydration: '/icons/hydration.png',
-  report: '/icons/report.png',
+  checkIn: '/icons/checkin.png?v=3',
+  checkedIn: '/icons/checkin.png?v=3',
+  tips: '/icons/tips.png?v=3',
+  breathe: '/icons/breathe.png?v=3',
+  journal: '/icons/journal.png?v=3',
+  hydration: '/icons/hydration.png?v=3',
+  report: '/icons/report.png?v=3',
 };
 
 const FeatureIcon = ({ name, size = 36 }: { name: string; size?: number }) => {
