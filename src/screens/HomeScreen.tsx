@@ -571,6 +571,124 @@ const FavoritesPanel = ({ favorites, onClose }: { favorites: string[]; onClose: 
   );
 };
 
+// ── Weekly Motivational Quotes ───────────────────────────
+const WEEKLY_QUOTES = [
+  { text: 'The body benefits from movement, and the mind benefits from stillness.', author: 'Sakyong Mipham' },
+  { text: 'Take care of your body. It is the only place you have to live.', author: 'Jim Rohn' },
+  { text: 'Almost everything will work again if you unplug it for a few minutes, including you.', author: 'Anne Lamott' },
+  { text: 'Wellness is the complete integration of body, mind, and spirit.', author: 'Greg Anderson' },
+  { text: 'The greatest wealth is health.', author: 'Virgil' },
+  { text: 'Calm mind brings inner strength and self-confidence, so that is very important for good health.', author: 'Dalai Lama' },
+  { text: 'Happiness is the highest form of health.', author: 'Dalai Lama' },
+  { text: 'To keep the body in good health is a duty, otherwise we shall not be able to keep the mind strong and clear.', author: 'Buddha' },
+  { text: 'The mind and body are not separate. What affects one, affects the other.', author: 'Unknown' },
+  { text: 'Self-care is not self-indulgence, it is self-preservation.', author: 'Audre Lorde' },
+  { text: 'You cannot pour from an empty cup. Take care of yourself first.', author: 'Unknown' },
+  { text: 'Health is not valued till sickness comes.', author: 'Thomas Fuller' },
+  { text: 'Rest when you are weary. Refresh and renew yourself, your body, your mind, your spirit.', author: 'Ralph Marston' },
+  { text: 'Investing in yourself is the best investment you will ever make.', author: 'Robin Sharma' },
+  { text: 'A healthy outside starts from the inside.', author: 'Robert Urich' },
+  { text: 'What lies behind us and what lies before us are tiny matters compared to what lies within us.', author: 'Ralph Waldo Emerson' },
+  { text: 'The secret of health for both mind and body is not to mourn for the past, not to worry about the future, but to live the present moment wisely.', author: 'Buddha' },
+  { text: 'Your calm mind is the ultimate weapon against your challenges.', author: 'Bryant McGill' },
+  { text: 'Be patient with yourself. Nothing in nature blooms all year.', author: 'Unknown' },
+  { text: 'Sleep is the best meditation.', author: 'Dalai Lama' },
+  { text: 'When you own your breath, nobody can steal your peace.', author: 'Unknown' },
+  { text: 'It is health that is real wealth and not pieces of gold and silver.', author: 'Mahatma Gandhi' },
+  { text: 'Nourishing yourself in a way that helps you blossom in the direction you want to go is attainable, and you are worth the effort.', author: 'Deborah Day' },
+  { text: 'Life is not merely to be alive, but to be well.', author: 'Marcus Valerius Martial' },
+  { text: 'The only way to keep your health is to eat what you do not want, drink what you do not like, and do what you would rather not.', author: 'Mark Twain' },
+  { text: 'An early morning walk is a blessing for the whole day.', author: 'Henry David Thoreau' },
+  { text: 'He who has health has hope, and he who has hope has everything.', author: 'Thomas Carlyle' },
+  { text: 'Every day is a chance to begin again. Do not focus on the failures of yesterday, start today with positive thoughts and expectations.', author: 'Catherine Pulsifer' },
+  { text: 'Physical fitness is the first requisite of happiness.', author: 'Joseph Pilates' },
+  { text: 'Water is the driving force of all nature.', author: 'Leonardo da Vinci' },
+  { text: 'The wish for healing has always been half of health.', author: 'Lucius Annaeus Seneca' },
+  { text: 'To ensure good health: eat lightly, breathe deeply, live moderately, cultivate cheerfulness, and maintain an interest in life.', author: 'William Londen' },
+  { text: 'The only person you are destined to become is the person you decide to be.', author: 'Ralph Waldo Emerson' },
+  { text: 'Your body hears everything your mind says.', author: 'Naomi Judd' },
+  { text: 'Time and health are two precious assets that we do not recognize and appreciate until they have been depleted.', author: 'Denis Waitley' },
+  { text: 'Keeping your body healthy is an expression of gratitude to the whole cosmos.', author: 'Thich Nhat Hanh' },
+  { text: 'A good laugh and a long sleep are the best cures in the doctor is book.', author: 'Irish Proverb' },
+  { text: 'Health is a state of complete harmony of the body, mind and spirit.', author: 'B.K.S. Iyengar' },
+  { text: 'Looking after my health today gives me a better hope for tomorrow.', author: 'Anne Wilson Schaef' },
+  { text: 'In the midst of movement and chaos, keep stillness inside of you.', author: 'Deepak Chopra' },
+  { text: 'Tension is who you think you should be. Relaxation is who you are.', author: 'Chinese Proverb' },
+  { text: 'Movement is a medicine for creating change in a person is physical, emotional, and mental states.', author: 'Carol Welch' },
+  { text: 'A fit body, a calm mind, a house full of love. These things cannot be bought. They must be earned.', author: 'Naval Ravikant' },
+  { text: 'Do something today that your future self will thank you for.', author: 'Sean Patrick Flanery' },
+  { text: 'You are what you do, not what you say you will do.', author: 'Carl Jung' },
+  { text: 'Create healthy habits, not restrictions.', author: 'Unknown' },
+  { text: 'The groundwork for all happiness is good health.', author: 'Leigh Hunt' },
+  { text: 'Peace comes from within. Do not seek it without.', author: 'Buddha' },
+  { text: 'What we achieve inwardly will change outer reality.', author: 'Plutarch' },
+  { text: 'One small positive thought in the morning can change your whole day.', author: 'Dalai Lama' },
+  { text: 'True silence is the rest of the mind, and is to the spirit what sleep is to the body, nourishment and refreshment.', author: 'William Penn' },
+  { text: 'Gratitude turns what we have into enough.', author: 'Melody Beattie' },
+];
+
+const getWeeklyQuote = () => {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const weekNumber = Math.floor((now.getTime() - startOfYear.getTime()) / (7 * 864e5));
+  return WEEKLY_QUOTES[weekNumber % WEEKLY_QUOTES.length];
+};
+
+const WeeklyQuote = () => {
+  const quote = getWeeklyQuote();
+  return (
+    <View style={{
+      backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: '#D4B96A',
+      padding: 24, marginBottom: 16, alignItems: 'center',
+    }}>
+      <Text style={{
+        fontSize: 10, color: '#BBAA88', fontFamily: bodySerif,
+        textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 12,
+      }}>Quote of the Week</Text>
+      <Text style={{
+        fontSize: 17, lineHeight: 30, color: '#3A3A3A', fontFamily: serif,
+        fontStyle: 'italic', textAlign: 'center', marginBottom: 10,
+      }}>{quote.text}</Text>
+      <Text style={{
+        fontSize: 12, color: '#BBAA88', fontFamily: bodySerif,
+      }}>-- {quote.author}</Text>
+    </View>
+  );
+};
+
+// ── Evening Prompt Banner ────────────────────────────────
+const EveningPromptBanner = ({ navigation }: { navigation?: any }) => {
+  const h = new Date().getHours();
+  if (h < 17 && h >= 5) return null; // Only show in evening/night
+
+  const today = new Date().toISOString().slice(0, 10);
+  const alreadyReflected = storage.getJSON(`wellth_evening_${today}`, null);
+  if (alreadyReflected) return null;
+
+  return (
+    <TouchableOpacity
+      onPress={() => navigation?.navigate('EveningReflection')}
+      activeOpacity={0.7}
+      style={{
+        backgroundColor: '#FFF9EE', borderWidth: 1.5, borderColor: '#D4B96A',
+        padding: 20, marginBottom: 16,
+      }}
+      {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+    >
+      <Text style={{
+        fontSize: 10, color: '#BBAA88', fontFamily: bodySerif,
+        textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 8,
+      }}>Evening Check-In</Text>
+      <Text style={{
+        fontSize: 17, color: '#3A3A3A', fontFamily: serif, fontStyle: 'italic', lineHeight: 26,
+      }}>How was your day?</Text>
+      <Text style={{
+        fontSize: 12, color: '#B8963E', fontFamily: bodySerif, marginTop: 8,
+      }}>Tap to reflect {'\u2192'}</Text>
+    </TouchableOpacity>
+  );
+};
+
 // ── Daily Affirmations ───────────────────────────────────
 const AFFIRMATIONS = [
   'You are building something meaningful, one day at a time.',
@@ -894,6 +1012,12 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           </TouchableOpacity>
         )}
 
+        {/* Evening Prompt Banner (shows after 5pm) */}
+        <EveningPromptBanner navigation={navigation} />
+
+        {/* Weekly Motivational Quote */}
+        <WeeklyQuote />
+
         {/* Daily Affirmation */}
         <DailyAffirmation dayIndex={dayIndex} />
 
@@ -997,6 +1121,54 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           >
             <FeatureIcon name="tips" />
             <Text style={styles.featureBtnLabel}>Tips</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Row 4: Social & Engagement */}
+        <View style={styles.featureGrid}>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('WellnessJourney')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+          >
+            <FeatureIcon name="report" />
+            <Text style={styles.featureBtnLabel}>Journey</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('Achievements')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+          >
+            <FeatureIcon name="tips" />
+            <Text style={styles.featureBtnLabel}>Badges</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('ShareStreak')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+          >
+            <FeatureIcon name="report" />
+            <Text style={styles.featureBtnLabel}>Share</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Row 5: Evening Reflection */}
+        <View style={[styles.featureGrid, { marginBottom: 20 }]}>
+          <TouchableOpacity
+            style={[styles.featureBtn, { flex: 1 }]}
+            onPress={() => navigation?.navigate('EveningReflection')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+          >
+            <FeatureIcon name="journal" />
+            <Text style={styles.featureBtnLabel}>Evening Reflection</Text>
           </TouchableOpacity>
         </View>
 

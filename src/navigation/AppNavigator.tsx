@@ -13,6 +13,10 @@ import SettingsScreen from '../screens/SettingsScreen';
 import MoodHistoryScreen from '../screens/MoodHistoryScreen';
 import GratitudeScreen from '../screens/GratitudeScreen';
 import SleepScreen from '../screens/SleepScreen';
+import ShareStreakScreen from '../screens/ShareStreakScreen';
+import WellnessJourneyScreen from '../screens/WellnessJourneyScreen';
+import AchievementsScreen from '../screens/AchievementsScreen';
+import EveningReflectionScreen from '../screens/EveningReflectionScreen';
 
 const Stack = createStackNavigator();
 
@@ -54,6 +58,10 @@ const AppNavigator = () => {
         <Stack.Screen name="MoodHistory" component={MoodHistoryScreen} />
         <Stack.Screen name="Gratitude" component={GratitudeScreen} />
         <Stack.Screen name="Sleep" component={SleepScreen} />
+        <Stack.Screen name="ShareStreak" component={ShareStreakScreen} />
+        <Stack.Screen name="WellnessJourney" component={WellnessJourneyScreen} />
+        <Stack.Screen name="Achievements" component={AchievementsScreen} />
+        <Stack.Screen name="EveningReflection" component={EveningReflectionScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
