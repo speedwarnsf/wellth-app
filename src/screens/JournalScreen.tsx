@@ -267,8 +267,8 @@ const styles = StyleSheet.create({
   promptText: { fontSize: 14, color: '#BBAA88', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 14 },
 
   textInput: {
-    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 20, fontSize: 16, lineHeight: 28,
-    fontFamily: bodySerif, color: '#3A3A3A', minHeight: 160, textAlignVertical: 'top',
+    backgroundColor: '#FFFFFF', borderRadius: 0, padding: 22, fontSize: 17, lineHeight: 30,
+    fontFamily: bodySerif, color: '#3A3A3A', minHeight: 200, textAlignVertical: 'top',
     borderWidth: 1, borderColor: '#EDE3CC',
     ...(Platform.OS === 'web' ? { outlineColor: '#D4B96A' } as any : {}),
   },

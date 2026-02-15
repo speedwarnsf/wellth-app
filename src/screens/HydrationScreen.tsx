@@ -356,10 +356,10 @@ const styles = StyleSheet.create({
 
   btnRow: { flexDirection: 'row', gap: 12, marginTop: 22, alignItems: 'center', justifyContent: 'center' },
   actionBtn: {
-    height: 48, paddingHorizontal: 24, borderWidth: 1.5, borderColor: '#D4B96A',
+    height: 52, paddingHorizontal: 28, borderWidth: 1.5, borderColor: '#D4B96A',
     alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF',
   },
-  actionBtnPrimary: { backgroundColor: '#B8963E', borderColor: '#B8963E', paddingHorizontal: 32 },
+  actionBtnPrimary: { backgroundColor: '#B8963E', borderColor: '#B8963E', paddingHorizontal: 36 },
   actionBtnText: { fontSize: 16, fontWeight: '700', color: '#B8963E', fontFamily: bodySerif },
 
   reminderCard: {

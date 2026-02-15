@@ -149,7 +149,9 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
             width: '100vw', position: 'relative', left: '50%', right: '50%',
             marginLeft: '-50vw', marginRight: '-50vw',
             overflow: 'hidden', marginBottom: 24,
-            background: 'transparent',
+            background: '#FFFFFF',
+            lineHeight: 0,
+            fontSize: 0,
           } as any}>
             <video
               key={step}
@@ -159,7 +161,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
               muted
               playsInline
               loop
-              style={{ width: '100%', display: 'block' }}
+              style={{ width: '100%', display: 'block', verticalAlign: 'bottom' }}
             />
           </div>
         ) as any : null}

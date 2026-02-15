@@ -245,7 +245,7 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
         markSplashSeen();
         onDone();
       }, 800);
-    }, 4000);
+    }, 2800);
     return () => clearTimeout(timer);
   }, [onDone]);
 
@@ -299,7 +299,9 @@ const OwlVideoSection = React.memo(() => {
       width: '100vw', position: 'relative', left: '50%', right: '50%',
       marginLeft: '-50vw', marginRight: '-50vw',
       overflow: 'hidden',
-      background: 'transparent',
+      background: '#FFFFFF',
+      lineHeight: 0,
+      fontSize: 0,
     } as any}>
       <video
         key={videos[currentVideo].src}
@@ -308,7 +310,7 @@ const OwlVideoSection = React.memo(() => {
         playsInline
         loop
         src={videos[currentVideo].src}
-        style={{ width: '100%', display: 'block' }}
+        style={{ width: '100%', display: 'block', verticalAlign: 'bottom' }}
       />
     </div>
   );
@@ -568,7 +570,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
 
   const [favorites, setFavorites] = useState<string[]>(loadFavorites);
   const [showFavs, setShowFavs] = useState(false);
-  const [showSplash, setShowSplash] = useState(false);
+  const [showSplash, setShowSplash] = useState(() => !hasSplashBeenSeen() && hasOnboarded());
   const [showOnboarding, setShowOnboarding] = useState(!hasOnboarded());
   const [streak, setStreak] = useState(0);
   const [checkedInToday, setCheckedInToday] = useState(false);
@@ -641,7 +643,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         <Text style={styles.greetingDate}>{getFormattedDate()}</Text>
 
         {/* Off-white background for rest of content */}
-        <View style={{ backgroundColor: '#FAF8F3', marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28, paddingTop: 24 }}>
+        <View style={{ backgroundColor: '#FAF8F3', marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28, paddingTop: 24, marginTop: 8 }}>
 
         {/* Streak Visualization */}
         <StreakVisualization streak={streak} />

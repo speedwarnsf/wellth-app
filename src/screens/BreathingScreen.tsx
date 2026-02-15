@@ -37,12 +37,12 @@ const injectBreathingCSS = () => {
       50% { box-shadow: 0 0 60px rgba(184,150,62,0.35); }
     }
     .breathing-circle {
-      transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 4s ease-in-out;
+      transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 4s ease-in-out, background-color 4s ease;
     }
-    .breathing-circle.inhale { transform: scale(1.35); box-shadow: 0 0 60px rgba(184,150,62,0.35); }
-    .breathing-circle.hold { transform: scale(1.35); box-shadow: 0 0 40px rgba(184,150,62,0.25); }
-    .breathing-circle.exhale { transform: scale(1); box-shadow: 0 0 20px rgba(184,150,62,0.12); }
-    .breathing-circle.pause { transform: scale(1); box-shadow: 0 0 20px rgba(184,150,62,0.12); }
+    .breathing-circle.inhale { transform: scale(1.35); box-shadow: 0 0 60px rgba(184,150,62,0.35); background-color: #FFF9EE; }
+    .breathing-circle.hold { transform: scale(1.35); box-shadow: 0 0 40px rgba(184,150,62,0.25); background-color: #FFF5E0; }
+    .breathing-circle.exhale { transform: scale(1); box-shadow: 0 0 20px rgba(184,150,62,0.12); background-color: #FFF9EE; }
+    .breathing-circle.pause { transform: scale(1); box-shadow: 0 0 10px rgba(184,150,62,0.08); background-color: #FFFDF8; }
     .breathing-message {
       transition: opacity 0.8s ease;
     }
