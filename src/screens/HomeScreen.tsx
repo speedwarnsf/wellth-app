@@ -426,7 +426,7 @@ const WELLNESS_REFLECTIONS: string[] = [
 ];
 
 const getReflection = (label: string, tipIdx: number): string => {
-  const reflections = label.includes('wealth') ? WEALTH_REFLECTIONS : WELLNESS_REFLECTIONS;
+  const reflections = label.toLowerCase().includes('wellth') || label.toLowerCase().includes('wealth') ? WEALTH_REFLECTIONS : WELLNESS_REFLECTIONS;
   return reflections[tipIdx % reflections.length];
 };
 
