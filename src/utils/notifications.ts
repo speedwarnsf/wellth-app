@@ -59,7 +59,7 @@ const getDailyTip = (): { title: string; body: string } => {
   const tips = isWealth ? getWealthTips() : getWellnessTips();
   const tip = tips[dayIndex % tips.length];
   return {
-    title: isWealth ? 'Wellth — Daily Wealth Tip' : 'Wellth — Daily Wellness Tip',
+    title: isWealth ? 'Wellth — Daily Wellth Tip' : 'Wellth — Daily Wellness Tip',
     body: tip.length > 140 ? tip.slice(0, 137) + '...' : tip,
   };
 };

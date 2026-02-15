@@ -118,10 +118,7 @@ const injectCSS = () => {
       from { opacity: 0; transform: scale(0.8) translateY(20px); }
       to   { opacity: 1; transform: scale(1) translateY(0); }
     }
-    @keyframes videoGlow {
-      0%, 100% { box-shadow: 0 4px 30px rgba(184,150,62,0.15); }
-      50% { box-shadow: 0 8px 50px rgba(184,150,62,0.3); }
-    }
+    /* videoGlow removed — owl videos are full frame, no effects */
     @keyframes streakPulse {
       0%, 100% { transform: scaleX(1); }
       50% { transform: scaleX(1.02); }
@@ -154,7 +151,6 @@ const injectCSS = () => {
     }
     .owl-video-container {
       overflow: hidden;
-      animation: videoGlow 4s ease-in-out infinite;
       cursor: pointer; position: relative;
     }
     .owl-video-container video {
@@ -268,9 +264,11 @@ const OwlVideoSection = React.memo(() => {
   if (Platform.OS !== 'web') return null;
 
   return (
-    <div onClick={cycleVideo} style={{ marginBottom: 24, marginLeft: -28, marginRight: -28, position: 'relative' as const, overflow: 'hidden' }}>
-      <div style={{ position: 'absolute' as const, top: 0, left: 0, right: 0, height: 4, backgroundColor: '#FFFFFF', zIndex: 2 }} />
-      <div style={{ position: 'absolute' as const, bottom: 0, left: 0, right: 0, height: 4, backgroundColor: '#FFFFFF', zIndex: 2 }} />
+    <div onClick={cycleVideo} style={{
+      width: '100vw', position: 'relative', left: '50%', right: '50%',
+      marginLeft: '-50vw', marginRight: '-50vw',
+      overflow: 'hidden', marginBottom: 24,
+    } as any}>
       <video
         key={videos[currentVideo].src}
         autoPlay
@@ -635,7 +633,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('Tips')}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="View all tips"
+            accessibilityLabel="More tips"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="tips" />
