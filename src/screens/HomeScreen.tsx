@@ -199,6 +199,37 @@ const injectCSS = () => {
     body { overflow: auto !important; -webkit-font-smoothing: antialiased; }
     #root { height: 100vh; min-height: 100vh; }
     html { scroll-behavior: smooth; }
+
+    /* Kill hairlines around videos */
+    video { vertical-align: bottom; }
+    .owl-video-container video, div video {
+      vertical-align: bottom;
+      image-rendering: auto;
+    }
+
+    /* Better text rendering */
+    h1, h2, h3, p, span, div {
+      text-rendering: optimizeLegibility;
+    }
+
+    /* Smooth scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #D4B96A; }
+    ::-webkit-scrollbar-thumb:hover { background: #B8963E; }
+
+    /* Focus states for accessibility */
+    button:focus-visible, [role="button"]:focus-visible {
+      outline: 2px solid #B8963E;
+      outline-offset: 2px;
+    }
+
+    /* Input focus */
+    textarea:focus, input:focus {
+      outline: none;
+      border-color: #D4B96A !important;
+      box-shadow: 0 0 0 3px rgba(212,185,106,0.15);
+    }
   `;
   document.head.appendChild(style);
 };
@@ -267,8 +298,8 @@ const OwlVideoSection = React.memo(() => {
     <div onClick={cycleVideo} style={{
       width: '100vw', position: 'relative', left: '50%', right: '50%',
       marginLeft: '-50vw', marginRight: '-50vw',
-      overflow: 'hidden', marginBottom: -1, marginTop: -1,
-      background: '#FFFFFF',
+      overflow: 'hidden',
+      background: 'transparent',
     } as any}>
       <video
         key={videos[currentVideo].src}
@@ -277,7 +308,7 @@ const OwlVideoSection = React.memo(() => {
         playsInline
         loop
         src={videos[currentVideo].src}
-        style={{ width: '100%', display: 'block', margin: '-1px 0' }}
+        style={{ width: '100%', display: 'block' }}
       />
     </div>
   );

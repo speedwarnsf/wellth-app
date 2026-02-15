@@ -6,6 +6,7 @@ const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : 
 const NAV_ITEMS = [
   { screen: 'Home', label: 'Home' },
   { screen: 'CheckIn', label: 'Check In' },
+  { screen: 'Tips', label: 'Tips' },
   { screen: 'Journal', label: 'Journal' },
   { screen: 'Hydration', label: 'Water' },
   { screen: 'Breathing', label: 'Breathe' },

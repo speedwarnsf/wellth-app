@@ -143,11 +143,13 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
       )}
 
       <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-        {/* Video — full width, no padding */}
+        {/* Video — full width, edge to edge, no hairlines */}
         {Platform.OS === 'web' && current.video ? (
           <div style={{
-            width: '100%', overflow: 'hidden', marginBottom: 24,
-            background: '#FFFFFF',
+            width: '100vw', position: 'relative', left: '50%', right: '50%',
+            marginLeft: '-50vw', marginRight: '-50vw',
+            overflow: 'hidden', marginBottom: 24,
+            background: 'transparent',
           } as any}>
             <video
               key={step}
@@ -157,7 +159,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
               muted
               playsInline
               loop
-              style={{ width: '100%', display: 'block', margin: '-1px 0' }}
+              style={{ width: '100%', display: 'block' }}
             />
           </div>
         ) as any : null}
@@ -231,6 +233,7 @@ const styles = StyleSheet.create({
     flex: 1, justifyContent: 'flex-start', alignItems: 'center',
     paddingHorizontal: 0, paddingTop: 60, paddingBottom: 40, width: '100%',
     backgroundColor: '#FFFFFF',
+    ...(Platform.OS === 'web' ? { overflow: 'hidden' } as any : {}),
   },
   progressBar: {
     position: 'absolute', top: 0, left: 0, right: 0, height: 3,
