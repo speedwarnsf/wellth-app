@@ -7,6 +7,7 @@ import { wealthTips, wellnessTips, fetchTips, getWealthTips, getWellnessTips } f
 import { getStreak, getStreakMilestone, getCheckIn, todayKey, getWeekDates, CheckInData } from '../utils/storage';
 import storage from '../utils/storage';
 import OnboardingScreen, { hasOnboarded } from './OnboardingScreen';
+import TutorialOverlay, { hasTutorialCompleted, markTutorialDone } from '../components/TutorialOverlay';
 import Confetti from '../components/Confetti';
 import {
   initNotifications,
@@ -901,6 +902,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   const [showFavs, setShowFavs] = useState(false);
   const [showSplash, setShowSplash] = useState(() => !hasSplashBeenSeen() && hasOnboarded());
   const [showOnboarding, setShowOnboarding] = useState(!hasOnboarded());
+  const [showTutorial, setShowTutorial] = useState(false);
   const [streak, setStreak] = useState(0);
   const [checkedInToday, setCheckedInToday] = useState(false);
   const [liveTips, setLiveTips] = useState<{ wealth: string[]; wellness: string[] }>({ wealth: wealthTips, wellness: wellnessTips });
@@ -954,12 +956,16 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   }
 
   if (showOnboarding) {
-    return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />;
+    return <OnboardingScreen onComplete={() => {
+      setShowOnboarding(false);
+      if (!hasTutorialCompleted()) setShowTutorial(true);
+    }} />;
   }
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]} accessibilityLabel="Wellth home screen">
       <Confetti active={showConfetti} />
+      {showTutorial && <TutorialOverlay onComplete={() => setShowTutorial(false)} />}
       <Animated.View style={Platform.OS !== 'web' ? { opacity: fadeAnim, transform: [{ translateY: slideAnim }] } : undefined}>
 
         {/* Header */}
