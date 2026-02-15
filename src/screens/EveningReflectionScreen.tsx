@@ -82,14 +82,14 @@ const EveningReflectionScreen = ({ navigation }: { navigation?: any }) => {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#FFFFFF' }} contentContainerStyle={{ maxWidth, alignSelf: 'center', width: '100%', paddingHorizontal: 28, paddingTop: 48, paddingBottom: 40 }}>
-      <TouchableOpacity onPress={() => navigation?.goBack()} style={{ marginBottom: 24 }}>
+      <TouchableOpacity onPress={() => navigation?.goBack()} style={{ marginBottom: 24 }} accessibilityRole="button" accessibilityLabel="Go back">
         <Text style={{ fontSize: 14, color: '#B8963E', fontFamily: bodySerif }}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
       <Text style={{ fontSize: 10, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 8 }}>
         Evening Reflection
       </Text>
-      <Text style={{ fontSize: 24, color: '#3A3A3A', fontFamily: serif, fontWeight: '600', marginBottom: 8 }}>
+      <Text style={{ fontSize: 24, color: '#3A3A3A', fontFamily: serif, fontWeight: '600', marginBottom: 8 }} accessibilityRole="header" aria-level={1}>
         How Was Your Day?
       </Text>
       <Text style={{ fontSize: 15, color: '#8A7A5A', fontFamily: bodySerif, fontStyle: 'italic', marginBottom: 24, lineHeight: 22 }}>
@@ -105,12 +105,15 @@ const EveningReflectionScreen = ({ navigation }: { navigation?: any }) => {
         <Text style={{ fontSize: 10, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 14, textAlign: 'center' }}>
           How was your day overall?
         </Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }} accessibilityRole="radiogroup" accessibilityLabel="Day rating">
           {ratings.map(r => (
             <TouchableOpacity
               key={r.value}
               onPress={() => setDayRating(r.value)}
               activeOpacity={0.6}
+              accessibilityRole="radio"
+              accessibilityLabel={`${r.label}, ${r.value} out of 5`}
+              accessibilityState={{ selected: dayRating === r.value }}
               style={{
                 flex: 1, alignItems: 'center', paddingVertical: 12, marginHorizontal: 2,
                 borderWidth: 1.5,

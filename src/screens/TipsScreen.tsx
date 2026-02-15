@@ -61,11 +61,11 @@ const TipsScreen = ({ navigation }: { navigation: any }) => {
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as any }]}>
-      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="Go back">
         <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Wellness Tips</Text>
+      <Text style={styles.title} accessibilityRole="header" aria-level={1}>Wellness Tips</Text>
       <Text style={styles.subtitle}>{filtered.length} tips to nourish your life</Text>
 
       {/* Category pills */}

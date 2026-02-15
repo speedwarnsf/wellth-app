@@ -175,14 +175,14 @@ const AchievementsScreen = ({ navigation }: { navigation?: any }) => {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#FFFFFF' }} contentContainerStyle={{ maxWidth, alignSelf: 'center', width: '100%', paddingHorizontal: 28, paddingTop: 48, paddingBottom: 40 }}>
-      <TouchableOpacity onPress={() => navigation?.goBack()} style={{ marginBottom: 24 }}>
+      <TouchableOpacity onPress={() => navigation?.goBack()} style={{ marginBottom: 24 }} accessibilityRole="button" accessibilityLabel="Go back">
         <Text style={{ fontSize: 14, color: '#B8963E', fontFamily: bodySerif }}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
       <Text style={{ fontSize: 10, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 8 }}>
         Your Achievements
       </Text>
-      <Text style={{ fontSize: 24, color: '#3A3A3A', fontFamily: serif, fontWeight: '600', marginBottom: 8 }}>
+      <Text style={{ fontSize: 24, color: '#3A3A3A', fontFamily: serif, fontWeight: '600', marginBottom: 8 }} accessibilityRole="header" aria-level={1}>
         Badges Earned
       </Text>
 

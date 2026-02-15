@@ -24,7 +24,7 @@ interface QuickNavProps {
 
 const QuickNav = ({ navigation, currentScreen }: QuickNavProps) => {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessibilityRole="navigation" accessibilityLabel="Quick navigation">
       <View style={styles.divider} />
       <View style={styles.row}>
         {NAV_ITEMS.filter(item => item.screen !== currentScreen).map(item => (
@@ -33,6 +33,8 @@ const QuickNav = ({ navigation, currentScreen }: QuickNavProps) => {
             onPress={() => navigation.navigate(item.screen)}
             style={styles.navBtn}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={`Navigate to ${item.label}`}
           >
             <Text style={styles.navLabel}>{item.label}</Text>
           </TouchableOpacity>

@@ -17,6 +17,7 @@ import ShareStreakScreen from '../screens/ShareStreakScreen';
 import WellnessJourneyScreen from '../screens/WellnessJourneyScreen';
 import AchievementsScreen from '../screens/AchievementsScreen';
 import EveningReflectionScreen from '../screens/EveningReflectionScreen';
+import MyJourneyScreen from '../screens/MyJourneyScreen';
 
 const Stack = createStackNavigator();
 
@@ -62,6 +63,7 @@ const AppNavigator = () => {
         <Stack.Screen name="WellnessJourney" component={WellnessJourneyScreen} />
         <Stack.Screen name="Achievements" component={AchievementsScreen} />
         <Stack.Screen name="EveningReflection" component={EveningReflectionScreen} />
+        <Stack.Screen name="MyJourney" component={MyJourneyScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

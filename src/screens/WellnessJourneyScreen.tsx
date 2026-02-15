@@ -130,7 +130,7 @@ const WellnessJourneyScreen = ({ navigation }: { navigation?: any }) => {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#FFFFFF' }} contentContainerStyle={{ maxWidth, alignSelf: 'center', width: '100%', paddingHorizontal: 28, paddingTop: 48, paddingBottom: 40 }}>
-      <TouchableOpacity onPress={() => navigation?.goBack()} style={{ marginBottom: 24 }}>
+      <TouchableOpacity onPress={() => navigation?.goBack()} style={{ marginBottom: 24 }} accessibilityRole="button" accessibilityLabel="Go back">
         <Text style={{ fontSize: 14, color: '#B8963E', fontFamily: bodySerif }}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 

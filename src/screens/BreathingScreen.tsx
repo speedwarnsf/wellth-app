@@ -153,11 +153,11 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.screen, { maxWidth, alignSelf: 'center' as any }]}>
-      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="Go back">
         <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Box Breathing</Text>
+      <Text style={styles.title} accessibilityRole="header" aria-level={1}>Box Breathing</Text>
       <Text style={styles.subtitle}>4 - 4 - 4 - 4</Text>
 
       {/* Breathing Circle */}
@@ -165,6 +165,10 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
         {Platform.OS === 'web' ? (
           <div
             className={`breathing-circle ${isActive ? phaseClass : ''}`}
+            role="timer"
+            aria-live="assertive"
+            aria-atomic="true"
+            aria-label={isActive ? `${phase.label}, ${countdown} seconds remaining` : 'Ready to begin breathing exercise'}
             style={{
               width: 220, height: 220, borderRadius: 0,
               backgroundColor: '#FFF9EE', border: '2px solid #D4B96A',
@@ -172,14 +176,14 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
               flexDirection: 'column',
             }}
           >
-            <span style={{
+            <span aria-hidden="true" style={{
               fontSize: 48, fontWeight: '700', color: '#B8963E',
               fontFamily: '"Playfair Display", Georgia, serif',
               lineHeight: 1.1,
             }}>
               {isActive ? countdown : '\u00B7'}
             </span>
-            <span style={{
+            <span aria-hidden="true" style={{
               fontSize: 13, color: '#8A7A5A',
               fontFamily: 'Georgia, serif',
               marginTop: 8,
@@ -223,6 +227,9 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
         onPress={() => setSoundEnabled(s => !s)}
         style={styles.soundToggle}
         activeOpacity={0.7}
+        accessibilityRole="switch"
+        accessibilityLabel="Transition chime sound"
+        accessibilityState={{ checked: soundEnabled }}
       >
         <Text style={styles.soundToggleText}>
           Sound: {soundEnabled ? 'On' : 'Off'}
@@ -234,6 +241,8 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
         onPress={isActive ? stop : start}
         style={[styles.actionBtn, isActive && styles.actionBtnStop]}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={isActive ? 'End breathing session' : 'Begin breathing exercise'}
       >
         <Text style={styles.actionBtnText}>{isActive ? 'End Session' : 'Begin Breathing'}</Text>
       </TouchableOpacity>
@@ -338,7 +347,7 @@ const styles = StyleSheet.create({
       ? { boxShadow: '0 2px 16px rgba(184,150,62,0.08)' } as any
       : { shadowColor: '#B8963E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3 }),
   },
-  instructTitle: { fontSize: 18, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 18 },
+  instructTitle: { fontSize: 18, fontWeight: '700', color: '#B8963E', fontFamily: serif, marginBottom: 18, accessibilityRole: 'header' } as any,
   instructStep: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
   instructNum: { fontSize: 18, fontWeight: '700', color: '#D4B96A', fontFamily: serif, width: 28 },
   instructText: { fontSize: 15, color: '#3A3A3A', fontFamily: Platform.OS === 'web' ? 'Georgia, serif' : undefined, lineHeight: 24, flex: 1 },

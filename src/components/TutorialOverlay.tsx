@@ -119,7 +119,7 @@ const TutorialOverlay = ({ onComplete }: { onComplete: () => void }) => {
       </View>
 
       {/* Skip button */}
-      <TouchableOpacity style={styles.skipBtn} onPress={finish} activeOpacity={0.7}>
+      <TouchableOpacity style={styles.skipBtn} onPress={finish} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Skip tutorial">
         <Text style={styles.skipText}>Skip Tutorial</Text>
       </TouchableOpacity>
 
@@ -160,6 +160,8 @@ const TutorialOverlay = ({ onComplete }: { onComplete: () => void }) => {
           style={[styles.nextBtn, { backgroundColor: current.accent }]}
           onPress={goNext}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={isLast ? 'Get started with Wellth' : `Next: step ${step + 2} of ${STEPS.length}`}
         >
           <Text style={styles.nextText}>
             {isLast ? 'Get Started' : 'Next'}

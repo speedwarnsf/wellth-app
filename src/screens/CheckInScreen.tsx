@@ -222,11 +222,11 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]}>
       <Confetti active={showConfetti} />
-      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="Go back">
         <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Daily Check-In</Text>
+      <Text style={styles.title} accessibilityRole="header" aria-level={1}>Daily Check-In</Text>
       <Text style={styles.subtitle}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
 
       {/* Completion State */}

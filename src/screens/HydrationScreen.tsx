@@ -230,11 +230,11 @@ const HydrationScreen = ({ navigation }: { navigation: any }) => {
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]}>
-      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="Go back">
         <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Hydration</Text>
+      <Text style={styles.title} accessibilityRole="header" aria-level={1}>Hydration</Text>
       <Text style={styles.subtitle}>Stay refreshed, stay sharp</Text>
 
       {/* Progress Display */}

@@ -281,11 +281,11 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]}>
       <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="Go back">
         <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Weekly Report</Text>
+      <Text style={styles.title} accessibilityRole="header" aria-level={1}>Weekly Report</Text>
       <Text style={styles.subtitle}>Your wellness at a glance</Text>
 
       {/* Wellness Score */}

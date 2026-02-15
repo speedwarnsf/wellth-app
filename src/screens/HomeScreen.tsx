@@ -25,6 +25,16 @@ const iconPaths: Record<string, string> = {
   report: '/icons/report.png?v=6',
 };
 
+const ICON_ALT_TEXT: Record<string, string> = {
+  checkIn: 'Check-in icon',
+  checkedIn: 'Checked in icon',
+  tips: 'Tips icon',
+  breathe: 'Breathing exercise icon',
+  journal: 'Journal icon',
+  hydration: 'Hydration tracking icon',
+  report: 'Report icon',
+};
+
 const FeatureIcon = ({ name, size = 36 }: { name: string; size?: number }) => {
   if (Platform.OS !== 'web') return null;
   const src = iconPaths[name] || iconPaths.checkIn;
@@ -36,7 +46,8 @@ const FeatureIcon = ({ name, size = 36 }: { name: string; size?: number }) => {
       loading="lazy"
       decoding="async"
       style={{ marginBottom: 6, opacity: 0.85 }}
-      alt={name}
+      alt=""
+      aria-hidden="true"
     /> as any
   );
 };
@@ -222,6 +233,15 @@ const injectCSS = () => {
       text-rendering: optimizeLegibility;
     }
 
+    /* WCAG AA contrast: ensure reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
     /* Smooth scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -229,16 +249,45 @@ const injectCSS = () => {
     ::-webkit-scrollbar-thumb:hover { background: #B8963E; }
 
     /* Focus states for accessibility */
-    button:focus-visible, [role="button"]:focus-visible {
-      outline: 2px solid #B8963E;
-      outline-offset: 2px;
+    button:focus-visible, [role="button"]:focus-visible, a:focus-visible,
+    [tabindex]:focus-visible, [accessibilityRole="button"]:focus-visible {
+      outline: 3px solid #7A6520;
+      outline-offset: 3px;
     }
 
     /* Input focus */
-    textarea:focus, input:focus {
+    textarea:focus-visible, input:focus-visible {
       outline: none;
-      border-color: #D4B96A !important;
-      box-shadow: 0 0 0 3px rgba(212,185,106,0.15);
+      border-color: #7A6520 !important;
+      box-shadow: 0 0 0 3px rgba(122,101,32,0.25);
+    }
+
+    /* Skip to content link */
+    .skip-link {
+      position: absolute; left: -9999px; top: auto;
+      width: 1px; height: 1px; overflow: hidden;
+      z-index: 99999;
+      background: #1a1a1a; color: #FFFFFF; padding: 12px 24px;
+      font-family: Georgia, serif; font-size: 14px;
+      text-decoration: none;
+    }
+    .skip-link:focus {
+      position: fixed; top: 10px; left: 10px;
+      width: auto; height: auto;
+      outline: 3px solid #7A6520;
+    }
+
+    /* Screen reader only utility */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* Ensure interactive elements are keyboard navigable */
+    .feature-btn-web:focus-visible {
+      outline: 3px solid #7A6520;
+      outline-offset: 2px;
     }
   `;
   document.head.appendChild(style);
@@ -270,12 +319,12 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
   if (Platform.OS !== 'web') return null;
 
   return (
-    <div className={`splash-screen ${fadeOut ? 'fade-out' : ''}`} onClick={handleSkip}>
+    <div className={`splash-screen ${fadeOut ? 'fade-out' : ''}`} onClick={handleSkip} role="dialog" aria-label="Welcome to Wellth">
       <img
         src={require('../assets/wellth-logo.png')}
         className="splash-logo"
         style={{ width: 200, marginTop: 24 }}
-        alt="Wellth"
+        alt="Wellth logo"
       />
       <div className="splash-tagline" style={{ color: '#D4B96A' }}>Grow your wellth. Nourish your wellness.</div>
       <div style={{
@@ -321,6 +370,8 @@ const OwlVideoSection = React.memo(() => {
         loop
         src={videos[currentVideo].src}
         style={{ width: '100%', display: 'block', verticalAlign: 'bottom' }}
+        aria-label={videos[currentVideo].label}
+        role="img"
       />
     </div>
   );
@@ -365,7 +416,7 @@ const StreakVisualization = ({ streak }: { streak: number }) => {
       marginBottom: 24,
     }}>
       {/* Top row: count + label */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 16 }} role="status" aria-label={`${streak} ${streak === 1 ? 'day' : 'days'} consistent streak`}>
         <span style={{
           fontSize: 42, fontWeight: '700', color: '#B8963E',
           fontFamily: '"Playfair Display", Georgia, serif', lineHeight: '1',
@@ -519,6 +570,9 @@ const AnimatedTipCard = React.memo(({ label, tips, dayIndex, favorites, onToggle
         <TouchableOpacity
           onPress={() => onToggleFav(tip)}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={isFav ? 'Remove from saved tips' : 'Save this tip'}
+          accessibilityState={{ selected: isFav }}
           {...(Platform.OS === 'web' ? { className: `fav-btn ${isFav ? 'active' : ''}` } : {})}
         >
           <Text style={[styles.favHeart, isFav && styles.favHeartActive]}>
@@ -536,11 +590,11 @@ const AnimatedTipCard = React.memo(({ label, tips, dayIndex, favorites, onToggle
       </Animated.View>
 
       <View style={styles.tipNav}>
-        <TouchableOpacity onPress={() => cycleTip(-1)} activeOpacity={0.6} style={styles.tipNavBtn}>
+        <TouchableOpacity onPress={() => cycleTip(-1)} activeOpacity={0.6} style={styles.tipNavBtn} accessibilityRole="button" accessibilityLabel="Previous tip">
           <Text style={styles.tipNavArrow}>{'\u2039'}</Text>
         </TouchableOpacity>
-        <Text style={styles.tipNavCounter}>{tipIdx + 1} / {tips.length}</Text>
-        <TouchableOpacity onPress={() => cycleTip(1)} activeOpacity={0.6} style={styles.tipNavBtn}>
+        <Text style={styles.tipNavCounter} accessibilityLabel={`Tip ${tipIdx + 1} of ${tips.length}`}>{tipIdx + 1} / {tips.length}</Text>
+        <TouchableOpacity onPress={() => cycleTip(1)} activeOpacity={0.6} style={styles.tipNavBtn} accessibilityRole="button" accessibilityLabel="Next tip">
           <Text style={styles.tipNavArrow}>{'\u203A'}</Text>
         </TouchableOpacity>
       </View>
@@ -555,7 +609,7 @@ const FavoritesPanel = ({ favorites, onClose }: { favorites: string[]; onClose: 
     <View style={styles.favPanel} {...webProps}>
       <View style={styles.favPanelHeader}>
         <Text style={styles.favPanelTitle}>Saved Tips</Text>
-        <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
+        <TouchableOpacity onPress={onClose} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Close saved tips panel">
           <Text style={styles.favPanelClose}>{'\u2715'}</Text>
         </TouchableOpacity>
       </View>
@@ -645,7 +699,7 @@ const WeeklyQuote = () => {
       <Text style={{
         fontSize: 10, color: '#BBAA88', fontFamily: bodySerif,
         textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 12,
-      }}>Quote of the Week</Text>
+      }} accessibilityRole="header" aria-level={2}>Quote of the Week</Text>
       <Text style={{
         fontSize: 17, lineHeight: 30, color: '#3A3A3A', fontFamily: serif,
         fontStyle: 'italic', textAlign: 'center', marginBottom: 10,
@@ -725,7 +779,7 @@ const DailyAffirmation = ({ dayIndex }: { dayIndex: number }) => {
       <Text style={{
         fontSize: 10, color: '#BBAA88', fontFamily: bodySerif,
         textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 10,
-      }}>Daily Affirmation</Text>
+      }} accessibilityRole="header" aria-level={2}>Daily Affirmation</Text>
       <Text style={{
         fontSize: 17, lineHeight: 30, color: '#3A3A3A', fontFamily: serif,
         fontStyle: 'italic', textAlign: 'center',
@@ -773,13 +827,16 @@ const QuickPulse = () => {
       <Text style={{
         fontSize: 10, color: '#BBAA88', fontFamily: bodySerif,
         textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 12, textAlign: 'center',
-      }}>How are you right now?</Text>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      }} accessibilityRole="header" aria-level={2}>How are you right now?</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }} accessibilityRole="radiogroup" accessibilityLabel="Mood selection">
         {PULSE_MOODS.map(m => (
           <TouchableOpacity
             key={m.value}
             onPress={() => handlePulse(m.value)}
             activeOpacity={0.6}
+            accessibilityRole="radio"
+            accessibilityLabel={`${m.label}, ${m.value} out of 5`}
+            accessibilityState={{ selected: pulseMood === m.value }}
             style={{
               flex: 1, alignItems: 'center', paddingVertical: 10, marginHorizontal: 2,
               borderWidth: 1.5,
@@ -963,7 +1020,8 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   }
 
   return (
-    <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]} accessibilityLabel="Wellth home screen">
+    <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]} accessibilityRole="main" accessibilityLabel="Wellth home screen">
+      {Platform.OS === 'web' && (<a href="#main-content" className="skip-link">Skip to main content</a> as any)}
       <Confetti active={showConfetti} />
       {showTutorial && <TutorialOverlay onComplete={() => setShowTutorial(false)} />}
       <Animated.View style={Platform.OS !== 'web' ? { opacity: fadeAnim, transform: [{ translateY: slideAnim }] } : undefined}>
@@ -984,15 +1042,16 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
 
         {/* Greeting */}
         <View style={styles.greetingRow}>
-          <Text style={styles.greetingText}>{getGreeting()}</Text>
+          <Text style={styles.greetingText} accessibilityRole="header" aria-level={1}>{getGreeting()}</Text>
         </View>
         <Text style={styles.greetingSubtext}>{getPersonalGreeting()}</Text>
-        <Text style={styles.greetingDate}>{getFormattedDate()}</Text>
+        <Text style={styles.greetingDate} accessibilityRole="text">{getFormattedDate()}</Text>
 
         {/* Off-white background for rest of content */}
         <View style={{ backgroundColor: '#FAF8F3', marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28, paddingTop: 24, marginTop: 8 }}>
 
         {/* Quick Pulse - most important, always accessible */}
+        {Platform.OS === 'web' && (<div id="main-content" tabIndex={-1} /> as any)}
         <QuickPulse />
 
         {/* Streak Visualization */}
@@ -1010,6 +1069,8 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             }}
             onPress={() => navigation?.navigate('CheckIn')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Start your daily check-in"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFFFFF', fontFamily: bodySerif, letterSpacing: 0.5 }}>
@@ -1034,17 +1095,19 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('CheckIn')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel={checkedInToday ? 'Check-in complete for today' : 'Daily check-in, not yet completed'}
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name={checkedInToday ? 'checkedIn' : 'checkIn'} />
             <Text style={styles.featureBtnLabel}>{checkedInToday ? 'Checked In' : 'Check In'}</Text>
-            {!checkedInToday && <View style={styles.featureDot} />}
+            {!checkedInToday && <View style={styles.featureDot} accessibilityLabel="Not completed" />}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('Sleep')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="Sleep tracking"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="report" />
@@ -1055,6 +1118,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('Hydration')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="Hydration tracking"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="hydration" />
@@ -1069,6 +1133,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('Journal')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="Open journal"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="journal" />
@@ -1079,6 +1144,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('Gratitude')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="Gratitude journal"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="journal" />
@@ -1089,6 +1155,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('Breathing')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="Breathing exercise"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="breathe" />
@@ -1103,6 +1170,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('WeeklyReport')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="Weekly wellness report"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="report" />
@@ -1113,6 +1181,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('MoodHistory')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="Mood history"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="report" />
@@ -1123,6 +1192,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('Tips')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="Wellness tips"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="tips" />
@@ -1134,19 +1204,21 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         <View style={styles.featureGrid}>
           <TouchableOpacity
             style={styles.featureBtn}
-            onPress={() => navigation?.navigate('WellnessJourney')}
+            onPress={() => navigation?.navigate('MyJourney')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="View my wellness journey"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="report" />
-            <Text style={styles.featureBtnLabel}>Journey</Text>
+            <Text style={styles.featureBtnLabel}>My Journey</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('Achievements')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="View achievement badges"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="tips" />
@@ -1157,6 +1229,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('ShareStreak')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="Share your streak"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="report" />
@@ -1171,6 +1244,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             onPress={() => navigation?.navigate('EveningReflection')}
             activeOpacity={0.7}
             accessibilityRole="button"
+            accessibilityLabel="Evening reflection journal"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="journal" />
@@ -1183,6 +1257,8 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           style={styles.settingsBtn}
           onPress={() => navigation?.navigate('Settings')}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Open settings"
         >
           <Text style={styles.settingsBtnText}>Settings</Text>
         </TouchableOpacity>
@@ -1196,6 +1272,9 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           style={styles.favToggle}
           onPress={() => setShowFavs(s => !s)}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={showFavs ? 'Hide saved tips' : `Show ${favorites.length} saved tips`}
+          accessibilityState={{ expanded: showFavs }}
         >
           <Text style={styles.favToggleText}>
             {showFavs ? 'Hide Saved Tips' : `Saved Tips (${favorites.length})`}
