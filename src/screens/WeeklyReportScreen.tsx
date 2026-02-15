@@ -158,6 +158,59 @@ const getInsights = (stats: WeekStats, prevStats: WeekStats, streak: number): st
   return insights;
 };
 
+const SLEEP_PREFIX_WR = 'wellth_sleep_';
+
+interface ScoreComponent {
+  key: string;
+  label: string;
+  weight: number;
+  score: number;
+  color: string;
+}
+
+const getWellnessScoreBreakdown = (stats: WeekStats, dates: string[]): { total: number; components: ScoreComponent[] } => {
+  // Mood 30%
+  const moodPct = stats.avgMood > 0 ? (stats.avgMood / 5) * 100 : 0;
+  
+  // Sleep 25% (includes quality if available)
+  let sleepPct = 0;
+  if (stats.avgSleep > 0) {
+    const hourScore = stats.avgSleep >= 7 && stats.avgSleep <= 9 ? 100 : stats.avgSleep >= 6 ? 70 : 40;
+    // Check for sleep quality data
+    let qualitySum = 0, qualityCount = 0;
+    dates.forEach(d => {
+      const sleepEntry = storage.getJSON<{ quality: number } | null>(`${SLEEP_PREFIX_WR}${d}`, null);
+      if (sleepEntry?.quality) { qualitySum += sleepEntry.quality; qualityCount++; }
+    });
+    const qualityScore = qualityCount > 0 ? (qualitySum / qualityCount / 5) * 100 : hourScore;
+    sleepPct = (hourScore + qualityScore) / 2;
+  }
+
+  // Water 20%
+  const waterPct = stats.avgWater > 0 ? Math.min((stats.avgWater / 8) * 100, 100) : 0;
+
+  // Breathing 15%
+  let breathDays = 0;
+  dates.forEach(d => {
+    if (storage.getJSON(`wellth_breathing_${d}`, null)) breathDays++;
+  });
+  const breathPct = (breathDays / 7) * 100;
+
+  // Journal 10%
+  const journalPct = (stats.journalEntries / 7) * 100;
+
+  const components: ScoreComponent[] = [
+    { key: 'mood', label: 'Mood', weight: 30, score: moodPct, color: '#B8963E' },
+    { key: 'sleep', label: 'Sleep', weight: 25, score: sleepPct, color: '#4A90D9' },
+    { key: 'water', label: 'Water', weight: 20, score: waterPct, color: '#87CEEB' },
+    { key: 'breathing', label: 'Breathing', weight: 15, score: breathPct, color: '#8BC34A' },
+    { key: 'journal', label: 'Journal', weight: 10, score: journalPct, color: '#D4B96A' },
+  ];
+
+  const total = components.reduce((s, c) => s + (c.score * c.weight / 100), 0);
+  return { total: Math.round(total), components };
+};
+
 const getWellnessScore = (stats: WeekStats): number => {
   let score = 0;
   score += Math.min(stats.checkins / 7, 1) * 20;
@@ -218,6 +271,7 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
 
   const scoreInfo = getScoreLabel(score);
   const scoreTrend = getTrendArrow(score, prevScore);
+  const breakdown = getWellnessScoreBreakdown(stats, dates);
 
   // Trend arrows for stats
   const moodTrend = getTrendArrow(stats.avgMood, prevStats.avgMood);
@@ -266,6 +320,59 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
           </Text>
         ) : null}
       </View>
+
+      {/* Wellness Score Breakdown */}
+      {breakdown.total > 0 && (
+        <View style={{
+          backgroundColor: '#FFFFFF', padding: 20, marginBottom: 20,
+          borderWidth: 1, borderColor: '#EDE3CC',
+        }}>
+          <Text style={[styles.trendTitle, { marginBottom: 14 }]}>Score Breakdown</Text>
+          {breakdown.components.map(c => (
+            <View key={c.key} style={{ marginBottom: 10 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                <Text style={{ fontSize: 12, color: '#8A7A5A', fontFamily: bodySerif }}>{c.label} ({c.weight}%)</Text>
+                <Text style={{ fontSize: 12, color: c.color, fontFamily: bodySerif, fontWeight: '600' }}>
+                  {(c.score * c.weight / 100).toFixed(0)} pts
+                </Text>
+              </View>
+              <View style={{ height: 6, backgroundColor: '#F0E8D8', width: '100%' }}>
+                <View style={{ height: '100%' as any, backgroundColor: c.color, width: `${Math.min(c.score, 100)}%` as any }} />
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Sleep Quality Trend */}
+      {(() => {
+        const sleepEntries = dates.map(d => ({
+          date: d,
+          entry: storage.getJSON<{ hours: number; quality: number } | null>(`${SLEEP_PREFIX_WR}${d}`, null),
+        })).filter(e => e.entry);
+        if (sleepEntries.length < 2) return null;
+        return (
+          <View style={styles.trendCard}>
+            <Text style={styles.trendTitle}>Sleep Quality</Text>
+            <View style={styles.chartRow}>
+              {dates.map((d, i) => {
+                const entry = storage.getJSON<{ hours: number; quality: number } | null>(`${SLEEP_PREFIX_WR}${d}`, null);
+                const quality = entry?.quality || 0;
+                const barHeight = quality > 0 ? Math.max(8, quality * 16) : 4;
+                const dayLabel = new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2);
+                const colors = ['#D4536A', '#CCBBAA', '#D4B96A', '#B8963E', '#4CAF50'];
+                return (
+                  <View key={i} style={styles.chartCol}>
+                    {quality > 0 && <Text style={styles.chartVal}>{quality}</Text>}
+                    <View style={[styles.chartBar, { height: barHeight, backgroundColor: quality > 0 ? colors[quality - 1] : '#EDE3CC' }]} />
+                    <Text style={styles.chartDay}>{dayLabel}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        );
+      })()}
 
       {/* Stat Grid with trend arrows */}
       <View style={styles.statGrid}>

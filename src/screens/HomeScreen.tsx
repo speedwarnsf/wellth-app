@@ -4,7 +4,8 @@ import {
   useWindowDimensions, TouchableOpacity, Animated, Easing,
 } from 'react-native';
 import { wealthTips, wellnessTips, fetchTips, getWealthTips, getWellnessTips } from '../data/tipData';
-import { getStreak, getStreakMilestone, getCheckIn, todayKey } from '../utils/storage';
+import { getStreak, getStreakMilestone, getCheckIn, todayKey, getWeekDates, CheckInData } from '../utils/storage';
+import storage from '../utils/storage';
 import OnboardingScreen, { hasOnboarded } from './OnboardingScreen';
 import Confetti from '../components/Confetti';
 import {
@@ -164,15 +165,22 @@ const injectCSS = () => {
       transform: scale(1.05);
     }
     .feature-btn-web {
-      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
     }
     .feature-btn-web:hover {
       background-color: #FFF9EE !important;
       border-color: #D4B96A !important;
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(184,150,62,0.12);
     }
     .feature-btn-web:active {
-      transform: translateY(0);
+      transform: translateY(0) scale(0.97);
+      transition-duration: 0.05s;
+    }
+    @keyframes cardTapFeedback {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.98); }
+      100% { transform: scale(1); }
     }
     .streak-bar-fill {
       animation: streakFillIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -607,6 +615,164 @@ const DailyAffirmation = ({ dayIndex }: { dayIndex: number }) => {
   );
 };
 
+// ── Quick Pulse (one-tap mood check-in) ──────────────────
+const PULSE_PREFIX = 'wellth_pulse_';
+const PULSE_MOODS = [
+  { label: 'Rough', value: 1 },
+  { label: 'Low', value: 2 },
+  { label: 'Okay', value: 3 },
+  { label: 'Good', value: 4 },
+  { label: 'Great', value: 5 },
+];
+
+const QuickPulse = () => {
+  const [pulseMood, setPulseMood] = useState<number | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
+  const now = new Date();
+  const pulseKey = `${PULSE_PREFIX}${now.toISOString().slice(0, 13)}`; // hourly granularity
+
+  useEffect(() => {
+    const existing = storage.getJSON<number | null>(pulseKey, null);
+    if (existing) { setPulseMood(existing); setJustSaved(true); }
+  }, []);
+
+  const handlePulse = (value: number) => {
+    setPulseMood(value);
+    storage.setJSON(pulseKey, value);
+    setJustSaved(true);
+    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(30);
+    }
+    setTimeout(() => setJustSaved(false), 2000);
+  };
+
+  return (
+    <View style={{
+      backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE3CC',
+      padding: 18, marginBottom: 16,
+    }}>
+      <Text style={{
+        fontSize: 10, color: '#BBAA88', fontFamily: bodySerif,
+        textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 12, textAlign: 'center',
+      }}>How are you right now?</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        {PULSE_MOODS.map(m => (
+          <TouchableOpacity
+            key={m.value}
+            onPress={() => handlePulse(m.value)}
+            activeOpacity={0.6}
+            style={{
+              flex: 1, alignItems: 'center', paddingVertical: 10, marginHorizontal: 2,
+              borderWidth: 1.5,
+              borderColor: pulseMood === m.value ? '#B8963E' : '#EDE3CC',
+              backgroundColor: pulseMood === m.value ? '#FFF9EE' : '#FFFFFF',
+            }}
+          >
+            <Text style={{
+              fontSize: 18, fontWeight: '700', fontFamily: serif,
+              color: pulseMood === m.value ? '#B8963E' : '#CCBBAA',
+            }}>{m.value}</Text>
+            <Text style={{
+              fontSize: 9, fontFamily: bodySerif, textTransform: 'uppercase' as any,
+              letterSpacing: 0.3, marginTop: 2,
+              color: pulseMood === m.value ? '#B8963E' : '#999',
+              fontWeight: pulseMood === m.value ? '600' : '400',
+            }}>{m.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      {justSaved && (
+        <Text style={{
+          fontSize: 12, color: '#B8963E', fontFamily: bodySerif, fontStyle: 'italic',
+          textAlign: 'center', marginTop: 8,
+        }}>Noted. Keep going.</Text>
+      )}
+    </View>
+  );
+};
+
+// ── Wellness Score Breakdown ─────────────────────────────
+const SCORE_WEIGHTS = [
+  { key: 'mood', label: 'Mood', weight: 30, color: '#B8963E' },
+  { key: 'sleep', label: 'Sleep', weight: 25, color: '#4A90D9' },
+  { key: 'water', label: 'Water', weight: 20, color: '#87CEEB' },
+  { key: 'breathing', label: 'Breathing', weight: 15, color: '#8BC34A' },
+  { key: 'journal', label: 'Journal', weight: 10, color: '#D4B96A' },
+];
+
+const WellnessBreakdown = () => {
+  const [scores, setScores] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const dates = getWeekDates();
+    const checkins = dates.map(d => getCheckIn(d)).filter(Boolean) as CheckInData[];
+    const n = checkins.length || 1;
+
+    const moodScore = checkins.length > 0
+      ? (checkins.reduce((s, c) => s + c.mood, 0) / n) / 5 * 100 : 0;
+
+    const sleepScore = checkins.length > 0
+      ? Math.min(((checkins.reduce((s, c) => s + c.sleep, 0) / n) / 8) * 100, 100) : 0;
+
+    const waterScore = checkins.length > 0
+      ? Math.min(((checkins.reduce((s, c) => s + c.water, 0) / n) / 8) * 100, 100) : 0;
+
+    // Breathing: check if any sessions logged
+    let breathDays = 0;
+    dates.forEach(d => {
+      if (storage.getJSON(`wellth_breathing_${d}`, null)) breathDays++;
+    });
+    const breathScore = (breathDays / 7) * 100;
+
+    // Journal entries
+    let journalDays = 0;
+    dates.forEach(d => {
+      if (storage.getJSON(`wellth_journal_${d}`, null)) journalDays++;
+    });
+    const journalScore = (journalDays / 7) * 100;
+
+    setScores({ mood: moodScore, sleep: sleepScore, water: waterScore, breathing: breathScore, journal: journalScore });
+  }, []);
+
+  const totalScore = SCORE_WEIGHTS.reduce((s, w) => s + ((scores[w.key] || 0) * w.weight / 100), 0);
+
+  if (totalScore === 0) return null;
+
+  return (
+    <View style={{
+      backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EDE3CC',
+      padding: 20, marginBottom: 16,
+    }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
+        <Text style={{
+          fontSize: 10, color: '#BBAA88', fontFamily: bodySerif,
+          textTransform: 'uppercase' as any, letterSpacing: 1.5,
+        }}>Wellness Score</Text>
+        <Text style={{
+          fontSize: 28, fontWeight: '700', color: '#B8963E', fontFamily: serif,
+        }}>{Math.round(totalScore)}</Text>
+      </View>
+      {SCORE_WEIGHTS.map(w => {
+        const val = scores[w.key] || 0;
+        const contribution = (val * w.weight / 100);
+        return (
+          <View key={w.key} style={{ marginBottom: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+              <Text style={{ fontSize: 12, color: '#8A7A5A', fontFamily: bodySerif }}>{w.label} ({w.weight}%)</Text>
+              <Text style={{ fontSize: 12, color: '#B8963E', fontFamily: bodySerif, fontWeight: '600' }}>
+                {contribution.toFixed(0)} pts
+              </Text>
+            </View>
+            <View style={{ height: 6, backgroundColor: '#F0E8D8', width: '100%' }}>
+              <View style={{ height: '100%', backgroundColor: w.color, width: `${Math.min(val, 100)}%` }} />
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+};
+
 // ── HomeScreen ───────────────────────────────────────────
 const HomeScreen = ({ navigation }: { navigation?: any }) => {
   const { width } = useWindowDimensions();
@@ -702,20 +868,42 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
         {/* Off-white background for rest of content */}
         <View style={{ backgroundColor: '#FAF8F3', marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28, paddingTop: 24, marginTop: 8 }}>
 
-        {/* Daily Affirmation */}
-        <DailyAffirmation dayIndex={dayIndex} />
+        {/* Quick Pulse - most important, always accessible */}
+        <QuickPulse />
 
         {/* Streak Visualization */}
         <StreakVisualization streak={streak} />
 
-        {/* Feature Buttons */}
+        {/* Wellness Score Breakdown */}
+        <WellnessBreakdown />
+
+        {/* Primary Action - Check In */}
+        {!checkedInToday && (
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#B8963E', paddingVertical: 18, alignItems: 'center',
+              marginBottom: 16, borderWidth: 1.5, borderColor: '#B8963E',
+            }}
+            onPress={() => navigation?.navigate('CheckIn')}
+            activeOpacity={0.7}
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+          >
+            <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFFFFF', fontFamily: bodySerif, letterSpacing: 0.5 }}>
+              Daily Check-In
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Daily Affirmation */}
+        <DailyAffirmation dayIndex={dayIndex} />
+
+        {/* Feature Buttons - Row 1: Core tracking */}
         <View style={styles.featureGrid}>
           <TouchableOpacity
-            style={[styles.featureBtn, !checkedInToday && styles.featureBtnHighlight]}
+            style={[styles.featureBtn, checkedInToday && styles.featureBtnHighlight]}
             onPress={() => navigation?.navigate('CheckIn')}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel={checkedInToday ? 'Already checked in today' : 'Daily check in'}
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name={checkedInToday ? 'checkedIn' : 'checkIn'} />
@@ -724,35 +912,33 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
-            onPress={() => navigation?.navigate('Tips')}
+            onPress={() => navigation?.navigate('Sleep')}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="More tips"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
-            <FeatureIcon name="tips" />
-            <Text style={styles.featureBtnLabel}>More Tips</Text>
+            <FeatureIcon name="report" />
+            <Text style={styles.featureBtnLabel}>Sleep</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
-            onPress={() => navigation?.navigate('Breathing')}
+            onPress={() => navigation?.navigate('Hydration')}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="Breathing exercises"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
-            <FeatureIcon name="breathe" />
-            <Text style={styles.featureBtnLabel}>Breathe</Text>
+            <FeatureIcon name="hydration" />
+            <Text style={styles.featureBtnLabel}>Hydration</Text>
           </TouchableOpacity>
         </View>
 
+        {/* Row 2: Reflection */}
         <View style={styles.featureGrid}>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('Journal')}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="Open journal"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="journal" />
@@ -760,36 +946,43 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
-            onPress={() => navigation?.navigate('Hydration')}
+            onPress={() => navigation?.navigate('Gratitude')}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="Track hydration"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
-            <FeatureIcon name="hydration" />
-            <Text style={styles.featureBtnLabel}>Hydration</Text>
+            <FeatureIcon name="journal" />
+            <Text style={styles.featureBtnLabel}>Gratitude</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('Breathing')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+          >
+            <FeatureIcon name="breathe" />
+            <Text style={styles.featureBtnLabel}>Breathe</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Row 3: Insights */}
+        <View style={styles.featureGrid}>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('WeeklyReport')}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="View weekly report"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="report" />
             <Text style={styles.featureBtnLabel}>Report</Text>
           </TouchableOpacity>
-        </View>
-
-        {/* Third row */}
-        <View style={styles.featureGrid}>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('MoodHistory')}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="Mood history"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name="report" />
@@ -797,16 +990,24 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.featureBtn}
-            onPress={() => navigation?.navigate('Settings')}
+            onPress={() => navigation?.navigate('Tips')}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="Settings"
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
-            <FeatureIcon name="report" />
-            <Text style={styles.featureBtnLabel}>Settings</Text>
+            <FeatureIcon name="tips" />
+            <Text style={styles.featureBtnLabel}>Tips</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Settings link */}
+        <TouchableOpacity
+          style={styles.settingsBtn}
+          onPress={() => navigation?.navigate('Settings')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.settingsBtnText}>Settings</Text>
+        </TouchableOpacity>
 
         {/* Tip Cards */}
         <AnimatedTipCard label="Wellth tip" tips={liveTips.wealth} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />

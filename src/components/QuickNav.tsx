@@ -10,6 +10,8 @@ const NAV_ITEMS = [
   { screen: 'Journal', label: 'Journal' },
   { screen: 'Hydration', label: 'Water' },
   { screen: 'Breathing', label: 'Breathe' },
+  { screen: 'Gratitude', label: 'Gratitude' },
+  { screen: 'Sleep', label: 'Sleep' },
   { screen: 'WeeklyReport', label: 'Report' },
   { screen: 'MoodHistory', label: 'Mood' },
   { screen: 'Settings', label: 'Settings' },
