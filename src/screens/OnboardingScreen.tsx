@@ -26,7 +26,7 @@ export const markOnboarded = () => {
 const STEPS = [
   {
     title: 'Welcome to Wellth',
-    body: 'Where wealth meets wellness. A daily companion for growing both your financial health and personal well-being.',
+    body: 'Where wellth meets wellness. A daily companion for growing both your financial health and personal well-being.',
     video: '/videos/owl-emerging.mp4',
     accent: '#B8963E',
   },

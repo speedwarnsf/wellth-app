@@ -292,7 +292,7 @@ const SettingsScreen = ({ navigation }: { navigation: any }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About Wellth</Text>
         <Text style={styles.aboutText}>
-          Wellth is a daily companion for building wellness habits. Track your mood, hydration, sleep, and exercise. Reflect through journaling. Breathe with intention. Grow your wealth of wellness, one day at a time.
+          Wellth is a daily companion for building wellness habits. Track your mood, hydration, sleep, and exercise. Reflect through journaling. Breathe with intention. Grow your wellth of wellness, one day at a time.
         </Text>
         <Text style={styles.version}>Version 1.2.0</Text>
       </View>

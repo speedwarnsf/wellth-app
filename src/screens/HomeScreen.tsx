@@ -276,7 +276,7 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
         style={{ width: 200, marginTop: 24 }}
         alt="Wellth"
       />
-      <div className="splash-tagline" style={{ color: '#D4B96A' }}>Grow your wealth. Nourish your wellness.</div>
+      <div className="splash-tagline" style={{ color: '#D4B96A' }}>Grow your wellth. Nourish your wellness.</div>
       <div style={{
         position: 'absolute', bottom: 40, color: '#8A7A5A',
         fontFamily: 'Georgia, serif', fontSize: 13, fontStyle: 'italic',
@@ -292,7 +292,7 @@ const SplashScreen = ({ onDone }: { onDone: () => void }) => {
 const OwlVideoSection = React.memo(() => {
   const [currentVideo, setCurrentVideo] = useState(0);
   const videos = [
-    { src: '/videos/owl-looking.mp4', label: 'Owl is watching over your wealth' },
+    { src: '/videos/owl-looking.mp4', label: 'Owl is watching over your wellth' },
     { src: '/videos/owl-maturing.mp4', label: 'Growing wiser every day' },
     { src: '/videos/owl-emerging.mp4', label: 'Growing together' },
   ];
@@ -1028,7 +1028,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
 
         {/* Footer */}
         <View style={styles.footerDivider} />
-        <Text style={styles.footer}>Grow your wealth. Nourish your wellness.</Text>
+        <Text style={styles.footer}>Grow your wellth. Nourish your wellness.</Text>
         <Text style={styles.copyright}>{'\u00A9'} {new Date().getFullYear()} Wellth</Text>
 
         </View>
