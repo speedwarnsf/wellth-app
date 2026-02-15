@@ -6,6 +6,7 @@ import {
 import { wealthTips, wellnessTips, fetchTips, getWealthTips, getWellnessTips } from '../data/tipData';
 import { getStreak, getStreakMilestone, getCheckIn, todayKey } from '../utils/storage';
 import OnboardingScreen, { hasOnboarded } from './OnboardingScreen';
+import Confetti from '../components/Confetti';
 import {
   initNotifications,
 } from '../utils/notifications';
@@ -562,6 +563,50 @@ const FavoritesPanel = ({ favorites, onClose }: { favorites: string[]; onClose: 
   );
 };
 
+// ── Daily Affirmations ───────────────────────────────────
+const AFFIRMATIONS = [
+  'You are building something meaningful, one day at a time.',
+  'Your consistency today is your freedom tomorrow.',
+  'Small steps, taken daily, lead to extraordinary places.',
+  'You deserve the peace you are creating for yourself.',
+  'Progress, not perfection, is the path.',
+  'What you nurture in yourself will flourish.',
+  'Today is another chance to grow your wellth.',
+  'Your discipline is an act of self-love.',
+  'The best investment you can make is in yourself.',
+  'You are more resilient than you realize.',
+  'Every healthy choice compounds over time.',
+  'Be patient with yourself. Growth takes time.',
+  'Your future self is grateful for what you do today.',
+  'Stillness and action both have their season.',
+  'You are worthy of the life you are building.',
+  'Trust the process. Trust yourself.',
+  'What matters most is that you showed up.',
+  'Rest is not the opposite of progress. It is part of it.',
+  'Your presence here is proof of your commitment.',
+  'The wealth that matters most cannot be measured in dollars.',
+];
+
+const DailyAffirmation = ({ dayIndex }: { dayIndex: number }) => {
+  const affirmation = AFFIRMATIONS[dayIndex % AFFIRMATIONS.length];
+
+  return (
+    <View style={{
+      backgroundColor: '#FFF9EE', borderWidth: 1.5, borderColor: '#D4B96A',
+      padding: 22, marginBottom: 24, alignItems: 'center',
+    }}>
+      <Text style={{
+        fontSize: 10, color: '#BBAA88', fontFamily: bodySerif,
+        textTransform: 'uppercase' as any, letterSpacing: 1.5, marginBottom: 10,
+      }}>Daily Affirmation</Text>
+      <Text style={{
+        fontSize: 17, lineHeight: 30, color: '#3A3A3A', fontFamily: serif,
+        fontStyle: 'italic', textAlign: 'center',
+      }}>{affirmation}</Text>
+    </View>
+  );
+};
+
 // ── HomeScreen ───────────────────────────────────────────
 const HomeScreen = ({ navigation }: { navigation?: any }) => {
   const { width } = useWindowDimensions();
@@ -575,10 +620,21 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   const [streak, setStreak] = useState(0);
   const [checkedInToday, setCheckedInToday] = useState(false);
   const [liveTips, setLiveTips] = useState<{ wealth: string[]; wellness: string[] }>({ wealth: wealthTips, wellness: wellnessTips });
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
-    setStreak(getStreak());
+    const s = getStreak();
+    setStreak(s);
     setCheckedInToday(!!getCheckIn(todayKey()));
+    // Trigger confetti for milestone streaks
+    if (getStreakMilestone(s)) {
+      const confettiKey = `wellth_confetti_${s}`;
+      if (Platform.OS === 'web' && !sessionStorage.getItem(confettiKey)) {
+        sessionStorage.setItem(confettiKey, 'true');
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 4500);
+      }
+    }
     fetchTips().then(() => {
       setLiveTips({ wealth: getWealthTips(), wellness: getWellnessTips() });
     });
@@ -619,6 +675,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]} accessibilityLabel="Wellth home screen">
+      <Confetti active={showConfetti} />
       <Animated.View style={Platform.OS !== 'web' ? { opacity: fadeAnim, transform: [{ translateY: slideAnim }] } : undefined}>
 
         {/* Header */}
@@ -644,6 +701,9 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
 
         {/* Off-white background for rest of content */}
         <View style={{ backgroundColor: '#FAF8F3', marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28, paddingTop: 24, marginTop: 8 }}>
+
+        {/* Daily Affirmation */}
+        <DailyAffirmation dayIndex={dayIndex} />
 
         {/* Streak Visualization */}
         <StreakVisualization streak={streak} />
@@ -722,17 +782,31 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Settings Button */}
-        <TouchableOpacity
-          style={styles.settingsBtn}
-          onPress={() => navigation?.navigate('Settings')}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityLabel="Settings"
-          {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
-        >
-          <Text style={styles.settingsBtnText}>Settings</Text>
-        </TouchableOpacity>
+        {/* Third row */}
+        <View style={styles.featureGrid}>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('MoodHistory')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Mood history"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+          >
+            <FeatureIcon name="report" />
+            <Text style={styles.featureBtnLabel}>Mood</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('Settings')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+          >
+            <FeatureIcon name="report" />
+            <Text style={styles.featureBtnLabel}>Settings</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Tip Cards */}
         <AnimatedTipCard label="Wellth tip" tips={liveTips.wealth} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />

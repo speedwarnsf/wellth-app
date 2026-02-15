@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { saveCheckIn, getCheckIn, todayKey, getWeekDates, CheckInData, getStreak, getStreakMilestone } from '../utils/storage';
 import QuickNav from '../components/QuickNav';
+import Confetti from '../components/Confetti';
 
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
@@ -185,6 +186,7 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
   const [showWeekly, setShowWeekly] = useState(false);
   const [streak, setStreak] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     const existing = getCheckIn(today);
@@ -206,6 +208,10 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
     const newStreak = getStreak();
     setStreak(newStreak);
     setShowCompletion(true);
+    if (getStreakMilestone(newStreak)) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 4500);
+    }
 
     // Haptic feedback on mobile
     if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -215,6 +221,7 @@ const CheckInScreen = ({ navigation }: { navigation: any }) => {
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]}>
+      <Confetti active={showConfetti} />
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
         <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>

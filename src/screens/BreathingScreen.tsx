@@ -15,6 +15,38 @@ const PHASES = [
   { label: 'Hold', duration: 4000 },
 ];
 
+// ── Web Audio API chime ──────────────────────────────────
+const playChime = (frequency: number = 528, duration: number = 0.4) => {
+  if (Platform.OS !== 'web') return;
+  try {
+    const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(frequency, ctx.currentTime);
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch (e) { /* silently fail */ }
+};
+
+const PHASE_CUES: Record<string, string[]> = {
+  'Breathe In': ['Let the air fill you slowly...', 'Draw breath deep into your belly...', 'Inhale calm, inhale peace...'],
+  'Hold': ['Hold gently. No tension.', 'Be still in this fullness.', 'Rest here a moment.'],
+  'Breathe Out': ['Release everything softly...', 'Let it all go...', 'Exhale slowly, completely...'],
+};
+
+const getGuidedCue = (label: string, cycle: number): string => {
+  const cues = PHASE_CUES[label] || PHASE_CUES['Hold'];
+  return cues[cycle % cues.length];
+};
+
 const CALM_MESSAGES = [
   "Let the calm wash over you.",
   "You are doing beautifully.",
@@ -61,6 +93,8 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
   const [cycleCount, setCycleCount] = useState(0);
   const [calmMsg, setCalmMsg] = useState(0);
   const [totalSeconds, setTotalSeconds] = useState(0);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const prevPhaseRef = useRef(0);
 
   useEffect(() => { injectBreathingCSS(); }, []);
 
@@ -81,6 +115,11 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
     const phaseTimeout = setTimeout(() => {
       const nextPhase = (phaseIndex + 1) % PHASES.length;
       setPhaseIndex(nextPhase);
+      // Play chime on phase change
+      if (soundEnabled) {
+        const freqs = [528, 396, 440, 396]; // different tone per phase
+        playChime(freqs[nextPhase], 0.5);
+      }
       if (nextPhase === 0) {
         setCycleCount(c => c + 1);
         setCalmMsg(m => (m + 1) % CALM_MESSAGES.length);
@@ -158,9 +197,12 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
         )}
       </View>
 
-      {/* Calming message */}
+      {/* Guided cue */}
       {isActive && (
         <View style={styles.calmMsgContainer}>
+          <Text style={[styles.calmMsgText, { fontSize: 18, color: '#3A3A3A', marginBottom: 6 }]}>
+            {getGuidedCue(phase.label, cycleCount)}
+          </Text>
           <Text style={styles.calmMsgText}>{CALM_MESSAGES[calmMsg]}</Text>
         </View>
       )}
@@ -175,6 +217,17 @@ const BreathingScreen = ({ navigation }: { navigation: any }) => {
           </Text>
         </View>
       )}
+
+      {/* Sound toggle */}
+      <TouchableOpacity
+        onPress={() => setSoundEnabled(s => !s)}
+        style={styles.soundToggle}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.soundToggleText}>
+          Sound: {soundEnabled ? 'On' : 'Off'}
+        </Text>
+      </TouchableOpacity>
 
       {/* Start/Stop */}
       <TouchableOpacity
@@ -254,6 +307,15 @@ const styles = StyleSheet.create({
 
   sessionStats: { alignItems: 'center', marginBottom: 20 },
   sessionStatText: { fontSize: 13, color: '#BBAA88', fontFamily: bodySerif, letterSpacing: 1 },
+
+  soundToggle: {
+    alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 20,
+    borderWidth: 1, borderColor: '#EDE3CC', backgroundColor: '#FFFFFF', marginBottom: 14,
+  },
+  soundToggleText: {
+    fontSize: 12, fontWeight: '600', color: '#8A7A5A', fontFamily: bodySerif,
+    textTransform: 'uppercase' as any, letterSpacing: 0.8,
+  },
 
   actionBtn: {
     backgroundColor: '#B8963E', borderRadius: 0, paddingVertical: 16,

@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { screen: 'Hydration', label: 'Water' },
   { screen: 'Breathing', label: 'Breathe' },
   { screen: 'WeeklyReport', label: 'Report' },
+  { screen: 'MoodHistory', label: 'Mood' },
   { screen: 'Settings', label: 'Settings' },
 ];
 

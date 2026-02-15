@@ -10,6 +10,7 @@ import JournalScreen from '../screens/JournalScreen';
 import HydrationScreen from '../screens/HydrationScreen';
 import WeeklyReportScreen from '../screens/WeeklyReportScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import MoodHistoryScreen from '../screens/MoodHistoryScreen';
 
 const Stack = createStackNavigator();
 
@@ -48,6 +49,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Hydration" component={HydrationScreen} />
         <Stack.Screen name="WeeklyReport" component={WeeklyReportScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="MoodHistory" component={MoodHistoryScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
