@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform,
-  useWindowDimensions,
+  useWindowDimensions, Animated, Easing,
 } from 'react-native';
 import storage, { getCheckIn, getWeekDates, CheckInData, getStreak } from '../utils/storage';
 import QuickNav from '../components/QuickNav';
@@ -27,24 +27,114 @@ interface WeekStats {
   waterTrend: number[];
 }
 
-const getInsights = (stats: WeekStats, streak: number): string[] => {
+const getPrevWeekDates = (): string[] => {
+  const dates: string[] = [];
+  const now = new Date();
+  for (let i = 13; i >= 7; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    dates.push(d.toISOString().slice(0, 10));
+  }
+  return dates;
+};
+
+const computeStats = (dates: string[]): WeekStats => {
+  const checkins: (CheckInData | null)[] = dates.map(d => getCheckIn(d));
+  const validCheckins = checkins.filter(Boolean) as CheckInData[];
+
+  const moodTrend = checkins.map(c => c?.mood || 0);
+  const sleepTrend = checkins.map(c => c?.sleep || 0);
+  const waterTrend = dates.map(d => {
+    const hydration = storage.getJSON<{ glasses: number } | null>(`${HYDRATION_PREFIX}${d}`, null);
+    return hydration?.glasses || (getCheckIn(d)?.water || 0);
+  });
+
+  let journalEntries = 0;
+  dates.forEach(d => {
+    if (storage.getJSON(`${JOURNAL_PREFIX}${d}`, null)) journalEntries++;
+  });
+
+  let bestDay: string | null = null;
+  let bestMood = 0;
+  dates.forEach((d, i) => {
+    const c = checkins[i];
+    if (c && c.mood > bestMood) {
+      bestMood = c.mood;
+      bestDay = d;
+    }
+  });
+
+  return {
+    checkins: validCheckins.length,
+    avgMood: validCheckins.length > 0
+      ? validCheckins.reduce((s, c) => s + c.mood, 0) / validCheckins.length : 0,
+    avgWater: validCheckins.length > 0
+      ? validCheckins.reduce((s, c) => s + c.water, 0) / validCheckins.length : 0,
+    avgSleep: validCheckins.length > 0
+      ? validCheckins.reduce((s, c) => s + c.sleep, 0) / validCheckins.length : 0,
+    exerciseDays: validCheckins.filter(c => c.exercise).length,
+    totalGlasses: waterTrend.reduce((s, g) => s + g, 0),
+    journalEntries,
+    bestDay,
+    moodTrend,
+    sleepTrend,
+    waterTrend,
+  };
+};
+
+const getTrendArrow = (current: number, previous: number): { arrow: string; color: string; label: string } => {
+  if (previous === 0 || current === 0) return { arrow: '', color: '#8A7A5A', label: '' };
+  const diff = current - previous;
+  const pct = Math.abs(Math.round((diff / previous) * 100));
+  if (diff > 0.1) return { arrow: '\u2191', color: '#4CAF50', label: `+${pct}%` };
+  if (diff < -0.1) return { arrow: '\u2193', color: '#D4536A', label: `-${pct}%` };
+  return { arrow: '\u2192', color: '#8A7A5A', label: 'same' };
+};
+
+const getInsights = (stats: WeekStats, prevStats: WeekStats, streak: number): string[] => {
   const insights: string[] = [];
 
   if (stats.checkins === 7) insights.push("Perfect week -- you checked in every single day.");
   else if (stats.checkins >= 5) insights.push(`Solid consistency -- ${stats.checkins}/7 check-ins this week.`);
   else if (stats.checkins > 0) insights.push(`${stats.checkins} check-in${stats.checkins > 1 ? 's' : ''} this week. Try to build the habit.`);
 
-  if (stats.avgMood >= 4) insights.push("Your mood has been great this week. Keep doing what you are doing.");
-  else if (stats.avgMood >= 3) insights.push("Steady mood this week. Small wins add up.");
-  else if (stats.avgMood > 0) insights.push("Tougher week mood-wise. Be gentle with yourself -- better days are ahead.");
+  // Mood comparison
+  if (stats.avgMood > 0 && prevStats.avgMood > 0) {
+    const diff = stats.avgMood - prevStats.avgMood;
+    if (diff > 0.5) insights.push(`Your mood improved from last week -- up from ${prevStats.avgMood.toFixed(1)} to ${stats.avgMood.toFixed(1)}. Keep it up.`);
+    else if (diff < -0.5) insights.push(`Mood dipped compared to last week (${prevStats.avgMood.toFixed(1)} to ${stats.avgMood.toFixed(1)}). Be patient with yourself.`);
+    else if (stats.avgMood >= 4) insights.push("Your mood has been great this week. Keep doing what you are doing.");
+    else if (stats.avgMood >= 3) insights.push("Steady mood this week. Small wins add up.");
+  } else if (stats.avgMood >= 4) {
+    insights.push("Your mood has been great this week. Keep doing what you are doing.");
+  } else if (stats.avgMood > 0) {
+    insights.push("Tougher week mood-wise. Be gentle with yourself -- better days are ahead.");
+  }
 
-  if (stats.avgSleep >= 7.5) insights.push("Excellent sleep habits -- averaging over 7.5 hours.");
-  else if (stats.avgSleep >= 6.5) insights.push("Decent sleep, but aiming for 7-8 hours could help even more.");
-  else if (stats.avgSleep > 0) insights.push("Sleep is below 6.5 hours on average. Your body needs more rest.");
+  // Sleep comparison
+  if (stats.avgSleep > 0 && prevStats.avgSleep > 0) {
+    const diff = stats.avgSleep - prevStats.avgSleep;
+    if (diff > 0.5) insights.push(`Sleep improved this week -- up ${diff.toFixed(1)} hours on average. Your body thanks you.`);
+    else if (diff < -0.5) insights.push(`Sleep dropped by ${Math.abs(diff).toFixed(1)} hours compared to last week. Prioritize rest.`);
+    else if (stats.avgSleep >= 7.5) insights.push("Excellent sleep habits -- averaging over 7.5 hours.");
+  } else if (stats.avgSleep >= 7.5) {
+    insights.push("Excellent sleep habits -- averaging over 7.5 hours.");
+  } else if (stats.avgSleep >= 6.5) {
+    insights.push("Decent sleep, but aiming for 7-8 hours could help even more.");
+  } else if (stats.avgSleep > 0) {
+    insights.push("Sleep is below 6.5 hours on average. Your body needs more rest.");
+  }
 
-  if (stats.avgWater >= 8) insights.push("Hydration champion -- great water intake this week.");
-  else if (stats.avgWater >= 5) insights.push("Good hydration. Try adding one more glass per day.");
-  else if (stats.avgWater > 0) insights.push("Your water intake could use a boost. Aim for 8 glasses daily.");
+  // Water comparison
+  if (stats.avgWater > 0 && prevStats.avgWater > 0) {
+    if (stats.avgWater > prevStats.avgWater + 1) insights.push(`Hydration improved this week. Great progress.`);
+    else if (stats.avgWater >= 8) insights.push("Hydration champion -- great water intake this week.");
+    else if (stats.avgWater >= 5) insights.push("Good hydration. Try adding one more glass per day.");
+  } else if (stats.avgWater >= 8) {
+    insights.push("Hydration champion -- great water intake this week.");
+  } else if (stats.avgWater > 0) {
+    insights.push("Your water intake could use a boost. Aim for 8 glasses daily.");
+  }
 
   if (stats.exerciseDays >= 5) insights.push("Active lifestyle -- " + stats.exerciseDays + " exercise days this week.");
   else if (stats.exerciseDays >= 3) insights.push(stats.exerciseDays + " exercise days -- nice momentum.");
@@ -54,6 +144,16 @@ const getInsights = (stats: WeekStats, streak: number): string[] => {
   else if (stats.journalEntries > 0) insights.push(stats.journalEntries + " journal entr" + (stats.journalEntries > 1 ? 'ies' : 'y') + ". Keep reflecting.");
 
   if (streak >= 7) insights.push("You are on a " + streak + "-day streak. Incredible discipline.");
+
+  // Motivational closing insight
+  const motivational = [
+    "Remember: consistency beats perfection. Show up for yourself.",
+    "Progress is not linear. What matters is that you keep going.",
+    "You are investing in yourself -- the returns are immeasurable.",
+    "Small daily improvements lead to remarkable results over time.",
+    "The fact that you are tracking your wellness says everything about your commitment.",
+  ];
+  insights.push(motivational[new Date().getDay() % motivational.length]);
 
   return insights;
 };
@@ -76,61 +176,37 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
   const { width } = useWindowDimensions();
   const maxWidth = Math.min(width, 520);
 
-  const [stats, setStats] = useState<WeekStats>({
+  const emptyStats: WeekStats = {
     checkins: 0, avgMood: 0, avgWater: 0, avgSleep: 0,
     exerciseDays: 0, totalGlasses: 0, journalEntries: 0,
     bestDay: null, moodTrend: [], sleepTrend: [], waterTrend: [],
-  });
+  };
+
+  const [stats, setStats] = useState<WeekStats>(emptyStats);
+  const [prevStats, setPrevStats] = useState<WeekStats>(emptyStats);
   const [streak, setStreak] = useState(0);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(16)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true, easing: Easing.out(Easing.cubic) }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true, easing: Easing.out(Easing.cubic) }),
+    ]).start();
+  }, []);
 
   useEffect(() => {
     const dates = getWeekDates();
-    const checkins: (CheckInData | null)[] = dates.map(d => getCheckIn(d));
-    const validCheckins = checkins.filter(Boolean) as CheckInData[];
-
-    const moodTrend = checkins.map(c => c?.mood || 0);
-    const sleepTrend = checkins.map(c => c?.sleep || 0);
-    const waterTrend = dates.map(d => {
-      const hydration = storage.getJSON<{ glasses: number } | null>(`${HYDRATION_PREFIX}${d}`, null);
-      return hydration?.glasses || (getCheckIn(d)?.water || 0);
-    });
-
-    let journalEntries = 0;
-    dates.forEach(d => {
-      if (storage.getJSON(`${JOURNAL_PREFIX}${d}`, null)) journalEntries++;
-    });
-
-    let bestDay: string | null = null;
-    let bestMood = 0;
-    dates.forEach((d, i) => {
-      const c = checkins[i];
-      if (c && c.mood > bestMood) {
-        bestMood = c.mood;
-        bestDay = d;
-      }
-    });
-
-    setStats({
-      checkins: validCheckins.length,
-      avgMood: validCheckins.length > 0
-        ? validCheckins.reduce((s, c) => s + c.mood, 0) / validCheckins.length : 0,
-      avgWater: validCheckins.length > 0
-        ? validCheckins.reduce((s, c) => s + c.water, 0) / validCheckins.length : 0,
-      avgSleep: validCheckins.length > 0
-        ? validCheckins.reduce((s, c) => s + c.sleep, 0) / validCheckins.length : 0,
-      exerciseDays: validCheckins.filter(c => c.exercise).length,
-      totalGlasses: waterTrend.reduce((s, g) => s + g, 0),
-      journalEntries,
-      bestDay,
-      moodTrend,
-      sleepTrend,
-      waterTrend,
-    });
+    const prevDates = getPrevWeekDates();
+    setStats(computeStats(dates));
+    setPrevStats(computeStats(prevDates));
     setStreak(getStreak());
   }, []);
 
   const score = getWellnessScore(stats);
-  const insights = getInsights(stats, streak);
+  const prevScore = getWellnessScore(prevStats);
+  const insights = getInsights(stats, prevStats, streak);
   const dates = getWeekDates();
 
   const getScoreLabel = (s: number) => {
@@ -141,9 +217,16 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
   };
 
   const scoreInfo = getScoreLabel(score);
+  const scoreTrend = getTrendArrow(score, prevScore);
+
+  // Trend arrows for stats
+  const moodTrend = getTrendArrow(stats.avgMood, prevStats.avgMood);
+  const sleepTrend = getTrendArrow(stats.avgSleep, prevStats.avgSleep);
+  const waterTrend = getTrendArrow(stats.totalGlasses, prevStats.totalGlasses);
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={[styles.container, { maxWidth, alignSelf: 'center' as const }]}>
+      <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
         <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
@@ -177,33 +260,53 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
           </View>
         )}
         <Text style={[styles.scoreLabel, { color: scoreInfo.color }]}>{scoreInfo.label}</Text>
+        {scoreTrend.arrow ? (
+          <Text style={[styles.scoreTrend, { color: scoreTrend.color }]}>
+            {scoreTrend.arrow} {scoreTrend.label} vs last week
+          </Text>
+        ) : null}
       </View>
 
-      {/* Stat Grid */}
+      {/* Stat Grid with trend arrows */}
       <View style={styles.statGrid}>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{stats.avgMood > 0 ? stats.avgMood.toFixed(1) : '\u2014'}</Text>
+          <View style={styles.statValueRow}>
+            <Text style={styles.statValue}>{stats.avgMood > 0 ? stats.avgMood.toFixed(1) : '\u2014'}</Text>
+            {moodTrend.arrow ? <Text style={[styles.trendArrow, { color: moodTrend.color }]}>{moodTrend.arrow}</Text> : null}
+          </View>
           <Text style={styles.statLabel}>Avg Mood</Text>
+          {prevStats.avgMood > 0 && <Text style={styles.prevWeek}>was {prevStats.avgMood.toFixed(1)}</Text>}
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{stats.avgSleep > 0 ? stats.avgSleep.toFixed(1) + 'h' : '\u2014'}</Text>
+          <View style={styles.statValueRow}>
+            <Text style={styles.statValue}>{stats.avgSleep > 0 ? stats.avgSleep.toFixed(1) + 'h' : '\u2014'}</Text>
+            {sleepTrend.arrow ? <Text style={[styles.trendArrow, { color: sleepTrend.color }]}>{sleepTrend.arrow}</Text> : null}
+          </View>
           <Text style={styles.statLabel}>Avg Sleep</Text>
+          {prevStats.avgSleep > 0 && <Text style={styles.prevWeek}>was {prevStats.avgSleep.toFixed(1)}h</Text>}
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{stats.totalGlasses}</Text>
+          <View style={styles.statValueRow}>
+            <Text style={styles.statValue}>{stats.totalGlasses}</Text>
+            {waterTrend.arrow ? <Text style={[styles.trendArrow, { color: waterTrend.color }]}>{waterTrend.arrow}</Text> : null}
+          </View>
           <Text style={styles.statLabel}>Total Glasses</Text>
+          {prevStats.totalGlasses > 0 && <Text style={styles.prevWeek}>was {prevStats.totalGlasses}</Text>}
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>{stats.exerciseDays}</Text>
           <Text style={styles.statLabel}>Exercise</Text>
+          {prevStats.exerciseDays > 0 && <Text style={styles.prevWeek}>was {prevStats.exerciseDays}</Text>}
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>{stats.checkins}/7</Text>
           <Text style={styles.statLabel}>Check-ins</Text>
+          {prevStats.checkins > 0 && <Text style={styles.prevWeek}>was {prevStats.checkins}/7</Text>}
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>{stats.journalEntries}</Text>
           <Text style={styles.statLabel}>Journal</Text>
+          {prevStats.journalEntries > 0 && <Text style={styles.prevWeek}>was {prevStats.journalEntries}</Text>}
         </View>
       </View>
 
@@ -298,6 +401,7 @@ const WeeklyReportScreen = ({ navigation }: { navigation: any }) => {
 
       <QuickNav navigation={navigation} currentScreen="WeeklyReport" />
       <View style={{ height: 40 }} />
+      </Animated.View>
     </ScrollView>
   );
 };
@@ -326,14 +430,18 @@ const styles = StyleSheet.create({
   scoreNum: { fontSize: 36, fontWeight: '700', fontFamily: serif },
   scoreOf: { fontSize: 14, color: '#8A7A5A', fontFamily: bodySerif, letterSpacing: 1 },
   scoreLabel: { fontSize: 16, fontWeight: '600', fontFamily: bodySerif, marginTop: 14, letterSpacing: 0.5 },
+  scoreTrend: { fontSize: 13, fontFamily: bodySerif, marginTop: 6, letterSpacing: 0.3 },
 
   statGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 20 },
   statBox: {
     width: '31%' as any, backgroundColor: '#FFFFFF', borderRadius: 0, padding: 16,
     marginBottom: 10, alignItems: 'center', borderWidth: 1, borderColor: '#EDE3CC',
   },
+  statValueRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   statValue: { fontSize: 20, fontWeight: '700', color: '#B8963E', fontFamily: serif },
+  trendArrow: { fontSize: 16, fontWeight: '700' },
   statLabel: { fontSize: 10, color: '#8A7A5A', fontFamily: bodySerif, marginTop: 4, textTransform: 'uppercase' as any, letterSpacing: 0.8, textAlign: 'center' },
+  prevWeek: { fontSize: 9, color: '#BBAA88', fontFamily: bodySerif, marginTop: 2 },
 
   trendCard: {
     backgroundColor: '#FFFFFF', borderRadius: 0, padding: 22, marginBottom: 16,

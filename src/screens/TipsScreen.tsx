@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform,
-  useWindowDimensions,
+  useWindowDimensions, Animated, Easing,
 } from 'react-native';
 import { wellnessTips, fetchTips, getWellnessTips } from '../data/tipData';
 import storage from '../utils/storage';
@@ -99,11 +99,24 @@ const TipsScreen = ({ navigation }: { navigation: any }) => {
                   ) : null;
                 })}
               </View>
-              <TouchableOpacity onPress={() => toggleFav(tip)} activeOpacity={0.7}>
-                <Text style={[styles.favHeart, isFav && styles.favHeartActive]}>
-                  {isFav ? 'SAVED' : 'SAVE'}
-                </Text>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+                <TouchableOpacity onPress={() => {
+                  if (Platform.OS === 'web' && navigator.share) {
+                    navigator.share({ text: tip + '\n\n-- Wellth' }).catch(() => {});
+                  } else if (Platform.OS === 'web' && navigator.clipboard) {
+                    navigator.clipboard.writeText(tip).then(() => {
+                      // brief feedback
+                    }).catch(() => {});
+                  }
+                }} activeOpacity={0.7}>
+                  <Text style={styles.shareBtn}>SHARE</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => toggleFav(tip)} activeOpacity={0.7}>
+                  <Text style={[styles.favHeart, isFav && styles.favHeartActive]}>
+                    {isFav ? 'SAVED' : 'SAVE'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
             <Text style={styles.tipText}>{tip}</Text>
           </View>
@@ -146,7 +159,8 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   catTags: { flexDirection: 'row', gap: 8 },
   catTag: { fontSize: 11, color: '#BBAA88', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.2 },
-  favHeart: { fontSize: 10, color: '#CCBBAA', paddingLeft: 8, letterSpacing: 1, fontWeight: '600' as any },
+  shareBtn: { fontSize: 10, color: '#BBAA88', letterSpacing: 1, fontWeight: '600' as any },
+  favHeart: { fontSize: 10, color: '#CCBBAA', letterSpacing: 1, fontWeight: '600' as any },
   favHeartActive: { color: '#D4536A' },
   tipText: { fontSize: 19, lineHeight: 34, color: '#3A3A3A', fontFamily: serif, letterSpacing: 0.2 },
 });
