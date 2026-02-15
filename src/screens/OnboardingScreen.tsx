@@ -147,6 +147,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         {Platform.OS === 'web' && current.video ? (
           <div style={{
             width: '100%', overflow: 'hidden', marginBottom: 24,
+            background: '#FFFFFF',
           } as any}>
             <video
               key={step}
@@ -156,7 +157,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
               muted
               playsInline
               loop
-              style={{ width: '100%', display: 'block' }}
+              style={{ width: '100%', display: 'block', margin: '-1px 0' }}
             />
           </div>
         ) as any : null}

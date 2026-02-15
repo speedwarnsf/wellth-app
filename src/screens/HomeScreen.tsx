@@ -267,7 +267,8 @@ const OwlVideoSection = React.memo(() => {
     <div onClick={cycleVideo} style={{
       width: '100vw', position: 'relative', left: '50%', right: '50%',
       marginLeft: '-50vw', marginRight: '-50vw',
-      overflow: 'hidden', marginBottom: 24,
+      overflow: 'hidden', marginBottom: -1, marginTop: -1,
+      background: '#FFFFFF',
     } as any}>
       <video
         key={videos[currentVideo].src}
@@ -276,7 +277,7 @@ const OwlVideoSection = React.memo(() => {
         playsInline
         loop
         src={videos[currentVideo].src}
-        style={{ width: '100%', display: 'block' }}
+        style={{ width: '100%', display: 'block', margin: '-1px 0' }}
       />
     </div>
   );
