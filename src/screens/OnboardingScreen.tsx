@@ -143,12 +143,10 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
       )}
 
       <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-        {/* Video for steps that have one — full bleed edge to edge, no box */}
+        {/* Video — full width, no padding */}
         {Platform.OS === 'web' && current.video ? (
           <div style={{
-            width: '100vw', position: 'relative', left: '50%', right: '50%',
-            marginLeft: '-50vw', marginRight: '-50vw',
-            overflow: 'hidden', background: '#FFFFFF', marginBottom: 24,
+            width: '100%', overflow: 'hidden', marginBottom: 24,
           } as any}>
             <video
               key={step}
@@ -174,14 +172,17 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         ) as any}
 
         {/* Step indicator */}
+        <View style={{ paddingHorizontal: 36, alignItems: 'center', width: '100%' }}>
         <Text style={[styles.stepIndicator, { color: current.accent }]}>
           {step + 1} of {STEPS.length}
         </Text>
 
         <Text style={styles.title}>{current.title}</Text>
         <Text style={styles.body}>{current.body}</Text>
+        </View>
 
         {/* Notification CTA */}
+        <View style={{ paddingHorizontal: 36, alignItems: 'center', width: '100%' }}>
         {isNotifStep && isNotificationsSupported() && notifStatus !== 'granted' && (
           <TouchableOpacity
             style={styles.notifBtn}
@@ -195,6 +196,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         {isNotifStep && notifStatus === 'granted' && (
           <Text style={styles.notifEnabled}>Notifications enabled — you are all set.</Text>
         )}
+        </View>
       </Animated.View>
 
       {/* Bottom section */}
@@ -226,7 +228,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1, justifyContent: 'flex-start', alignItems: 'center',
-    paddingHorizontal: 36, paddingTop: 60, paddingBottom: 40, width: '100%',
+    paddingHorizontal: 0, paddingTop: 60, paddingBottom: 40, width: '100%',
     backgroundColor: '#FFFFFF',
   },
   progressBar: {
@@ -236,9 +238,9 @@ const styles = StyleSheet.create({
   progressFill: {
     height: 3, backgroundColor: '#B8963E',
   },
-  skipBtn: { position: 'absolute', top: Platform.OS === 'web' ? 48 : 60, right: 28 },
+  skipBtn: { position: 'absolute', top: Platform.OS === 'web' ? 48 : 60, right: 36 },
   skipText: { fontSize: 16, color: '#BBAA88', fontFamily: bodySerif },
-  content: { alignItems: 'center', paddingBottom: 32, flex: 1, justifyContent: 'center' },
+  content: { alignItems: 'center', paddingBottom: 32, flex: 1, justifyContent: 'center', width: '100%' },
   stepIndicator: {
     fontSize: 13, fontWeight: '600', letterSpacing: 2,
     textTransform: 'uppercase' as any, marginBottom: 12, fontFamily: bodySerif,
