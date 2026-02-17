@@ -71,7 +71,7 @@ const ShareStreakScreen = ({ navigation }: { navigation?: any }) => {
   const handleShare = async () => {
     if (Platform.OS === 'web' && navigator.share) {
       try {
-        await navigator.share({ title: 'My Wellth Streak', text: shareText, url: 'https://wellth-app.vercel.app' });
+        await navigator.share({ title: 'My Wellth Streak', text: shareText, url: 'https://wellth-mvp.vercel.app' });
       } catch {}
     } else {
       handleCopyText();

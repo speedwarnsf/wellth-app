@@ -956,20 +956,22 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   const dayIndex = getDayIndex();
 
   const [favorites, setFavorites] = useState<string[]>(loadFavorites);
-  const [showFavs, setShowFavs] = useState(false);
-  const [showSplash, setShowSplash] = useState(() => !hasSplashBeenSeen() && hasOnboarded());
   const [showOnboarding, setShowOnboarding] = useState(!hasOnboarded());
   const [showTutorial, setShowTutorial] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   const [streak, setStreak] = useState(0);
   const [checkedInToday, setCheckedInToday] = useState(false);
   const [liveTips, setLiveTips] = useState<{ wealth: string[]; wellness: string[] }>({ wealth: wealthTips, wellness: wellnessTips });
   const [showConfetti, setShowConfetti] = useState(false);
 
+  // Alternate between wealth and wellness tips daily
+  const todayTipLabel = dayIndex % 2 === 0 ? 'Wellth tip' : 'wellness tip';
+  const todayTips = dayIndex % 2 === 0 ? liveTips.wealth : liveTips.wellness;
+
   useEffect(() => {
     const s = getStreak();
     setStreak(s);
     setCheckedInToday(!!getCheckIn(todayKey()));
-    // Trigger confetti for milestone streaks
     if (getStreakMilestone(s)) {
       const confettiKey = `wellth_confetti_${s}`;
       if (Platform.OS === 'web' && !sessionStorage.getItem(confettiKey)) {
@@ -986,9 +988,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(24)).current;
 
-  useEffect(() => {
-    initNotifications();
-  }, []);
+  useEffect(() => { initNotifications(); }, []);
 
   useEffect(() => {
     injectCSS();
@@ -1008,10 +1008,6 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
 
   const isSmall = width < 400;
 
-  if (showSplash && Platform.OS === 'web') {
-    return <SplashScreen onDone={() => setShowSplash(false)} />;
-  }
-
   if (showOnboarding) {
     return <OnboardingScreen onComplete={() => {
       setShowOnboarding(false);
@@ -1026,7 +1022,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
       {showTutorial && <TutorialOverlay onComplete={() => setShowTutorial(false)} />}
       <Animated.View style={Platform.OS !== 'web' ? { opacity: fadeAnim, transform: [{ translateY: slideAnim }] } : undefined}>
 
-        {/* Header */}
+        {/* ── Hero: Logo ── */}
         <View style={styles.logoContainer}>
           <Image
             source={require('../assets/wellth-logo.png')}
@@ -1037,35 +1033,27 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           />
         </View>
 
-        {/* Owl Video — full frame, edge to edge — DO NOT TOUCH */}
+        {/* ── Hero: Owl Video — DO NOT TOUCH ── */}
         <OwlVideoSection />
 
-        {/* Greeting */}
+        {/* ── Hero: Greeting ── */}
         <View style={styles.greetingRow}>
           <Text style={styles.greetingText} accessibilityRole="header" aria-level={1}>{getGreeting()}</Text>
         </View>
         <Text style={styles.greetingSubtext}>{getPersonalGreeting()}</Text>
         <Text style={styles.greetingDate} accessibilityRole="text">{getFormattedDate()}</Text>
 
-        {/* Off-white background for rest of content */}
+        {/* ── Content ── */}
         <View style={{ backgroundColor: '#FAF8F3', marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28, paddingTop: 24, marginTop: 8 }}>
 
-        {/* Quick Pulse - most important, always accessible */}
         {Platform.OS === 'web' && (<div id="main-content" tabIndex={-1} /> as any)}
-        <QuickPulse />
 
-        {/* Streak Visualization */}
-        <StreakVisualization streak={streak} />
-
-        {/* Wellness Score Breakdown */}
-        <WellnessBreakdown />
-
-        {/* Primary Action - Check In */}
+        {/* Primary Action — Check In (only if not yet done) */}
         {!checkedInToday && (
           <TouchableOpacity
             style={{
               backgroundColor: '#B8963E', paddingVertical: 18, alignItems: 'center',
-              marginBottom: 16, borderWidth: 1.5, borderColor: '#B8963E',
+              marginBottom: 24, borderWidth: 1.5, borderColor: '#B8963E',
             }}
             onPress={() => navigation?.navigate('CheckIn')}
             activeOpacity={0.7}
@@ -1079,29 +1067,52 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           </TouchableOpacity>
         )}
 
-        {/* Evening Prompt Banner (shows after 5pm) */}
-        <EveningPromptBanner navigation={navigation} />
+        {/* Streak (only if checked in) */}
+        {checkedInToday && <StreakVisualization streak={streak} />}
 
-        {/* Weekly Motivational Quote */}
-        <WeeklyQuote />
+        {/* Quick Pulse */}
+        <QuickPulse />
 
-        {/* Daily Affirmation */}
-        <DailyAffirmation dayIndex={dayIndex} />
-
-        {/* Feature Buttons - Row 1: Core tracking */}
-        <View style={styles.featureGrid}>
+        {/* Feature Grid — Row 1 */}
+        <View style={[styles.featureGrid, { marginTop: 8 }]}>
           <TouchableOpacity
             style={[styles.featureBtn, checkedInToday && styles.featureBtnHighlight]}
             onPress={() => navigation?.navigate('CheckIn')}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel={checkedInToday ? 'Check-in complete for today' : 'Daily check-in, not yet completed'}
+            accessibilityLabel={checkedInToday ? 'Check-in complete for today' : 'Daily check-in'}
             {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
           >
             <FeatureIcon name={checkedInToday ? 'checkedIn' : 'checkIn'} />
             <Text style={styles.featureBtnLabel}>{checkedInToday ? 'Checked In' : 'Check In'}</Text>
             {!checkedInToday && <View style={styles.featureDot} accessibilityLabel="Not completed" />}
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('Breathing')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Breathing exercise"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+          >
+            <FeatureIcon name="breathe" />
+            <Text style={styles.featureBtnLabel}>Breathe</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.featureBtn}
+            onPress={() => navigation?.navigate('Journal')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Open journal"
+            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
+          >
+            <FeatureIcon name="journal" />
+            <Text style={styles.featureBtnLabel}>Journal</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Feature Grid — Row 2 */}
+        <View style={[styles.featureGrid, { marginBottom: 24 }]}>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('Sleep')}
@@ -1124,47 +1135,6 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             <FeatureIcon name="hydration" />
             <Text style={styles.featureBtnLabel}>Hydration</Text>
           </TouchableOpacity>
-        </View>
-
-        {/* Row 2: Reflection */}
-        <View style={styles.featureGrid}>
-          <TouchableOpacity
-            style={styles.featureBtn}
-            onPress={() => navigation?.navigate('Journal')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Open journal"
-            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
-          >
-            <FeatureIcon name="journal" />
-            <Text style={styles.featureBtnLabel}>Journal</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.featureBtn}
-            onPress={() => navigation?.navigate('Gratitude')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Gratitude journal"
-            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
-          >
-            <FeatureIcon name="journal" />
-            <Text style={styles.featureBtnLabel}>Gratitude</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.featureBtn}
-            onPress={() => navigation?.navigate('Breathing')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Breathing exercise"
-            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
-          >
-            <FeatureIcon name="breathe" />
-            <Text style={styles.featureBtnLabel}>Breathe</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Row 3: Insights */}
-        <View style={styles.featureGrid}>
           <TouchableOpacity
             style={styles.featureBtn}
             onPress={() => navigation?.navigate('WeeklyReport')}
@@ -1176,112 +1146,69 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
             <FeatureIcon name="report" />
             <Text style={styles.featureBtnLabel}>Report</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.featureBtn}
-            onPress={() => navigation?.navigate('MoodHistory')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Mood history"
-            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
-          >
-            <FeatureIcon name="report" />
-            <Text style={styles.featureBtnLabel}>Mood</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.featureBtn}
-            onPress={() => navigation?.navigate('Tips')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Wellness tips"
-            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
-          >
-            <FeatureIcon name="tips" />
-            <Text style={styles.featureBtnLabel}>Tips</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Row 4: Social & Engagement */}
-        <View style={styles.featureGrid}>
-          <TouchableOpacity
-            style={styles.featureBtn}
-            onPress={() => navigation?.navigate('MyJourney')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="View my wellness journey"
-            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
-          >
-            <FeatureIcon name="report" />
-            <Text style={styles.featureBtnLabel}>My Journey</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.featureBtn}
-            onPress={() => navigation?.navigate('Achievements')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="View achievement badges"
-            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
-          >
-            <FeatureIcon name="tips" />
-            <Text style={styles.featureBtnLabel}>Badges</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.featureBtn}
-            onPress={() => navigation?.navigate('ShareStreak')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Share your streak"
-            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
-          >
-            <FeatureIcon name="report" />
-            <Text style={styles.featureBtnLabel}>Share</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Row 5: Evening Reflection */}
-        <View style={[styles.featureGrid, { marginBottom: 20 }]}>
-          <TouchableOpacity
-            style={[styles.featureBtn, { flex: 1 }]}
-            onPress={() => navigation?.navigate('EveningReflection')}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Evening reflection journal"
-            {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
-          >
-            <FeatureIcon name="journal" />
-            <Text style={styles.featureBtnLabel}>Evening Reflection</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Settings link */}
+        {/* More — expandable secondary features */}
         <TouchableOpacity
-          style={styles.settingsBtn}
-          onPress={() => navigation?.navigate('Settings')}
+          style={{ alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 28, borderWidth: 1, borderColor: '#EDE3CC', backgroundColor: '#FFFFFF', marginBottom: 16 }}
+          onPress={() => setShowMore(s => !s)}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="Open settings"
+          accessibilityLabel={showMore ? 'Show fewer options' : 'Show more options'}
+          accessibilityState={{ expanded: showMore }}
+          {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}
         >
-          <Text style={styles.settingsBtnText}>Settings</Text>
-        </TouchableOpacity>
-
-        {/* Tip Cards */}
-        <AnimatedTipCard label="Wellth tip" tips={liveTips.wealth} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
-        <AnimatedTipCard label="wellness tip" tips={liveTips.wellness} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
-
-        {/* Favorites toggle */}
-        <TouchableOpacity
-          style={styles.favToggle}
-          onPress={() => setShowFavs(s => !s)}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityLabel={showFavs ? 'Hide saved tips' : `Show ${favorites.length} saved tips`}
-          accessibilityState={{ expanded: showFavs }}
-        >
-          <Text style={styles.favToggleText}>
-            {showFavs ? 'Hide Saved Tips' : `Saved Tips (${favorites.length})`}
+          <Text style={{ fontSize: 12, fontWeight: '600', color: '#8A7A5A', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 0.8 }}>
+            {showMore ? 'Less' : 'More'}
           </Text>
         </TouchableOpacity>
 
-        {showFavs && <FavoritesPanel favorites={favorites} onClose={() => setShowFavs(false)} />}
+        {showMore && (
+          <>
+            <View style={styles.featureGrid}>
+              <TouchableOpacity style={styles.featureBtn} onPress={() => navigation?.navigate('Gratitude')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Gratitude journal" {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}>
+                <FeatureIcon name="journal" />
+                <Text style={styles.featureBtnLabel}>Gratitude</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.featureBtn} onPress={() => navigation?.navigate('Achievements')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="View achievement badges" {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}>
+                <FeatureIcon name="tips" />
+                <Text style={styles.featureBtnLabel}>Badges</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.featureBtn} onPress={() => navigation?.navigate('MyJourney')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="View my wellness journey" {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}>
+                <FeatureIcon name="report" />
+                <Text style={styles.featureBtnLabel}>Journey</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.featureGrid, { marginBottom: 8 }]}>
+              <TouchableOpacity style={styles.featureBtn} onPress={() => navigation?.navigate('MoodHistory')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Mood history" {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}>
+                <FeatureIcon name="report" />
+                <Text style={styles.featureBtnLabel}>Mood</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.featureBtn} onPress={() => navigation?.navigate('ShareStreak')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Share your streak" {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}>
+                <FeatureIcon name="report" />
+                <Text style={styles.featureBtnLabel}>Share</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.featureBtn} onPress={() => navigation?.navigate('EveningReflection')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Evening reflection" {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}>
+                <FeatureIcon name="journal" />
+                <Text style={styles.featureBtnLabel}>Evening</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.featureGrid, { marginBottom: 16 }]}>
+              <TouchableOpacity style={styles.featureBtn} onPress={() => navigation?.navigate('Tips')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Wellness tips" {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}>
+                <FeatureIcon name="tips" />
+                <Text style={styles.featureBtnLabel}>Tips</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.featureBtn} onPress={() => navigation?.navigate('Settings')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Settings" {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}>
+                <FeatureIcon name="report" />
+                <Text style={styles.featureBtnLabel}>Settings</Text>
+              </TouchableOpacity>
+              <View style={{ flex: 1 }} />
+            </View>
+          </>
+        )}
+
+        {/* Single Tip Card — alternates daily */}
+        <AnimatedTipCard label={todayTipLabel} tips={todayTips} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
 
         {/* Footer */}
         <View style={styles.footerDivider} />
