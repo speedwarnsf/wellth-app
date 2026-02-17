@@ -1,13 +1,29 @@
 import { Platform } from 'react-native';
+import { syncKey } from '../lib/syncEngine';
 
-// localStorage wrapper for web
+// Active user ID for cloud sync (set by AuthContext)
+let _activeUserId: string | null = null;
+
+export const setActiveUserId = (id: string | null) => {
+  _activeUserId = id;
+};
+
+export const getActiveUserId = () => _activeUserId;
+
+// localStorage wrapper for web, with background Supabase sync
 const storage = {
   get(key: string): string | null {
     if (Platform.OS !== 'web') return null;
     try { return localStorage.getItem(key); } catch { return null; }
   },
   set(key: string, value: string) {
-    if (Platform.OS === 'web') localStorage.setItem(key, value);
+    if (Platform.OS === 'web') {
+      localStorage.setItem(key, value);
+      // Background sync to cloud if authenticated
+      if (_activeUserId) {
+        syncKey(key, _activeUserId).catch(() => {});
+      }
+    }
   },
   getJSON<T>(key: string, fallback: T): T {
     const raw = storage.get(key);
@@ -77,9 +93,9 @@ export const updateStreak = () => {
 };
 
 export const getStreakMilestone = (streak: number): string | null => {
-  if (streak === 7) return 'One week streak — well done.';
+  if (streak === 7) return 'One week streak -- well done.';
   if (streak === 14) return 'Two weeks strong. The habit is forming.';
-  if (streak === 21) return 'Three weeks — this is who you are now.';
+  if (streak === 21) return 'Three weeks -- this is who you are now.';
   if (streak === 30) return '30 days of consistency. Remarkable.';
   if (streak === 60) return '60 days. Unstoppable.';
   if (streak === 90) return '90 days. You are legendary.';

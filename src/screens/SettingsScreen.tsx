@@ -4,6 +4,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import storage from '../utils/storage';
+import { useAuth } from '../lib/AuthContext';
 import QuickNav from '../components/QuickNav';
 
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
@@ -64,6 +65,7 @@ const SettingsScreen = ({ navigation }: { navigation: any }) => {
   const { width } = useWindowDimensions();
   const maxWidth = Math.min(width, 520);
 
+  const { user, isGuest, signOut } = useAuth();
   const [settings, setSettings] = useState<Settings>(getSettings);
   const [resetConfirm, setResetConfirm] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -285,6 +287,32 @@ const SettingsScreen = ({ navigation }: { navigation: any }) => {
           <TouchableOpacity onPress={() => setResetConfirm(false)} style={styles.cancelBtn}>
             <Text style={styles.cancelBtnText}>Cancel</Text>
           </TouchableOpacity>
+        )}
+      </View>
+
+      {/* Account */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Account</Text>
+        {user ? (
+          <>
+            <Text style={styles.sectionDesc}>{user.email}</Text>
+            <Text style={{ fontSize: 13, color: '#27AE60', fontFamily: bodySerif, marginBottom: 12 }}>
+              Data syncs to cloud
+            </Text>
+            <TouchableOpacity
+              onPress={signOut}
+              style={{
+                paddingVertical: 14, alignItems: 'center' as any,
+                borderWidth: 1.5, borderColor: '#D4B96A', backgroundColor: '#FFFFFF',
+              }}
+            >
+              <Text style={{ fontSize: 15, color: '#B8963E', fontFamily: bodySerif, fontWeight: '600', letterSpacing: 0.5 }}>
+                Sign Out
+              </Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <Text style={styles.sectionDesc}>Guest mode -- data stored locally only.</Text>
         )}
       </View>
 
