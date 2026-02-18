@@ -964,9 +964,9 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
   const [liveTips, setLiveTips] = useState<{ wealth: string[]; wellness: string[] }>({ wealth: wealthTips, wellness: wellnessTips });
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Alternate between wealth and wellness tips daily
-  const todayTipLabel = dayIndex % 2 === 0 ? 'Wellth tip' : 'wellness tip';
-  const todayTips = dayIndex % 2 === 0 ? liveTips.wealth : liveTips.wellness;
+  // Show both wealth and wellness tips every day
+  const wealthTipLabel = 'wealth tip';
+  const wellnessTipLabel = 'wellness tip';
 
   useEffect(() => {
     const s = getStreak();
@@ -1207,8 +1207,9 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
           </>
         )}
 
-        {/* Single Tip Card — alternates daily */}
-        <AnimatedTipCard label={todayTipLabel} tips={todayTips} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
+        {/* Wealth + Wellness — both every day */}
+        <AnimatedTipCard label={wealthTipLabel} tips={liveTips.wealth} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
+        <AnimatedTipCard label={wellnessTipLabel} tips={liveTips.wellness} dayIndex={dayIndex} favorites={favorites} onToggleFav={toggleFav} />
 
         {/* Footer */}
         <View style={styles.footerDivider} />
