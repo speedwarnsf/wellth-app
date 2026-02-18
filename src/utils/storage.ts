@@ -1,11 +1,15 @@
 import { Platform } from 'react-native';
-import { syncKey } from '../lib/syncEngine';
+import { syncKey, setActiveDEK } from '../lib/syncEngine';
 
 // Active user ID for cloud sync (set by AuthContext)
 let _activeUserId: string | null = null;
 
 export const setActiveUserId = (id: string | null) => {
   _activeUserId = id;
+};
+
+export const setActiveDEKFromAuth = (dek: CryptoKey | null) => {
+  setActiveDEK(dek);
 };
 
 export const getActiveUserId = () => _activeUserId;

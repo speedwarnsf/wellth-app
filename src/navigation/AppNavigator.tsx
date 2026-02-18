@@ -3,7 +3,7 @@ import { Platform, View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
 import { useAuth } from '../lib/AuthContext';
-import { setActiveUserId } from '../utils/storage';
+import { setActiveUserId, setActiveDEKFromAuth } from '../utils/storage';
 import { pullCloudToLocal, migrateLocalToCloud } from '../lib/syncEngine';
 import AuthScreen from '../screens/AuthScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -26,20 +26,22 @@ import MyJourneyScreen from '../screens/MyJourneyScreen';
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-  const { user, loading, isGuest } = useAuth();
+  const { user, loading, isGuest, dek } = useAuth();
 
-  // Sync user ID to storage layer
+  // Sync user ID + DEK to storage layer
   useEffect(() => {
     if (user) {
       setActiveUserId(user.id);
+      setActiveDEKFromAuth(dek);
       // On login, pull cloud data then migrate any local data
       pullCloudToLocal(user.id).then(() => {
         migrateLocalToCloud(user.id).catch(() => {});
       }).catch(() => {});
     } else {
       setActiveUserId(null);
+      setActiveDEKFromAuth(null);
     }
-  }, [user]);
+  }, [user, dek]);
 
   if (loading) {
     return (

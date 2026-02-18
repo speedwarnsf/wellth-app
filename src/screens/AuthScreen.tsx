@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../lib/AuthContext';
 import { migrateLocalToCloud, pullCloudToLocal } from '../lib/syncEngine';
+import RecoveryPhraseModal from '../components/RecoveryPhraseModal';
 
 const serif = Platform.OS === 'web' ? '"Playfair Display", Georgia, "Times New Roman", serif' : undefined;
 const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined;
@@ -12,7 +13,7 @@ const bodySerif = Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : 
 const AuthScreen = () => {
   const { width } = useWindowDimensions();
   const maxWidth = Math.min(width, 440);
-  const { signIn, signUp, continueAsGuest } = useAuth();
+  const { signIn, signUp, continueAsGuest, recoveryPhrase, clearRecoveryPhrase } = useAuth();
 
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
@@ -59,11 +60,12 @@ const AuthScreen = () => {
         // Auth state change will handle the rest
       }
     } else {
-      const { error: err } = await signUp(email.trim(), password);
-      if (err) {
-        setError(err);
+      const result = await signUp(email.trim(), password);
+      if (result.error) {
+        setError(result.error);
         setLoading(false);
       } else {
+        // Recovery phrase will be shown via modal if encryption was set up
         setSuccess('Account created. Check your email to confirm, then sign in.');
         setMode('login');
         setLoading(false);
@@ -72,6 +74,13 @@ const AuthScreen = () => {
   };
 
   return (
+    <>
+    {recoveryPhrase && (
+      <RecoveryPhraseModal
+        phrase={recoveryPhrase}
+        onConfirm={clearRecoveryPhrase}
+      />
+    )}
     <ScrollView
       style={{ flex: 1, backgroundColor: '#FFF9EE' }}
       contentContainerStyle={{ alignItems: 'center', paddingVertical: 80, paddingHorizontal: 24 }}
@@ -284,6 +293,7 @@ const AuthScreen = () => {
         </Text>
       </View>
     </ScrollView>
+    </>
   );
 };
 

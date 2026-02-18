@@ -1,5 +1,34 @@
 import { Platform } from 'react-native';
 import { supabase } from './supabase';
+import { encrypt, decrypt, isEncrypted } from './crypto';
+
+// Active DEK reference (set from AuthContext via setActiveDEK)
+let _activeDEK: CryptoKey | null = null;
+
+export function setActiveDEK(dek: CryptoKey | null) {
+  _activeDEK = dek;
+}
+
+// Encrypt a value if DEK is available
+async function maybeEncrypt(value: any): Promise<any> {
+  if (!_activeDEK) return value;
+  if (value === null || value === undefined) return value;
+  const str = typeof value === 'string' ? value : JSON.stringify(value);
+  return await encrypt(str, _activeDEK);
+}
+
+// Decrypt a value if it looks encrypted and DEK is available
+async function maybeDecrypt(value: any): Promise<any> {
+  if (!_activeDEK) return value;
+  if (!isEncrypted(value)) return value; // backward compatible: unencrypted data passes through
+  try {
+    const decrypted = await decrypt(value, _activeDEK);
+    // Try to parse as JSON (arrays, objects), otherwise return string
+    try { return JSON.parse(decrypted); } catch { return decrypted; }
+  } catch {
+    return value; // decryption failed, return as-is
+  }
+}
 
 // Maps localStorage key prefixes to Supabase tables and column mappings
 const TABLE_MAP: Record<string, { table: string; dateField: boolean; columns?: string[] }> = {
@@ -71,7 +100,7 @@ async function syncEntry(key: string, userId: string): Promise<boolean> {
     for (const [jsKey, value] of Object.entries(data)) {
       if (jsKey === 'date' || jsKey === 'timestamp') continue;
       const dbCol = mapping[jsKey] || jsKey;
-      row[dbCol] = value;
+      row[dbCol] = await maybeEncrypt(value);
     }
 
     // Upsert (for tables with unique constraint on user_id + date)
@@ -183,12 +212,12 @@ export async function pullCloudToLocal(userId: string): Promise<number> {
         const date = row.date || '';
         const key = `${prefix}${date}`;
 
-        // Convert DB columns back to JS format
+        // Convert DB columns back to JS format, decrypting if needed
         const obj: Record<string, any> = {};
         for (const [col, val] of Object.entries(row)) {
           if (['id', 'user_id', 'created_at', 'date'].includes(col)) continue;
           const jsKey = reverseMap[col] || col;
-          obj[jsKey] = val;
+          obj[jsKey] = await maybeDecrypt(val);
         }
         obj.date = date;
         obj.timestamp = new Date(row.created_at).getTime();
