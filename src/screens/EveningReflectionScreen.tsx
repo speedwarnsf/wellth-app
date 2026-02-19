@@ -215,6 +215,9 @@ const EveningReflectionScreen = ({ navigation }: { navigation?: any }) => {
       <Text style={{ textAlign: 'center', fontSize: 13, color: '#BBAA88', fontStyle: 'italic', fontFamily: bodySerif }}>
         Let the day go gently.
       </Text>
+      <Text style={{ fontSize: 11, color: '#BBAA88', fontFamily: bodySerif, fontStyle: 'italic', textAlign: 'center', lineHeight: 16, marginTop: 20, paddingHorizontal: 12, ...(Platform.OS === 'web' ? { textWrap: 'balance' } as any : {}) }}>
+        All data is encrypted with AES-256-GCM end-to-end encryption and can only ever be read by you as a logged-in user. Your entries are unretrievable any other way. Your privacy is secure.
+      </Text>
     </ScrollView>
   );
 };

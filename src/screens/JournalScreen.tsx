@@ -137,10 +137,28 @@ const JournalScreen = ({ navigation }: { navigation: any }) => {
 
     const existing = storage.getJSON<JournalEntry | null>(`${JOURNAL_PREFIX}${today}`, null);
     if (existing) {
-      setJournalText(existing.text);
-      setSelectedTags(existing.tags);
-      setMoodTag(existing.moodTag || '');
-      setSaved(true);
+      // Check if this entry was actually written today (local time)
+      // Older entries may have been saved under UTC dates that collide with today's local date
+      const entryDate = existing.timestamp ? new Date(existing.timestamp) : null;
+      const now = new Date();
+      const isFromToday = entryDate &&
+        entryDate.getFullYear() === now.getFullYear() &&
+        entryDate.getMonth() === now.getMonth() &&
+        entryDate.getDate() === now.getDate();
+
+      if (isFromToday) {
+        setJournalText(existing.text);
+        setSelectedTags(existing.tags);
+        setMoodTag(existing.moodTag || '');
+        setSaved(true);
+      } else if (entryDate) {
+        // Move the miskeyed entry to its correct local date key
+        const correctKey = `${entryDate.getFullYear()}-${String(entryDate.getMonth() + 1).padStart(2, '0')}-${String(entryDate.getDate()).padStart(2, '0')}`;
+        if (correctKey !== today) {
+          storage.setJSON(`${JOURNAL_PREFIX}${correctKey}`, existing);
+          try { localStorage.removeItem(`${JOURNAL_PREFIX}${today}`); } catch {}
+        }
+      }
     }
     loadHistory();
   }, []);
@@ -349,6 +367,9 @@ const JournalScreen = ({ navigation }: { navigation: any }) => {
         >
           <Text style={styles.saveBtnText}>{saved ? 'Saved' : 'Save Entry'}</Text>
         </TouchableOpacity>
+        <Text style={{ fontSize: 11, color: '#BBAA88', fontFamily: bodySerif, fontStyle: 'italic', textAlign: 'center', lineHeight: 16, marginTop: 12, ...(Platform.OS === 'web' ? { textWrap: 'balance' } as any : {}) }}>
+          All data is encrypted with AES-256-GCM end-to-end encryption and can only ever be read by you as a logged-in user. Your entries are unretrievable any other way. Your privacy is secure.
+        </Text>
       </View>
 
       {/* History */}

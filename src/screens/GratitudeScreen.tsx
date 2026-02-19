@@ -201,6 +201,9 @@ const GratitudeScreen = ({ navigation }: { navigation: any }) => {
         >
           <Text style={styles.saveBtnText}>{saved ? 'Saved' : 'Save Gratitude'}</Text>
         </TouchableOpacity>
+        <Text style={{ fontSize: 11, color: '#BBAA88', fontFamily: Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : undefined, fontStyle: 'italic', textAlign: 'center', lineHeight: 16, marginTop: 12, ...(Platform.OS === 'web' ? { textWrap: 'balance' } as any : {}) }}>
+          All data is encrypted with AES-256-GCM end-to-end encryption and can only ever be read by you as a logged-in user. Your entries are unretrievable any other way. Your privacy is secure.
+        </Text>
 
         {/* History */}
         <TouchableOpacity onPress={() => setShowHistory(!showHistory)} style={styles.historyToggle}>

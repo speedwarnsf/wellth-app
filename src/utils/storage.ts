@@ -42,7 +42,13 @@ const storage = {
 export default storage;
 
 // Date helpers
-export const todayKey = () => new Date().toISOString().slice(0, 10);
+export const todayKey = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export const getWeekDates = (): string[] => {
   const dates: string[] = [];
