@@ -80,11 +80,12 @@ interface DayLog {
   movement: number; // minutes
   meals: number;
   spend: number; // dollar amount
+  steps: number; // daily steps
   pulses: { time: string; mood: number }[];
 }
 
 const emptyDayLog = (): DayLog => ({
-  water: 0, movement: 0, meals: 0, spend: 0, pulses: [],
+  water: 0, movement: 0, meals: 0, spend: 0, steps: 0, pulses: [],
 });
 
 const getDayLog = (): DayLog => {
@@ -635,6 +636,14 @@ const TapLogger = ({ dayLog, onUpdate }: { dayLog: DayLog; onUpdate: (log: DayLo
       increment: 5,
       prefix: '$',
     },
+    {
+      key: 'steps' as const,
+      label: 'Steps',
+      value: dayLog.steps,
+      unit: '/ 10,000',
+      color: '#7A6520',
+      increment: 1000,
+    },
   ];
 
   return (
@@ -825,6 +834,7 @@ const TimeContextBanner = ({ dayLog, navigation }: { dayLog: DayLog; navigation?
     if (dayLog.water > 0) summaryItems.push(`${dayLog.water} glasses of water`);
     if (dayLog.movement > 0) summaryItems.push(`${dayLog.movement} min of exercise`);
     if (dayLog.meals > 0) summaryItems.push(`${dayLog.meals} meal${dayLog.meals !== 1 ? 's' : ''}`);
+    if (dayLog.steps > 0) summaryItems.push(`${dayLog.steps.toLocaleString()} steps`);
     if (dayLog.spend > 0) summaryItems.push(`$${dayLog.spend} spent`);
 
     return (
