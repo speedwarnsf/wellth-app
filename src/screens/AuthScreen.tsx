@@ -85,6 +85,7 @@ const AuthScreen = () => {
       style={{ flex: 1, backgroundColor: '#FFF9EE' }}
       contentContainerStyle={{ alignItems: 'center', paddingVertical: 80, paddingHorizontal: 24 }}
       keyboardShouldPersistTaps="handled"
+      accessibilityRole="main"
     >
       <View style={{ width: '100%', maxWidth, alignItems: 'center' }}>
         {/* Title */}
@@ -133,6 +134,7 @@ const AuthScreen = () => {
             autoComplete="email"
             placeholder="you@example.com"
             placeholderTextColor="#CCC"
+            accessibilityLabel="Email address"
             style={{
               fontFamily: bodySerif,
               fontSize: 16,
@@ -161,6 +163,7 @@ const AuthScreen = () => {
             autoComplete="password"
             placeholder="At least 6 characters"
             placeholderTextColor="#CCC"
+            accessibilityLabel="Password"
             style={{
               fontFamily: bodySerif,
               fontSize: 16,
@@ -199,6 +202,9 @@ const AuthScreen = () => {
         <TouchableOpacity
           onPress={handleSubmit}
           disabled={loading}
+          accessibilityRole="button"
+          accessibilityLabel={mode === 'login' ? 'Sign in' : 'Create account'}
+          accessibilityState={{ disabled: loading }}
           style={{
             width: '100%',
             backgroundColor: '#B8963E',
@@ -231,6 +237,8 @@ const AuthScreen = () => {
             setSuccess('');
           }}
           style={{ marginBottom: 32, paddingVertical: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={mode === 'login' ? 'Switch to sign up' : 'Switch to sign in'}
         >
           <Text style={{
             fontFamily: bodySerif,
@@ -263,6 +271,8 @@ const AuthScreen = () => {
         {/* Guest mode */}
         <TouchableOpacity
           onPress={continueAsGuest}
+          accessibilityRole="button"
+          accessibilityLabel="Continue as guest"
           style={{
             width: '100%',
             borderWidth: 1,
