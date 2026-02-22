@@ -880,12 +880,142 @@ const TimeContextBanner = ({ dayLog, navigation }: { dayLog: DayLog; navigation?
   return null;
 };
 
+// ── Tip Save/Share helpers ────────────────────────────────
+const FAVORITES_KEY = 'wellth_favorites';
+
+const getFavorites = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+  } catch { return []; }
+};
+
+const toggleFavorite = (tip: string): boolean => {
+  const favs = getFavorites();
+  const idx = favs.indexOf(tip);
+  if (idx >= 0) { favs.splice(idx, 1); } else { favs.push(tip); }
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+  return idx < 0; // true if now saved
+};
+
+const generateShareCard = async (tipText: string): Promise<Blob> => {
+  const SIZE = 1080;
+  const canvas = document.createElement('canvas');
+  canvas.width = SIZE;
+  canvas.height = SIZE;
+  const ctx = canvas.getContext('2d')!;
+
+  // White background
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, SIZE, SIZE);
+
+  // Tip text - centered
+  ctx.fillStyle = '#3A3A3A';
+  ctx.font = '42px "Playfair Display", Georgia, "Times New Roman", serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Word wrap
+  const maxWidth = SIZE - 360;
+  const words = tipText.split(' ');
+  const lines: string[] = [];
+  let currentLine = '';
+  for (const word of words) {
+    const test = currentLine ? currentLine + ' ' + word : word;
+    if (ctx.measureText(test).width > maxWidth) {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = test;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+
+  const lineHeight = 58;
+  const totalHeight = lines.length * lineHeight;
+  const startY = (SIZE - totalHeight) / 2 - 40;
+  lines.forEach((line, i) => {
+    ctx.fillText(line, SIZE / 2, startY + i * lineHeight);
+  });
+
+  // Bottom section
+  const bottomY = SIZE - 80;
+
+  // Load images
+  const loadImg = (src: string): Promise<HTMLImageElement> =>
+    new Promise((resolve) => {
+      const img = new window.Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(img);
+      img.src = src;
+    });
+
+  try {
+    const [logo, owl] = await Promise.all([
+      loadImg('/wellth-logo.png'),
+      loadImg('/owl-icon.png'),
+    ]);
+    // Logo lower-left (~200px wide)
+    if (logo.complete && logo.naturalWidth) {
+      const lw = 200;
+      const lh = lw * (logo.naturalHeight / logo.naturalWidth);
+      ctx.drawImage(logo, 60, bottomY - lh / 2, lw, lh);
+    }
+    // Owl lower-right (~300px)
+    if (owl.complete && owl.naturalWidth) {
+      const ow = 300;
+      ctx.drawImage(owl, SIZE - 60 - ow, bottomY - ow / 2, ow, ow);
+    }
+  } catch {}
+
+  // "goodwellth.com" centered bottom
+  ctx.fillStyle = '#BBAA88';
+  ctx.font = '24px Georgia, "Times New Roman", serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('goodwellth.com', SIZE / 2, bottomY + 6);
+
+  return new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
+};
+
+const shareTip = async (tipText: string) => {
+  const blob = await generateShareCard(tipText);
+  const file = new File([blob], 'wellth-tip.png', { type: 'image/png' });
+
+  if (navigator.share && navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: 'Wellth Tip' });
+      return;
+    } catch {}
+  }
+  // Fallback: download
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'wellth-tip.png';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
 // ── Daily Tip Card ───────────────────────────────────────
 const DailyTipCard = React.memo(({ label, tips, dayIndex }: {
   label: string; tips: string[]; dayIndex: number;
 }) => {
   const [tipIdx, setTipIdx] = useState(dayIndex % tips.length);
   const tip = tips[tipIdx];
+  const [isSaved, setIsSaved] = useState(() => getFavorites().includes(tips[dayIndex % tips.length]));
+
+  useEffect(() => {
+    setIsSaved(getFavorites().includes(tip));
+  }, [tip]);
+
+  const handleSave = () => {
+    const nowSaved = toggleFavorite(tip);
+    setIsSaved(nowSaved);
+  };
+
+  const handleShare = () => {
+    shareTip(tip);
+  };
 
   const webProps: any = Platform.OS === 'web' ? { className: 'tip-card' } : {};
 
@@ -901,6 +1031,16 @@ const DailyTipCard = React.memo(({ label, tips, dayIndex }: {
         </Text>
       </View>
       <Text style={styles.tipText}>{tip}</Text>
+      <View style={styles.tipActions}>
+        <TouchableOpacity onPress={handleSave} activeOpacity={0.6}>
+          <Text style={[styles.tipActionText, isSaved && styles.tipActionTextActive]}>
+            {isSaved ? 'SAVED' : 'SAVE'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleShare} activeOpacity={0.6}>
+          <Text style={styles.tipActionText}>SHARE</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.tipNav}>
         <TouchableOpacity onPress={() => setTipIdx(prev => (prev - 1 + tips.length) % tips.length)} activeOpacity={0.6} style={styles.tipNavBtn}>
           <Text style={styles.tipNavArrow}>{'\u2039'}</Text>
@@ -1110,10 +1250,7 @@ const HomeScreen = ({ navigation }: { navigation?: any }) => {
               </TouchableOpacity>
             </View>
             <View style={[styles.featureGrid, { marginBottom: 16 }]}>
-              <TouchableOpacity style={styles.featureBtn} onPress={() => navigation?.navigate('Tips')} activeOpacity={0.7} {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}>
-                <FeatureIcon name="tips" />
-                <Text style={styles.featureBtnLabel}>Tips</Text>
-              </TouchableOpacity>
+              {/* Tips button removed — save/share now on tip cards */}
               <TouchableOpacity style={styles.featureBtn} onPress={() => navigation?.navigate('Settings')} activeOpacity={0.7} {...(Platform.OS === 'web' ? { className: 'feature-btn-web' } as any : {})}>
                 <FeatureIcon name="report" />
                 <Text style={styles.featureBtnLabel}>Settings</Text>
@@ -1187,6 +1324,16 @@ const styles = StyleSheet.create({
   tipLabelBoldGold: { fontSize: 11, fontWeight: '700', color: '#B8963E', fontFamily: bodySerif, textTransform: 'uppercase' as any, letterSpacing: 1.5 },
   tipText: { fontSize: 18, lineHeight: 32, color: '#3A3A3A', fontFamily: serif, letterSpacing: 0.2 },
 
+  tipActions: {
+    flexDirection: 'row', justifyContent: 'center', gap: 24, marginTop: 14,
+  },
+  tipActionText: {
+    fontSize: 11, fontWeight: '600', color: '#BBAA88', fontFamily: bodySerif,
+    textTransform: 'uppercase' as any, letterSpacing: 1.2,
+  },
+  tipActionTextActive: {
+    color: '#B8963E',
+  },
   tipNav: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
     marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#F0E8D8', gap: 24,

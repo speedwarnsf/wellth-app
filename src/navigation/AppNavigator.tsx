@@ -91,7 +91,7 @@ const AppNavigator = () => {
               }}
             />
             <Stack.Screen name="CheckIn" component={CheckInScreen} />
-            <Stack.Screen name="Tips" component={TipsScreen} />
+            {/* Tips screen removed — save/share now on home tip cards */}
             <Stack.Screen name="Breathing" component={BreathingScreen} />
             <Stack.Screen name="Journal" component={JournalScreen} />
             <Stack.Screen name="Hydration" component={HydrationScreen} />
