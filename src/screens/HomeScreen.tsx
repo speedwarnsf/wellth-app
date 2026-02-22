@@ -908,37 +908,146 @@ const generateShareCard = async (tipText: string): Promise<Blob> => {
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, SIZE, SIZE);
 
-  // Tip text - centered
+  // Tip text - left justified, 20% narrower column
   ctx.fillStyle = '#3A3A3A';
   ctx.font = '42px "Playfair Display", Georgia, "Times New Roman", serif';
-  ctx.textAlign = 'center';
+  ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
 
-  // Word wrap
-  const maxWidth = SIZE - 360;
-  const words = tipText.split(' ');
-  const lines: string[] = [];
+  // Word wrap — left justified, adjusted column width
+  const textMarginLeft = 100;
+  const maxWidth = (SIZE - 360) * 0.92;
+
+  // Helpers for sentence boundary detection
+  const isSentenceEnd = (w: string) => /[.!?]$/.test(w) || /[.!?]["'\u201D]$/.test(w);
+
+  // Step 1: Basic word wrap
+  const allWords = tipText.split(/\s+/);
+  let lines: string[] = [];
   let currentLine = '';
-  for (const word of words) {
-    const test = currentLine ? currentLine + ' ' + word : word;
-    if (ctx.measureText(test).width > maxWidth) {
-      if (currentLine) lines.push(currentLine);
-      currentLine = word;
-    } else {
+  for (const word of allWords) {
+    if (!currentLine) { currentLine = word; continue; }
+    const test = currentLine + ' ' + word;
+    if (ctx.measureText(test).width <= maxWidth) {
       currentLine = test;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
     }
   }
   if (currentLine) lines.push(currentLine);
 
+  // Step 2: Typographic cleanup (multiple passes to resolve cascading fixes)
+  for (let pass = 0; pass < 4; pass++) {
+    let changed = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const lw = lines[i].trim().split(/\s+/);
+
+      // Rule A: Line ENDS with 1 word that starts a new sentence
+      // (the word before it ends a sentence with . ! ?)
+      // Push that lone sentence-start word to the next line
+      if (lw.length >= 2 && i < lines.length - 1) {
+        const secondLast = lw[lw.length - 2];
+        if (isSentenceEnd(secondLast)) {
+          const orphan = lw.pop()!;
+          lines[i] = lw.join(' ');
+          lines[i + 1] = orphan + ' ' + lines[i + 1];
+          changed = true; continue;
+        }
+      }
+
+      // Rule B: Line has only 1 word — pull last word from previous line
+      // so we always have at least 2 words per line
+      if (lw.length === 1 && i > 0) {
+        const pw = lines[i - 1].trim().split(/\s+/);
+        if (pw.length > 2) {
+          const pulled = pw.pop()!;
+          lines[i - 1] = pw.join(' ');
+          lines[i] = pulled + ' ' + lw[0];
+          changed = true; continue;
+        }
+      }
+
+      // Rule C: Next line STARTS with 1 word that ends a sentence (e.g. "go.")
+      // Pull a companion word from this line so that ending word isn't alone
+      if (i < lines.length - 1) {
+        const nw = lines[i + 1].trim().split(/\s+/);
+        if (nw.length >= 2 && isSentenceEnd(nw[0]) && lw.length > 2) {
+          const pulled = lw.pop()!;
+          lines[i] = lw.join(' ');
+          lines[i + 1] = pulled + ' ' + lines[i + 1];
+          changed = true; continue;
+        }
+      }
+    }
+
+    if (!changed) break;
+  }
+
+  // Rule D: Rag smoothing — if a line's last word makes it jut out significantly
+  // past the line below (by 3+ characters worth of width), and the next line
+  // has room to absorb it, knock that word down for a smoother right rag
+  for (let pass = 0; pass < 3; pass++) {
+    let changed = false;
+    for (let i = 0; i < lines.length - 1; i++) {
+      const thisWidth = ctx.measureText(lines[i]).width;
+      const nextWidth = ctx.measureText(lines[i + 1]).width;
+      const lw = lines[i].trim().split(/\s+/);
+      if (lw.length < 2) continue;
+      const lastWord = lw[lw.length - 1];
+      const lastWordWidth = ctx.measureText(lastWord).width;
+      // How much does this line overshoot the next?
+      const overshoot = thisWidth - nextWidth;
+      // Threshold: ~3 average characters (~42px at this font size)
+      const charWidth = ctx.measureText('abcde').width / 5;
+      const threshold = charWidth * 3;
+      if (overshoot > threshold) {
+        // Check if next line can absorb the word
+        const candidateNext = lastWord + ' ' + lines[i + 1];
+        if (ctx.measureText(candidateNext).width <= maxWidth) {
+          lw.pop();
+          lines[i] = lw.join(' ');
+          lines[i + 1] = candidateNext;
+          changed = true;
+        }
+      }
+    }
+    if (!changed) break;
+  }
+
   const lineHeight = 58;
   const totalHeight = lines.length * lineHeight;
   const startY = (SIZE - totalHeight) / 2 - 40;
+
+  // Word spacing polish pass — measure each line, nudge toward average width
+  const lineWidths = lines.map(l => ctx.measureText(l).width);
+  const avgWidth = lineWidths.reduce((a, b) => a + b, 0) / lineWidths.length;
+  const maxAdjust = 4.0; // max ±4px per word gap
+
   lines.forEach((line, i) => {
-    ctx.fillText(line, SIZE / 2, startY + i * lineHeight);
+    const words = line.split(' ');
+    if (words.length <= 1) {
+      ctx.fillText(line, textMarginLeft, startY + i * lineHeight);
+      return;
+    }
+
+    const gaps = words.length - 1;
+    const diff = avgWidth - lineWidths[i]; // positive = line is short, negative = line is long
+    const adjustPerGap = Math.max(-maxAdjust, Math.min(maxAdjust, diff / gaps));
+
+    // Draw word by word with adjusted spacing
+    const baseSpaceWidth = ctx.measureText(' ').width;
+    const adjustedSpace = baseSpaceWidth + adjustPerGap;
+    let x = textMarginLeft;
+    words.forEach((word, w) => {
+      ctx.fillText(word, x, startY + i * lineHeight);
+      x += ctx.measureText(word).width + (w < gaps ? adjustedSpace : 0);
+    });
   });
 
-  // Bottom section
-  const bottomY = SIZE - 80;
+  // Bottom baseline — everything sits here
+  const baseline = SIZE - 60;
 
   // Load images
   const loadImg = (src: string): Promise<HTMLImageElement> =>
@@ -955,24 +1064,25 @@ const generateShareCard = async (tipText: string): Promise<Blob> => {
       loadImg('/wellth-logo.png'),
       loadImg('/owl-icon.png'),
     ]);
-    // Logo lower-left (~200px wide)
+    // Logo lower-left (~270px wide, 35% larger), bottom-aligned to baseline
     if (logo.complete && logo.naturalWidth) {
-      const lw = 200;
+      const lw = 270;
       const lh = lw * (logo.naturalHeight / logo.naturalWidth);
-      ctx.drawImage(logo, 60, bottomY - lh / 2, lw, lh);
+      ctx.drawImage(logo, 60 + 7, baseline - lh + 8, lw, lh);
     }
-    // Owl lower-right (~300px)
+    // Owl lower-right (~312px wide, 25% larger), transparent PNG — no white bg
     if (owl.complete && owl.naturalWidth) {
-      const ow = 300;
-      ctx.drawImage(owl, SIZE - 60 - ow, bottomY - ow / 2, ow, ow);
+      const ow = 312;
+      const oh = ow * (owl.naturalHeight / owl.naturalWidth);
+      ctx.drawImage(owl, SIZE - 60 - ow, baseline - oh, ow, oh);
     }
   } catch {}
 
-  // "goodwellth.com" centered bottom
+  // "goodwellth.com" — nudged left 10px, up 2px
   ctx.fillStyle = '#BBAA88';
-  ctx.font = '24px Georgia, "Times New Roman", serif';
+  ctx.font = '28px Georgia, "Times New Roman", serif';
   ctx.textAlign = 'center';
-  ctx.fillText('goodwellth.com', SIZE / 2, bottomY + 6);
+  ctx.fillText('goodwellth.com', SIZE / 2 - 21, baseline - 20 - 12);
 
   return new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
 };

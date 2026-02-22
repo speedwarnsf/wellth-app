@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Platform, View, ActivityIndicator } from 'react-native';
+import { typesetAll } from '../utils/typeset';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
 import { useAuth } from '../lib/AuthContext';
@@ -42,6 +43,17 @@ const AppNavigator = () => {
       setActiveDEKFromAuth(null);
     }
   }, [user, dek]);
+
+  // Global typographic refinement for web
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const run = () => typesetAll('[role="text"], [data-testid] p, div[style] > div[style]');
+    const t1 = setTimeout(run, 800);
+    const t2 = setTimeout(run, 2500);
+    const observer = new MutationObserver(() => requestAnimationFrame(run));
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => { clearTimeout(t1); clearTimeout(t2); observer.disconnect(); };
+  }, []);
 
   if (loading) {
     return (
