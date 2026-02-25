@@ -206,8 +206,9 @@ const injectCSS = () => {
     .tap-btn:hover {
       background-color: #FFF9EE !important;
     }
-    [data-testid="title"], div[style*="Playfair"] { text-wrap: balance; }
-    * { text-wrap: balance; border-radius: 0 !important; }
+    [data-testid="title"], div[style*="Playfair"], h1, h2, h3 { text-wrap: balance; }
+    * { border-radius: 0 !important; }
+    p, span, div { text-wrap: pretty; }
 
     html, body { height: 100vh; }
     body { overflow: auto !important; -webkit-font-smoothing: antialiased; }

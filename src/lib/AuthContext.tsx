@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error || !data) {
         // No encryption keys yet — user signed up before E2E was added
         // They'll get keys on next signUp or migration
-        console.log('[E2E] No encryption keys found for user — unencrypted mode');
+        // No encryption keys found for user — unencrypted mode
         return null;
       }
 
